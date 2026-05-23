@@ -133,8 +133,12 @@ class ComplianceService
         $user->trustedDevices()->delete();
         $user->apiKeys()->delete();
         $user->dataAccessRequests()->where('id', '!=', $request->id)->delete();
-        $user->profile?->delete();
+        $user->dataSharingAgreements()->delete();
+        $user->dataAccessTokens()->delete();
+        $user->dataRequests()->where('id', '!=', $request->id)->delete();
         $user->parentalConsents()->delete();
+        $user->profile?->delete();
+        $user->auditLogs()->delete();
 
         $user->delete();
 
@@ -164,6 +168,24 @@ class ComplianceService
                 'email' => $s->email,
                 'name' => $s->name,
                 'linked_at' => $s->linked_at,
+            ]),
+            'data_stores' => $user->dataStores()->get()->map(fn ($d) => [
+                'app_id' => $d->app_id,
+                'app_name' => $d->app?->name,
+                'key' => $d->key,
+                'value' => $d->value,
+                'created_at' => $d->created_at,
+                'updated_at' => $d->updated_at,
+            ]),
+            'data_sharing_agreements' => $user->dataSharingAgreements()->get()->map(fn ($a) => [
+                'source_app_id' => $a->source_app_id,
+                'source_app_name' => $a->sourceApp?->name,
+                'target_app_id' => $a->target_app_id,
+                'target_app_name' => $a->targetApp?->name,
+                'data_keys' => $a->data_keys,
+                'consent_status' => $a->consent_status,
+                'granted_at' => $a->granted_at,
+                'revoked_at' => $a->revoked_at,
             ]),
             'audit_logs' => $user->auditLogs()->get()->map(fn ($l) => [
                 'event_type' => $l->event_type,
