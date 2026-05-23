@@ -26,12 +26,14 @@ class TwoFactorController extends Controller
         $provider = app(TwoFactorAuthenticationProvider::class);
         $secret = $provider->generateSecretKey();
         $user->two_factor_secret = encrypt($secret);
+        $user->two_factor_recovery_codes = encrypt(json_encode(
+            collect(range(1, 8))->map(fn () => str()->random(10))->all()
+        ));
         $user->save();
 
         $this->auditService->logTwoFactorSetup($user);
 
         return response()->json([
-            'secret' => $secret,
             'qr_code_url' => $this->getQrCodeUrl($user, $secret),
         ]);
     }
@@ -88,9 +90,16 @@ class TwoFactorController extends Controller
             return response()->json(['message' => '2FA is not enabled.'], 400);
         }
 
-        $codes = $user->recoveryCodes();
+        if (! $user->two_factor_confirmed_at) {
+            return response()->json(['message' => '2FA is not yet confirmed. Confirm 2FA before viewing recovery codes.'], 400);
+        }
 
-        return response()->json(['recovery_codes' => $codes]);
+        $codes = json_decode(decrypt($user->two_factor_recovery_codes), true) ?? [];
+        $usedCodes = $user->two_factor_recovery_codes_used ?? [];
+
+        $availableCodes = array_diff($codes, $usedCodes);
+
+        return response()->json(['recovery_codes' => array_values($availableCodes)]);
     }
 
     protected function getQrCodeUrl($user, string $secret): string
