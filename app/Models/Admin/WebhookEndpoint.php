@@ -41,7 +41,7 @@ class WebhookEndpoint extends Model
 
     public function handlesEvent(string $event): bool
     {
-        if (!is_array($this->events)) {
+        if (! is_array($this->events)) {
             return false;
         }
 

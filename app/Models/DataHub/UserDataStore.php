@@ -2,8 +2,8 @@
 
 namespace App\Models\DataHub;
 
-use App\Models\User;
 use App\Models\OAuth\App;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -35,7 +35,7 @@ class UserDataStore extends Model
 
     public function getValue(string $key, mixed $default = null): mixed
     {
-        if (!is_array($this->value)) {
+        if (! is_array($this->value)) {
             return $default;
         }
 

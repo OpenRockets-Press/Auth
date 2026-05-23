@@ -28,7 +28,7 @@ class Role extends Model
 
     public function hasPermission(string $permission): bool
     {
-        if (!is_array($this->permissions)) {
+        if (! is_array($this->permissions)) {
             return false;
         }
 

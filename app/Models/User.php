@@ -2,21 +2,20 @@
 
 namespace App\Models;
 
+use App\Models\Admin\ApiKey;
 use App\Models\Admin\Role;
 use App\Models\Admin\TrustedDevice;
-use App\Models\Admin\ApiKey;
-use App\Models\Compliance\UserProfile;
-use App\Models\Compliance\ParentalConsent;
-use App\Models\Compliance\DataAccessRequest;
 use App\Models\Compliance\AuditLog;
-use App\Models\DataHub\SocialAccount;
-use App\Models\DataHub\UserDataStore;
-use App\Models\DataHub\DataSharingAgreement;
+use App\Models\Compliance\DataAccessRequest;
+use App\Models\Compliance\ParentalConsent;
+use App\Models\Compliance\UserProfile;
 use App\Models\DataHub\DataAccessToken;
 use App\Models\DataHub\DataRequest;
+use App\Models\DataHub\DataSharingAgreement;
+use App\Models\DataHub\SocialAccount;
+use App\Models\DataHub\UserDataStore;
 use App\Models\OAuth\App;
 use App\Models\OAuth\ConsentRecord;
-use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -135,7 +134,7 @@ class User extends Authenticatable implements PasskeyUser
 
     public function isMinor(): bool
     {
-        if (!$this->profile || !$this->profile->date_of_birth) {
+        if (! $this->profile || ! $this->profile->date_of_birth) {
             return false;
         }
 

@@ -67,6 +67,6 @@ class App extends Model
 
     public function isActive(): bool
     {
-        return !$this->isSuspended() && $this->status !== 'rejected';
+        return ! $this->isSuspended() && $this->status !== 'rejected';
     }
 }

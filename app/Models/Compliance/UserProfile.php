@@ -39,7 +39,7 @@ class UserProfile extends Model
 
     public function getAgeAttribute(): ?int
     {
-        if (!$this->date_of_birth) {
+        if (! $this->date_of_birth) {
             return null;
         }
 
@@ -59,7 +59,7 @@ class UserProfile extends Model
 
     public function needsParentalConsent(): bool
     {
-        if (!$this->country || !$this->date_of_birth) {
+        if (! $this->country || ! $this->date_of_birth) {
             return false;
         }
 
@@ -74,7 +74,7 @@ class UserProfile extends Model
 
     public function hasConsent(): bool
     {
-        return !$this->parental_consent_required
+        return ! $this->parental_consent_required
             || $this->parental_consent_status === 'granted';
     }
 }

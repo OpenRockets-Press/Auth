@@ -45,7 +45,7 @@ class ConsentRecord extends Model
 
     public function isActive(): bool
     {
-        return !$this->isRevoked();
+        return ! $this->isRevoked();
     }
 
     public function revoke(): void
