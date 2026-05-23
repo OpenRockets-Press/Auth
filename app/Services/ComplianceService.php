@@ -116,6 +116,12 @@ class ComplianceService
         $exportData = $this->compileUserData($user);
 
         $path = 'data-exports/'.$user->id.'/'.$request->id.'.json';
+        $directory = dirname($path);
+
+        if (! Storage::exists($directory)) {
+            Storage::makeDirectory($directory);
+        }
+
         Storage::put($path, json_encode($exportData, JSON_PRETTY_PRINT));
 
         $request->fulfill($path);

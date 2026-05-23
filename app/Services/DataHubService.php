@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\DataHub\NoDataSharingAgreementException;
 use App\Models\DataHub\DataAccessToken;
 use App\Models\DataHub\DataRequest;
 use App\Models\DataHub\DataSharingAgreement;
@@ -111,7 +112,7 @@ class DataHubService
             ->first();
 
         if (! $agreement) {
-            throw new \RuntimeException('No active data sharing agreement exists.');
+            throw new NoDataSharingAgreementException;
         }
 
         $token = Str::random(64);
@@ -148,7 +149,7 @@ class DataHubService
             ->first();
 
         if (! $agreement) {
-            throw new \RuntimeException('Data sharing agreement is no longer valid.');
+            throw new NoDataSharingAgreementException('Data sharing agreement is no longer valid.');
         }
 
         $allowedKeys = $requestedKeys ?? $agreement->data_keys;

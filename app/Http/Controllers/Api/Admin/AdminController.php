@@ -184,23 +184,25 @@ class AdminController extends Controller
 
     public function analytics(): JsonResponse
     {
-        $stats = [
-            'total_users' => User::count(),
-            'active_users' => User::where('status', 'active')->count(),
-            'suspended_users' => User::where('status', 'suspended')->count(),
-            'total_apps' => App::count(),
-            'verified_apps' => App::where('status', 'verified')->count(),
-            'pending_apps' => App::where('status', 'pending')->count(),
-            'total_consents' => ConsentRecord::whereNull('revoked_at')->count(),
-            'total_audit_events' => AuditLog::count(),
-            'pending_data_requests' => DataAccessRequest::where('status', 'pending')->count(),
-            'users_last_24h' => User::where('created_at', '>=', now()->subDay())->count(),
-            'logins_last_24h' => AuditLog::where('event_type', 'auth.login.success')
-                ->where('created_at', '>=', now()->subDay())
-                ->count(),
-        ];
+        $now = now();
+        $yesterday = $now->copy()->subDay();
 
-        return response()->json($stats);
+        $stats = \Illuminate\Support\Facades\DB::selectOne("
+            SELECT
+                (SELECT COUNT(*) FROM users) AS total_users,
+                (SELECT COUNT(*) FROM users WHERE status = 'active') AS active_users,
+                (SELECT COUNT(*) FROM users WHERE status = 'suspended') AS suspended_users,
+                (SELECT COUNT(*) FROM apps) AS total_apps,
+                (SELECT COUNT(*) FROM apps WHERE status = 'verified') AS verified_apps,
+                (SELECT COUNT(*) FROM apps WHERE status = 'pending') AS pending_apps,
+                (SELECT COUNT(*) FROM consent_records WHERE revoked_at IS NULL) AS total_consents,
+                (SELECT COUNT(*) FROM audit_logs) AS total_audit_events,
+                (SELECT COUNT(*) FROM data_access_requests WHERE status = 'pending') AS pending_data_requests,
+                (SELECT COUNT(*) FROM users WHERE created_at >= ?) AS users_last_24h,
+                (SELECT COUNT(*) FROM audit_logs WHERE event_type = 'auth.login.success' AND created_at >= ?) AS logins_last_24h
+        ", [$yesterday, $yesterday]);
+
+        return response()->json((array) $stats);
     }
 
     public function countries(): JsonResponse

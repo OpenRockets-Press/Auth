@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/compliance/countries', [ComplianceController::class, 'countries']);
 Route::get('/compliance/country/{code}', [ComplianceController::class, 'country']);
 Route::post('/consent/verify/{token}', [ComplianceController::class, 'respondToParentalConsent'])
-    ->middleware('throttle:10,1');
+    ->middleware('throttle:5,1');
 
 Route::middleware('auth:api')->group(function () {
     Route::prefix('compliance')->group(function () {
