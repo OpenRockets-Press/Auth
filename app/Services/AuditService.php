@@ -89,6 +89,16 @@ class AuditService
         return $this->log('app.suspended', $admin, $app);
     }
 
+    public function logAppUnsuspended(User $admin, App $app): AuditLog
+    {
+        return $this->log('app.unsuspended', $admin, $app);
+    }
+
+    public function logAppRejected(User $admin, App $app): AuditLog
+    {
+        return $this->log('app.rejected', $admin, $app);
+    }
+
     public function logDataExportRequested(User $user): AuditLog
     {
         return $this->log('compliance.data.export.requested', $user);

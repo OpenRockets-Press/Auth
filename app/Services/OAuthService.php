@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Events\OAuth\ConsentGranted;
+use App\Events\OAuth\ConsentRevoked;
 use App\Models\OAuth\App;
 use App\Models\OAuth\AppScope;
 use App\Models\OAuth\ConsentRecord;
@@ -94,6 +96,8 @@ class OAuthService
             'status' => 'rejected',
         ]);
 
+        $this->auditService->logAppRejected($admin, $app);
+
         return $app;
     }
 
@@ -115,6 +119,8 @@ class OAuthService
             'status' => 'verified',
             'suspended_at' => null,
         ]);
+
+        $this->auditService->logAppUnsuspended($admin, $app);
 
         return $app;
     }
@@ -151,6 +157,8 @@ class OAuthService
 
         $this->auditService->logConsentGranted($user, $app, $scopes);
 
+        event(new ConsentGranted($user, $app, $scopes));
+
         return $record;
     }
 
@@ -158,6 +166,8 @@ class OAuthService
     {
         $record->revoke();
         $this->auditService->logConsentRevoked($record->user, $record->app);
+
+        event(new ConsentRevoked($record->user, $record->app));
     }
 
     public function revokeAllConsents(User $user, App $app): void
