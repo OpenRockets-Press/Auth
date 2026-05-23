@@ -132,6 +132,10 @@ class DataHubController extends Controller
             return response()->json(['message' => 'Invalid or expired token.'], 401);
         }
 
+        if ($userId !== (string) $dataToken->user_id) {
+            return response()->json(['message' => 'Token does not authorize access to this user data.'], 403);
+        }
+
         $data = $this->dataHubService->accessSharedData($dataToken, $userId);
 
         return response()->json(['data' => $data]);
