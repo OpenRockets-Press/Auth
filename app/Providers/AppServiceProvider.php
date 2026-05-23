@@ -46,9 +46,9 @@ class AppServiceProvider extends ServiceProvider
 
     protected function configurePassport(): void
     {
-        Passport::tokensExpireIn(now()->addMinutes(config('auth-system.session_lifetime_minutes', 480)));
-        Passport::refreshTokensExpireIn(now()->addDays(config('auth-system.remember_lifetime_days', 30)));
-        Passport::personalAccessTokensExpireIn(now()->addMinutes(config('auth-system.session_lifetime_minutes', 480)));
+        Passport::tokensExpireIn(now()->addMinutes((int) config('auth-system.session_lifetime_minutes', 480)));
+        Passport::refreshTokensExpireIn(now()->addDays((int) config('auth-system.remember_lifetime_days', 30)));
+        Passport::personalAccessTokensExpireIn(now()->addMinutes((int) config('auth-system.session_lifetime_minutes', 480)));
 
         Passport::tokensCan([
             'openid' => 'OpenID Connect identifier',
