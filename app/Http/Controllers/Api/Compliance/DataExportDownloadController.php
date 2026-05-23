@@ -7,6 +7,7 @@ use App\Models\Compliance\DataAccessRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 
 class DataExportDownloadController extends Controller
 {
@@ -24,12 +25,34 @@ class DataExportDownloadController extends Controller
             return response()->json(['message' => 'Export file not found.'], 404);
         }
 
-        $content = Storage::get($dataRequest->data_export_path);
+        $downloadUrl = URL::temporarySignedRoute(
+            'compliance.data-export.download-file',
+            now()->addMinutes(30),
+            ['dataRequest' => $dataRequest->id]
+        );
 
         return response()->json([
-            'data' => json_decode($content, true),
+            'download_url' => $downloadUrl,
+            'expires_at' => now()->addMinutes(30),
             'filename' => basename($dataRequest->data_export_path),
             'generated_at' => $dataRequest->fulfilled_at,
         ]);
+    }
+
+    public function download(Request $request, DataAccessRequest $dataRequest)
+    {
+        if (! $request->hasValidSignature()) {
+            return response()->json(['message' => 'Download link has expired.'], 403);
+        }
+
+        if ($dataRequest->user_id !== $request->user()->id && ! $request->user()->isAdmin()) {
+            return response()->json(['message' => 'Unauthorized.'], 403);
+        }
+
+        if (! Storage::exists($dataRequest->data_export_path)) {
+            return response()->json(['message' => 'Export file not found.'], 404);
+        }
+
+        return Storage::download($dataRequest->data_export_path);
     }
 }
