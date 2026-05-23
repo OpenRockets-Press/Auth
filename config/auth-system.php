@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'ip_geolocation' => [
+        'service' => env('IP_GEOLOCATION_SERVICE', 'ip-api'),
+        'maxmind_database_path' => env('MAXMIND_DATABASE_PATH', storage_path('app/GeoLite2-City.mmdb')),
+    ],
+
 ];
