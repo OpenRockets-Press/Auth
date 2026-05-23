@@ -20,7 +20,7 @@ class VerifyWebhookSignature
 
         [$algorithm, $signatureHash] = explode('=', $signature, 2) + [null, $signature];
 
-        $secret = $request->header('X-Webhook-Secret') ?? config('services.webhook.secret');
+        $secret = config('services.webhook.secret');
 
         if (! $secret) {
             return response()->json(['message' => 'Webhook secret not configured.'], 500);
