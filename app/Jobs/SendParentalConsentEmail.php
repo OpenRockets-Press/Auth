@@ -6,7 +6,7 @@ use App\Models\Compliance\ParentalConsent;
 use App\Notifications\ParentalConsentRequest;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 
 class SendParentalConsentEmail implements ShouldQueue
 {
@@ -18,10 +18,7 @@ class SendParentalConsentEmail implements ShouldQueue
 
     public function handle(): void
     {
-        $user = $this->consent->user;
-
-        Mail::to($this->consent->parent_email)->send(
-            new ParentalConsentRequest($this->consent)
-        );
+        Notification::route('mail', $this->consent->parent_email)
+            ->notify(new ParentalConsentRequest($this->consent));
     }
 }

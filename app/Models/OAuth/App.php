@@ -33,6 +33,8 @@ class App extends Model
         'privacy_policy_url',
         'terms_url',
         'category',
+        'verified_at',
+        'suspended_at',
     ];
 
     public function owner(): BelongsTo

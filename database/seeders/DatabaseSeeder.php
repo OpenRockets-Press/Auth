@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             CountrySeeder::class,
             RoleSeeder::class,
+            PassportClientSeeder::class,
         ]);
 
         User::factory()->create([

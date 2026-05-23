@@ -2,9 +2,10 @@
 
 use App\Http\Controllers\Api\Admin\AdminController;
 use App\Http\Controllers\Api\Admin\ImpersonationController;
+use App\Http\Middleware\EnsureAdmin;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('admin')->middleware('auth:api')->group(function () {
+Route::prefix('admin')->middleware(['auth:api', EnsureAdmin::class])->group(function () {
     Route::post('/users/{user}/impersonate', [ImpersonationController::class, 'store']);
     Route::post('/impersonate/stop', [ImpersonationController::class, 'destroy']);
     Route::get('/users', [AdminController::class, 'users']);

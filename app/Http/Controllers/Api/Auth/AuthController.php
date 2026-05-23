@@ -68,9 +68,7 @@ class AuthController extends Controller
             'locked_until' => null,
         ]);
 
-        $token = $user->createToken('login-token', expiresAt: now()->addMinutes(
-            config('auth-system.session_lifetime_minutes', 480)
-        ));
+        $token = $user->createToken('login-token');
 
         event(new UserLoggedIn(
             $user,

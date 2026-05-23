@@ -30,7 +30,7 @@ class SessionController extends Controller
         return response()->json(['sessions' => $tokens]);
     }
 
-    public function destroy(Request $request, int $tokenId): JsonResponse
+    public function destroy(Request $request, string $tokenId): JsonResponse
     {
         $token = $request->user()->tokens()->findOrFail($tokenId);
         $token->revoke();

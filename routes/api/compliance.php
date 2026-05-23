@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/compliance/countries', [ComplianceController::class, 'countries']);
 Route::get('/compliance/country/{code}', [ComplianceController::class, 'country']);
+Route::post('/consent/verify/{token}', [ComplianceController::class, 'respondToParentalConsent']);
 
 Route::middleware('auth:api')->group(function () {
     Route::prefix('compliance')->group(function () {
@@ -17,6 +18,4 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/data-export/{dataRequest}/download', DataExportDownloadController::class);
         Route::get('/data-requests', [ComplianceController::class, 'dataRequests']);
     });
-
-    Route::post('/consent/verify/{token}', [ComplianceController::class, 'respondToParentalConsent']);
 });

@@ -29,7 +29,7 @@ use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Passport\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'password', 'status', 'last_login_at', 'login_method', 'failed_login_attempts', 'locked_until'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser
 {
@@ -119,7 +119,8 @@ class User extends Authenticatable implements PasskeyUser
     public function isAdmin(): bool
     {
         return $this->roles()->where('name', 'super_admin')->exists()
-            || $this->roles()->where('name', 'moderator')->exists();
+            || $this->roles()->where('name', 'moderator')->exists()
+            || $this->roles()->where('name', 'reviewer')->exists();
     }
 
     public function hasPermission(string $permission): bool
