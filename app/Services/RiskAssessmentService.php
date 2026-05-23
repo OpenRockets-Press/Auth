@@ -12,7 +12,7 @@ class RiskAssessmentService
         $riskFactors = [];
         $riskScore = 0;
 
-        if ($this->isNewDevice($user, $userAgent)) {
+        if ($this->isNewDevice($user, $ipAddress, $userAgent)) {
             $riskFactors[] = 'new_device';
             $riskScore += 20;
         }
@@ -42,9 +42,9 @@ class RiskAssessmentService
         ];
     }
 
-    public function isNewDevice(User $user, string $userAgent): bool
+    public function isNewDevice(User $user, string $ipAddress, string $userAgent): bool
     {
-        $fingerprint = $this->generateDeviceFingerprint($userAgent);
+        $fingerprint = $this->generateDeviceFingerprint($ipAddress, $userAgent);
 
         return ! TrustedDevice::where('user_id', $user->id)
             ->where('device_fingerprint', $fingerprint)
@@ -105,7 +105,7 @@ class RiskAssessmentService
 
     public function trustDevice(User $user, string $deviceName, string $ipAddress, string $userAgent): TrustedDevice
     {
-        $fingerprint = $this->generateDeviceFingerprint($userAgent);
+        $fingerprint = $this->generateDeviceFingerprint($ipAddress, $userAgent);
 
         return TrustedDevice::create([
             'user_id' => $user->id,
@@ -118,18 +118,18 @@ class RiskAssessmentService
         ]);
     }
 
-    public function isTrustedDevice(User $user, string $userAgent): bool
+    public function isTrustedDevice(User $user, string $ipAddress, string $userAgent): bool
     {
-        $fingerprint = $this->generateDeviceFingerprint($userAgent);
+        $fingerprint = $this->generateDeviceFingerprint($ipAddress, $userAgent);
 
         return TrustedDevice::where('user_id', $user->id)
             ->where('device_fingerprint', $fingerprint)
             ->exists();
     }
 
-    public function generateDeviceFingerprint(string $userAgent): string
+    public function generateDeviceFingerprint(string $ipAddress, string $userAgent): string
     {
-        return hash('sha256', $userAgent);
+        return hash('sha256', $ipAddress.'|'.$userAgent.'|'.config('app.key'));
     }
 
     protected function getRiskLevel(int $score): string
@@ -144,7 +144,67 @@ class RiskAssessmentService
 
     protected function getIpLocation(string $ipAddress): ?array
     {
-        return null;
+        $cacheKey = 'ip_location_'.md5($ipAddress);
+
+        return cache()->remember($cacheKey, now()->addDays(30), function () use ($ipAddress) {
+            $service = config('auth-system.ip_geolocation.service', 'ip-api');
+
+            return match ($service) {
+                'maxmind' => $this->getIpLocationViaMaxMind($ipAddress),
+                'ip-api' => $this->getIpLocationViaIpApi($ipAddress),
+                default => null,
+            };
+        });
+    }
+
+    protected function getIpLocationViaMaxMind(string $ipAddress): ?array
+    {
+        if (! extension_loaded('geoip2') || ! class_exists('\GeoIp2\Database\Reader')) {
+            return null;
+        }
+
+        try {
+            $reader = new \GeoIp2\Database\Reader(
+                config('auth-system.ip_geolocation.maxmind_database_path')
+            );
+            $record = $reader->city($ipAddress);
+
+            return [
+                'lat' => $record->location->latitude,
+                'lon' => $record->location->longitude,
+                'country' => $record->country->isoCode,
+                'city' => $record->city->name,
+            ];
+        } catch (\Exception) {
+            return null;
+        }
+    }
+
+    protected function getIpLocationViaIpApi(string $ipAddress): ?array
+    {
+        try {
+            $response = \Illuminate\Support\Facades\Http::timeout(5)
+                ->get("http://ip-api.com/json/{$ipAddress}");
+
+            if (! $response->ok()) {
+                return null;
+            }
+
+            $data = $response->json();
+
+            if ($data['status'] !== 'success') {
+                return null;
+            }
+
+            return [
+                'lat' => (float) $data['lat'],
+                'lon' => (float) $data['lon'],
+                'country' => $data['countryCode'],
+                'city' => $data['city'],
+            ];
+        } catch (\Exception) {
+            return null;
+        }
     }
 
     protected function calculateDistance(float $lat1, float $lon1, float $lat2, float $lon2): float
