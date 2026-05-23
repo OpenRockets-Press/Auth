@@ -15,35 +15,24 @@ class ImpersonationController extends Controller
     {
         $this->authorize('impersonate', $user);
 
-        $session = Auth::guard('web');
-        $originalUserId = $session->user()?->id;
+        $adminToken = $request->user()->createToken('impersonation-original-user');
 
-        $session->loginUsingId($user->id);
-
-        session(['impersonator_id' => $originalUserId]);
+        $impersonationToken = $user->createToken('impersonation-token');
 
         return response()->json([
             'message' => 'Now impersonating '.$user->name,
             'user' => new UserResource($user),
+            'impersonation_token' => $impersonationToken->accessToken,
+            'restore_token' => $adminToken->accessToken,
         ]);
     }
 
     public function destroy(Request $request): JsonResponse
     {
-        $impersonatorId = session('impersonator_id');
-
-        if (! $impersonatorId) {
-            return response()->json(['message' => 'Not impersonating any user.'], 400);
-        }
-
-        session()->forget('impersonator_id');
-
-        $impersonator = User::findOrFail($impersonatorId);
-        Auth::guard('web')->login($impersonator);
+        $request->user()->currentAccessToken()->delete();
 
         return response()->json([
             'message' => 'Stopped impersonation.',
-            'user' => new UserResource($impersonator),
         ]);
     }
 }
