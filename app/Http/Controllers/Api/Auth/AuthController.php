@@ -30,12 +30,26 @@ class AuthController extends Controller
 
         if (! $user || ! Hash::check($credentials['password'], $user->password)) {
             if ($user) {
-                $user->increment('failed_login_attempts');
+                $maxAttempts = config('auth-system.max_login_attempts', 5);
+                $lockoutDuration = config('auth-system.lockout_duration', 60);
 
-                if ($user->failed_login_attempts >= config('auth-system.max_login_attempts', 5)) {
-                    $user->update([
-                        'locked_until' => now()->addMinutes(config('auth-system.lockout_duration', 60)),
+                $affected = \Illuminate\Support\Facades\DB::table('users')
+                    ->where('id', $user->id)
+                    ->where('locked_until', '<=', now())
+                    ->update([
+                        'failed_login_attempts' => \Illuminate\Support\Facades\DB::raw('failed_login_attempts + 1'),
                     ]);
+
+                $user->refresh();
+
+                if ($affected && $user->failed_login_attempts >= $maxAttempts) {
+                    \Illuminate\Support\Facades\DB::table('users')
+                        ->where('id', $user->id)
+                        ->update([
+                            'locked_until' => now()->addMinutes($lockoutDuration),
+                        ]);
+
+                    $user->refresh();
                 }
 
                 $this->auditService->logLogin($user, 'password', false);
@@ -61,12 +75,16 @@ class AuthController extends Controller
             $request->userAgent()
         );
 
-        $user->update([
-            'last_login_at' => now(),
-            'login_method' => 'password',
-            'failed_login_attempts' => 0,
-            'locked_until' => null,
-        ]);
+        \Illuminate\Support\Facades\DB::table('users')
+            ->where('id', $user->id)
+            ->update([
+                'last_login_at' => now(),
+                'login_method' => 'password',
+                'failed_login_attempts' => 0,
+                'locked_until' => null,
+            ]);
+
+        $user->refresh();
 
         $token = $user->createToken('login-token');
 
