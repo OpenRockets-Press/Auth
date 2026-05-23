@@ -7,6 +7,7 @@ use App\Models\OAuth\AppScope;
 use App\Models\OAuth\ConsentRecord;
 use App\Models\User;
 use Illuminate\Support\Str;
+use Laravel\Passport\ClientRepository;
 
 class OAuthService
 {
@@ -16,8 +17,28 @@ class OAuthService
 
     public function registerApp(User $owner, array $data): App
     {
+        $clientRepository = app(ClientRepository::class);
+
+        $client = $clientRepository->create(
+            $owner->id,
+            $data['name'],
+            $data['redirect_uris'][0],
+            null,
+            false,
+            false,
+            false
+        );
+
+        $client->provider = 'users';
+        $client->redirect = json_encode($data['redirect_uris']);
+        $client->personal_access_client = false;
+        $client->password_client = false;
+        $client->revoked = false;
+        $client->save();
+
         $app = App::create([
             'owner_id' => $owner->id,
+            'client_id' => $client->id,
             'name' => $data['name'],
             'description' => $data['description'] ?? null,
             'icon_url' => $data['icon_url'] ?? null,

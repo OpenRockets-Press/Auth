@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Compliance\ComplianceController;
+use App\Http\Controllers\Api\Compliance\DataExportDownloadController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/compliance/countries', [ComplianceController::class, 'countries']);
@@ -13,6 +14,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/parental-consent/request', [ComplianceController::class, 'requestParentalConsent']);
         Route::post('/data-export', [ComplianceController::class, 'requestDataExport']);
         Route::post('/data-deletion', [ComplianceController::class, 'requestDataDeletion']);
+        Route::get('/data-export/{dataRequest}/download', DataExportDownloadController::class);
         Route::get('/data-requests', [ComplianceController::class, 'dataRequests']);
     });
 

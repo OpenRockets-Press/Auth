@@ -2,6 +2,7 @@
 
 use App\Exceptions\BaseException;
 use App\Http\Middleware\AuditRequest;
+use App\Http\Middleware\AuthenticateWithApiKey;
 use App\Http\Middleware\CheckAccountStatus;
 use App\Http\Middleware\EnsureAdmin;
 use App\Http\Middleware\EnsureAppIsActive;
@@ -40,6 +41,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'consent' => EnsureParentalConsent::class,
             'account.status' => CheckAccountStatus::class,
             'audit' => AuditRequest::class,
+            'api.key' => AuthenticateWithApiKey::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

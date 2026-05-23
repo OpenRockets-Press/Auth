@@ -1,9 +1,12 @@
 <?php
 
 use App\Http\Controllers\Api\Admin\AdminController;
+use App\Http\Controllers\Api\Admin\ImpersonationController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->middleware('auth:api')->group(function () {
+    Route::post('/users/{user}/impersonate', [ImpersonationController::class, 'store']);
+    Route::post('/impersonate/stop', [ImpersonationController::class, 'destroy']);
     Route::get('/users', [AdminController::class, 'users']);
     Route::get('/users/{user}', [AdminController::class, 'user']);
     Route::post('/users/{user}/suspend', [AdminController::class, 'suspendUser']);

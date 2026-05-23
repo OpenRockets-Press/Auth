@@ -2,7 +2,10 @@
 
 use App\Http\Controllers\Api\OAuth\AppsController;
 use App\Http\Controllers\Api\OAuth\ConsentController;
+use App\Http\Controllers\Api\OAuth\OidcDiscoveryController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/.well-known/openid-configuration', OidcDiscoveryController::class);
 
 Route::middleware('auth:api')->group(function () {
     Route::prefix('apps')->group(function () {
