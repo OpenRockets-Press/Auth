@@ -3,7 +3,7 @@
 use App\Http\Controllers\Api\DataHub\DataHubController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth:api')->group(function () {
+Route::middleware(['auth:api', 'app.active'])->group(function () {
     Route::prefix('data-hub')->group(function () {
         Route::post('/{app}/store', [DataHubController::class, 'store']);
         Route::get('/{app}/data', [DataHubController::class, 'index']);

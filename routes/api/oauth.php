@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/.well-known/openid-configuration', OidcDiscoveryController::class);
 
-Route::middleware('auth:api')->group(function () {
+Route::middleware(['auth:api', 'app.active'])->group(function () {
     Route::prefix('apps')->group(function () {
         Route::get('/', [AppsController::class, 'index']);
         Route::post('/', [AppsController::class, 'store']);
