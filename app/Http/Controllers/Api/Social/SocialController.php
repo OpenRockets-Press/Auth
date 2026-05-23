@@ -46,11 +46,17 @@ class SocialController extends Controller
             $user = User::where('email', $socialUser->getEmail())->first();
 
             if ($user) {
+                if (! $user->email_verified_at) {
+                    return response()->json([
+                        'message' => 'An account with this email exists but is not verified. Please verify your email first.',
+                    ], 409);
+                }
+
                 $user->socialAccounts()->create([
                     'provider' => $provider,
                     'provider_id' => $socialUser->getId(),
-                    'access_token' => $socialUser->token,
-                    'refresh_token' => $socialUser->refreshToken,
+                    'access_token' => encrypt($socialUser->token),
+                    'refresh_token' => $socialUser->refreshToken ? encrypt($socialUser->refreshToken) : null,
                     'token_expires_at' => $socialUser->expiresIn ? now()->addSeconds($socialUser->expiresIn) : null,
                     'avatar_url' => $socialUser->getAvatar(),
                     'email' => $socialUser->getEmail(),
@@ -70,8 +76,8 @@ class SocialController extends Controller
                 $user->socialAccounts()->create([
                     'provider' => $provider,
                     'provider_id' => $socialUser->getId(),
-                    'access_token' => $socialUser->token,
-                    'refresh_token' => $socialUser->refreshToken,
+                    'access_token' => encrypt($socialUser->token),
+                    'refresh_token' => $socialUser->refreshToken ? encrypt($socialUser->refreshToken) : null,
                     'token_expires_at' => $socialUser->expiresIn ? now()->addSeconds($socialUser->expiresIn) : null,
                     'avatar_url' => $socialUser->getAvatar(),
                     'email' => $socialUser->getEmail(),
@@ -119,8 +125,8 @@ class SocialController extends Controller
         $request->user()->socialAccounts()->create([
             'provider' => $validated['provider'],
             'provider_id' => $socialUser->getId(),
-            'access_token' => $socialUser->token,
-            'refresh_token' => $socialUser->refreshToken,
+            'access_token' => encrypt($socialUser->token),
+            'refresh_token' => $socialUser->refreshToken ? encrypt($socialUser->refreshToken) : null,
             'token_expires_at' => $socialUser->expiresIn ? now()->addSeconds($socialUser->expiresIn) : null,
             'avatar_url' => $socialUser->getAvatar(),
             'email' => $socialUser->getEmail(),

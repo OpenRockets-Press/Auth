@@ -14,6 +14,8 @@ class SocialAccount extends Model
     protected $casts = [
         'token_expires_at' => 'datetime',
         'linked_at' => 'datetime',
+        'access_token' => 'encrypted',
+        'refresh_token' => 'encrypted',
     ];
 
     protected $fillable = [
