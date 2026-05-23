@@ -127,6 +127,11 @@ class ComplianceService
     {
         $user = $request->user;
 
+        $userId = $user->id;
+        $userName = $user->name;
+        $userEmail = $user->email;
+
+        $user->tokens()->delete();
         $user->consentRecords()->delete();
         $user->dataStores()->delete();
         $user->socialAccounts()->delete();
@@ -138,9 +143,30 @@ class ComplianceService
         $user->dataRequests()->where('id', '!=', $request->id)->delete();
         $user->parentalConsents()->delete();
         $user->profile?->delete();
+
+        $auditLogs = $user->auditLogs()->get()->toArray();
         $user->auditLogs()->delete();
 
         $user->delete();
+
+        if (! empty($auditLogs)) {
+            $deletionRecord = [
+                'event_type' => 'compliance.data.deletion.executed',
+                'event_data' => [
+                    'deleted_user_id' => $userId,
+                    'deleted_user_name' => $userName,
+                    'deleted_user_email' => $userEmail,
+                    'deletion_requested_at' => $request->created_at,
+                    'deletion_fulfilled_at' => now(),
+                    'audit_log_count' => count($auditLogs),
+                ],
+                'ip_address' => request()?->ip(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+
+            \Illuminate\Support\Facades\DB::table('audit_logs')->insert($deletionRecord);
+        }
 
         $request->fulfill();
     }
