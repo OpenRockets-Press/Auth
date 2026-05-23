@@ -40,4 +40,8 @@ return [
         'maxmind_database_path' => env('MAXMIND_DATABASE_PATH', storage_path('app/GeoLite2-City.mmdb')),
     ],
 
+    'device_fingerprint' => [
+        'secret_key' => env('DEVICE_FINGERPRINT_KEY'),
+    ],
+
 ];

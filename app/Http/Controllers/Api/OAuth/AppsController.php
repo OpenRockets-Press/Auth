@@ -59,6 +59,10 @@ class AppsController extends Controller
     {
         $this->authorize('update', $app);
 
+        $validated = $request->validate([
+            'confirm' => ['required', 'boolean', 'accepted'],
+        ]);
+
         $secret = $this->oauthService->regenerateClientSecret($app);
 
         return response()->json([

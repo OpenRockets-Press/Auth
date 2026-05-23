@@ -23,6 +23,12 @@ class DeliverWebhook implements ShouldQueue
     {
         $endpoint = $this->delivery->webhookEndpoint;
 
+        if (! $endpoint || ! $endpoint->is_active) {
+            $this->delivery->markFailed(0, 'Webhook endpoint is inactive or deleted.');
+
+            return;
+        }
+
         $payload = json_encode([
             'event' => $this->delivery->event_type,
             'data' => $this->delivery->payload,
@@ -33,23 +39,37 @@ class DeliverWebhook implements ShouldQueue
 
         $this->delivery->incrementAttempts();
 
-        $response = Http::timeout(config('auth-system.webhooks.timeout_seconds', 30))
-            ->withHeaders([
-                'Content-Type' => 'application/json',
-                'X-Webhook-Signature' => 'sha256='.$signature,
-                'X-Webhook-Event' => $this->delivery->event_type,
-                'User-Agent' => 'Auth-System-Webhook/1.0',
-            ])
-            ->post($endpoint->url, json_decode($payload, true));
+        try {
+            $response = Http::timeout(config('auth-system.webhooks.timeout_seconds', 30))
+                ->withHeaders([
+                    'Content-Type' => 'application/json',
+                    'X-Webhook-Signature' => 'sha256='.$signature,
+                    'X-Webhook-Event' => $this->delivery->event_type,
+                    'User-Agent' => 'Auth-System-Webhook/1.0',
+                ])
+                ->post($endpoint->url, json_decode($payload, true));
 
-        if ($response->successful()) {
-            $this->delivery->markDelivered($response->status(), $response->body());
-        } else {
+            if ($response->successful()) {
+                $this->delivery->markDelivered($response->status(), $response->body());
+            } else {
+                if ($this->delivery->attempts >= $this->tries) {
+                    $this->delivery->markFailed($response->status(), $response->body());
+
+                    return;
+                }
+
+                $backoffIndex = min($this->delivery->attempts - 1, count($this->backoff) - 1);
+                $this->release($this->backoff[$backoffIndex] ?? 3600);
+            }
+        } catch (\Exception $e) {
             if ($this->delivery->attempts >= $this->tries) {
-                $this->delivery->markFailed($response->status(), $response->body());
+                $this->delivery->markFailed(0, $e->getMessage());
+
+                return;
             }
 
-            $this->release($this->backoff[$this->delivery->attempts - 1] ?? 3600);
+            $backoffIndex = min($this->delivery->attempts - 1, count($this->backoff) - 1);
+            $this->release($this->backoff[$backoffIndex] ?? 3600);
         }
     }
 }

@@ -27,7 +27,7 @@ class ExpireOldData implements ShouldQueue
                 'audit_logs' => AuditLog::where('created_at', '<', $cutoff)->delete(),
                 'parental_consents' => ParentalConsent::where('consent_status', '!=', 'pending')
                     ->where('created_at', '<', $cutoff)->delete(),
-                'data_access_tokens' => DataAccessToken::where('expires_at', '<', $cutoff)->delete(),
+                'data_access_tokens' => DataAccessToken::where('expires_at', '<', now())->delete(),
                 'data_requests' => DataRequest::where('status', '!=', 'pending')
                     ->where('created_at', '<', $cutoff)->delete(),
                 'data_sharing_agreements' => DataSharingAgreement::whereNotNull('revoked_at')

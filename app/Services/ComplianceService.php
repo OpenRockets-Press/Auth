@@ -221,10 +221,28 @@ class ComplianceService
             ]),
             'audit_logs' => $user->auditLogs()->get()->map(fn ($l) => [
                 'event_type' => $l->event_type,
-                'event_data' => $l->event_data,
+                'event_data' => $this->sanitizeAuditData($l->event_data),
+                'ip_address' => $l->ip_address,
                 'created_at' => $l->created_at,
             ]),
         ];
+    }
+
+    protected function sanitizeAuditData(?array $data): array
+    {
+        if (! $data) {
+            return [];
+        }
+
+        $sensitiveKeys = ['password', 'token', 'secret', 'access_token', 'refresh_token'];
+
+        return collect($data)->mapWithKeys(function ($value, $key) use ($sensitiveKeys) {
+            if (in_array(strtolower($key), $sensitiveKeys, true)) {
+                return [$key => '[redacted]'];
+            }
+
+            return [$key => $value];
+        })->toArray();
     }
 
     public function canUserProceed(User $user): bool

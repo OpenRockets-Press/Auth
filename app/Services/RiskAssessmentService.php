@@ -129,7 +129,9 @@ class RiskAssessmentService
 
     public function generateDeviceFingerprint(string $ipAddress, string $userAgent): string
     {
-        return hash('sha256', $ipAddress.'|'.$userAgent.'|'.config('app.key'));
+        $key = config('auth-system.device_fingerprint.secret_key') ?? config('app.key');
+
+        return hash('sha256', $ipAddress.'|'.$userAgent.'|'.$key);
     }
 
     protected function getRiskLevel(int $score): string
@@ -149,11 +151,17 @@ class RiskAssessmentService
         return cache()->remember($cacheKey, now()->addDays(30), function () use ($ipAddress) {
             $service = config('auth-system.ip_geolocation.service', 'ip-api');
 
-            return match ($service) {
+            $result = match ($service) {
                 'maxmind' => $this->getIpLocationViaMaxMind($ipAddress),
                 'ip-api' => $this->getIpLocationViaIpApi($ipAddress),
                 default => null,
             };
+
+            if ($result === null && $service !== 'ip-api') {
+                $result = $this->getIpLocationViaIpApi($ipAddress);
+            }
+
+            return $result;
         });
     }
 

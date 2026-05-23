@@ -20,6 +20,8 @@ class AuditRequest
         '/robots.txt',
     ];
 
+    protected array $auditMethods = ['POST', 'PUT', 'PATCH', 'DELETE'];
+
     public function __construct(
         protected AuditService $auditService,
     ) {}
@@ -32,7 +34,7 @@ class AuditRequest
             if (! in_array($request->method(), $this->skipMethods, true)) {
                 $path = parse_url($request->path(), PHP_URL_PATH);
 
-                if (! $this->shouldSkipPath($path)) {
+                if (! $this->shouldSkipPath($path) && $this->shouldAudit($request, $response)) {
                     $user = Auth::user();
 
                     $this->auditService->log(
@@ -52,6 +54,29 @@ class AuditRequest
         }
 
         return $response;
+    }
+
+    protected function shouldAudit(Request $request, Response $response): bool
+    {
+        if (in_array($request->method(), $this->auditMethods, true)) {
+            return true;
+        }
+
+        if ($response->getStatusCode() >= 400) {
+            return true;
+        }
+
+        $sampleRate = config('auth-system.audit.get_sample_rate', 0.01);
+
+        if ($sampleRate <= 0) {
+            return false;
+        }
+
+        if ($sampleRate >= 1) {
+            return true;
+        }
+
+        return rand(1, 100) <= ($sampleRate * 100);
     }
 
     protected function shouldSkipPath(string $path): bool
