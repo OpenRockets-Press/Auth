@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Admin\AdminController;
 use App\Http\Controllers\Api\Admin\ImpersonationController;
+use App\Http\Controllers\Api\Admin\WebhookController;
 use App\Http\Middleware\EnsureAdmin;
 use Illuminate\Support\Facades\Route;
 
@@ -27,4 +28,12 @@ Route::prefix('admin')->middleware(['auth:api', EnsureAdmin::class])->group(func
 
     Route::get('/countries', [AdminController::class, 'countries']);
     Route::put('/countries/{code}', [AdminController::class, 'updateCountry']);
+
+    Route::get('/webhooks', [WebhookController::class, 'index']);
+    Route::post('/webhooks', [WebhookController::class, 'store']);
+    Route::get('/webhooks/{endpoint}', [WebhookController::class, 'show']);
+    Route::put('/webhooks/{endpoint}', [WebhookController::class, 'update']);
+    Route::post('/webhooks/{endpoint}/regenerate-secret', [WebhookController::class, 'regenerateSecret']);
+    Route::get('/webhooks/{endpoint}/deliveries', [WebhookController::class, 'deliveries']);
+    Route::delete('/webhooks/{endpoint}', [WebhookController::class, 'destroy']);
 });
