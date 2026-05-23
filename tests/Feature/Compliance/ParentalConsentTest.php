@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Compliance\Country;
 use App\Models\Compliance\ParentalConsent;
 use App\Models\User;
 use Database\Seeders\CountrySeeder;

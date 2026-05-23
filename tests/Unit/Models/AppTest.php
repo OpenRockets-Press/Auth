@@ -2,6 +2,7 @@
 
 use App\Models\OAuth\App;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 
 test('isVerified returns true for verified apps', function () {
     $app = App::factory()->verified()->create();
@@ -123,11 +124,11 @@ test('app casts redirect_uris as array', function () {
 test('app casts verified_at as datetime', function () {
     $app = App::factory()->verified()->create();
 
-    expect($app->verified_at)->toBeInstanceOf(\Carbon\CarbonImmutable::class);
+    expect($app->verified_at)->toBeInstanceOf(CarbonImmutable::class);
 });
 
 test('app casts suspended_at as datetime', function () {
     $app = App::factory()->suspended()->create();
 
-    expect($app->suspended_at)->toBeInstanceOf(\Carbon\CarbonImmutable::class);
+    expect($app->suspended_at)->toBeInstanceOf(CarbonImmutable::class);
 });

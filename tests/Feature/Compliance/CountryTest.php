@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Compliance\Country;
 use Database\Seeders\CountrySeeder;
 
 beforeEach(function () {

@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\Admin\Role;
-use App\Models\Compliance\UserProfile;
+use App\Models\OAuth\App;
 use App\Models\User;
 
 test('isMinor returns true for users under 18', function () {
@@ -120,7 +120,7 @@ test('user has many apps relationship', function () {
 
 test('user has many consent records relationship', function () {
     $user = User::factory()->create();
-    $app = \App\Models\OAuth\App::factory()->create();
+    $app = App::factory()->create();
 
     $user->consentRecords()->createMany([
         ['app_id' => $app->id, 'scopes' => ['profile'], 'granted_at' => now()],

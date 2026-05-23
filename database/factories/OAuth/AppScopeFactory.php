@@ -15,7 +15,7 @@ class AppScopeFactory extends Factory
     {
         return [
             'app_id' => App::factory(),
-            'name' => fake()->word(),
+            'name' => fake()->unique()->word(),
             'description' => fake()->sentence(),
             'is_required' => false,
         ];

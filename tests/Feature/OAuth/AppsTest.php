@@ -2,6 +2,7 @@
 
 use App\Models\OAuth\App;
 use App\Models\User;
+use App\Services\OAuthService;
 
 test('user can list their apps', function () {
     $user = User::factory()->create();
@@ -155,7 +156,7 @@ test('user can regenerate client secret', function () {
     $token = $user->createToken('test-token');
 
     // Create app through the service so it has an OAuth client
-    $app = app(\App\Services\OAuthService::class)->registerApp($user, [
+    $app = app(OAuthService::class)->registerApp($user, [
         'name' => 'Test App',
         'redirect_uris' => ['https://example.com/callback'],
     ]);

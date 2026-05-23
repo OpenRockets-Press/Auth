@@ -2,7 +2,6 @@
 
 use App\Models\DataHub\DataRequest;
 use App\Models\DataHub\DataSharingAgreement;
-use App\Models\DataHub\UserDataStore;
 use App\Models\OAuth\App;
 use App\Models\User;
 
