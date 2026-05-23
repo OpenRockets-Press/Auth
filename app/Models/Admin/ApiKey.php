@@ -59,7 +59,7 @@ class ApiKey extends Model
 
     public static function findByPlainKey(string $plainKey): ?static
     {
-        $hashed = hash('sha256', $plainKey);
+        $hashed = self::hashKey($plainKey);
 
         return static::where('key_hash', $hashed)->first();
     }
@@ -71,6 +71,6 @@ class ApiKey extends Model
 
     public static function hashKey(string $plainKey): string
     {
-        return hash('sha256', $plainKey);
+        return hash_hmac('sha256', $plainKey, config('app.key'));
     }
 }
