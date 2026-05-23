@@ -36,6 +36,14 @@ class SocialController extends Controller
 
         $socialUser = Socialite::driver($provider)->stateless()->user();
 
+        if (! $socialUser->getEmail()) {
+            return response()->json([
+                'message' => 'Social provider did not return an email address.',
+            ], 400);
+        }
+
+        $emailVerified = $this->isProviderEmailVerified($provider, $socialUser);
+
         $socialAccount = SocialAccount::where('provider', $provider)
             ->where('provider_id', $socialUser->getId())
             ->first();
@@ -46,7 +54,7 @@ class SocialController extends Controller
             $user = User::where('email', $socialUser->getEmail())->first();
 
             if ($user) {
-                if (! $user->email_verified_at) {
+                if (! $emailVerified && ! $user->email_verified_at) {
                     return response()->json([
                         'message' => 'An account with this email exists but is not verified. Please verify your email first.',
                     ], 409);
@@ -64,8 +72,18 @@ class SocialController extends Controller
                     'linked_at' => now(),
                 ]);
 
+                if (! $user->email_verified_at && $emailVerified) {
+                    $user->update(['email_verified_at' => now()]);
+                }
+
                 $this->auditService->logSocialAccountLinked($user, $provider);
             } else {
+                if (! $emailVerified) {
+                    return response()->json([
+                        'message' => 'Email address not verified by social provider. Cannot create account.',
+                    ], 400);
+                }
+
                 $user = User::create([
                     'name' => $socialUser->getName() ?? $socialUser->getNickname() ?? 'User',
                     'email' => $socialUser->getEmail(),
@@ -101,6 +119,21 @@ class SocialController extends Controller
                 'email' => $user->email,
             ],
         ]);
+    }
+
+    protected function isProviderEmailVerified(string $provider, $socialUser): bool
+    {
+        $verifiedProviders = ['google', 'apple', 'microsoft', 'facebook'];
+
+        if (in_array($provider, $verifiedProviders, true)) {
+            return true;
+        }
+
+        if (method_exists($socialUser, 'getEmailVerified')) {
+            return (bool) $socialUser->getEmailVerified();
+        }
+
+        return false;
     }
 
     public function link(Request $request): JsonResponse
