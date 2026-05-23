@@ -46,4 +46,14 @@ class AppPolicy
     {
         return $user->hasPermission('apps.suspend');
     }
+
+    public function manageWebhooks(User $user, App $app): bool
+    {
+        return $user->id === $app->owner_id || $user->hasPermission('webhooks.manage');
+    }
+
+    public function viewWebhook(User $user, App $app): bool
+    {
+        return $user->id === $app->owner_id || $user->hasPermission('webhooks.view');
+    }
 }

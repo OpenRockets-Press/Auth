@@ -12,6 +12,7 @@ use App\Listeners\LogUserLogout;
 use App\Listeners\SendParentalConsentNotification;
 use App\Listeners\TriggerConsentRevokedWebhooks;
 use App\Listeners\TriggerConsentWebhooks;
+use App\Models\Admin\WebhookEndpoint;
 use App\Models\Compliance\DataAccessRequest;
 use App\Models\DataHub\DataSharingAgreement;
 use App\Models\OAuth\App;
@@ -20,6 +21,7 @@ use App\Policies\AppPolicy;
 use App\Policies\DataAccessRequestPolicy;
 use App\Policies\DataSharingAgreementPolicy;
 use App\Policies\UserPolicy;
+use App\Policies\WebhookEndpointPolicy;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
@@ -47,6 +49,7 @@ class EventServiceProvider extends ServiceProvider
         User::class => UserPolicy::class,
         DataAccessRequest::class => DataAccessRequestPolicy::class,
         DataSharingAgreement::class => DataSharingAgreementPolicy::class,
+        WebhookEndpoint::class => WebhookEndpointPolicy::class,
     ];
 
     public function boot(): void
