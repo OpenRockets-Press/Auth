@@ -40,8 +40,12 @@ class SessionController extends Controller
 
     public function destroyAll(Request $request): JsonResponse
     {
-        $request->user()->tokens()->delete();
+        $currentTokenId = $request->user()->currentAccessToken()->id;
 
-        return response()->json(['message' => 'All sessions revoked.']);
+        $request->user()->tokens()
+            ->where('id', '!=', $currentTokenId)
+            ->delete();
+
+        return response()->json(['message' => 'All other sessions revoked.']);
     }
 }
