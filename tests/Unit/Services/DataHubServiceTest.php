@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\DataHub\NoDataSharingAgreementException;
 use App\Models\DataHub\DataAccessToken;
 use App\Models\DataHub\DataRequest;
 use App\Models\DataHub\DataSharingAgreement;
@@ -194,7 +195,7 @@ test('exchangeToken throws exception without agreement', function () {
     $service = app(DataHubService::class);
 
     expect(fn () => $service->exchangeToken($user, $requestingApp, $grantingApp, ['read']))
-        ->toThrow(RuntimeException::class, 'No active data sharing agreement exists.');
+        ->toThrow(NoDataSharingAgreementException::class, 'No active data sharing agreement exists.');
 });
 
 test('validateDataAccessToken returns token when valid', function () {

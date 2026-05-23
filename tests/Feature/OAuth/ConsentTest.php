@@ -112,7 +112,7 @@ test('user cannot revoke another users consent', function () {
         ->deleteJson('/api/consent/'.$consent->id);
 
     $response->assertForbidden()
-        ->assertJson(['message' => 'Unauthorized.']);
+        ->assertJson(['message' => 'This action is unauthorized.']);
 });
 
 test('granting consent merges scopes with existing consent', function () {

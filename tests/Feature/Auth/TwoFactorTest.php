@@ -11,7 +11,7 @@ test('user can enable 2FA', function () {
         ->postJson('/api/2fa/enable');
 
     $response->assertOk()
-        ->assertJsonStructure(['secret', 'qr_code_url']);
+        ->assertJsonStructure(['qr_code_url']);
 
     expect($user->fresh()->two_factor_secret)->not->toBeNull();
 });

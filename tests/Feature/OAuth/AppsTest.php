@@ -162,7 +162,7 @@ test('user can regenerate client secret', function () {
     ]);
 
     $response = $this->withHeaders(['Authorization' => 'Bearer '.$token->accessToken])
-        ->postJson('/api/apps/'.$app->id.'/regenerate-secret');
+        ->postJson('/api/apps/'.$app->id.'/regenerate-secret', ['confirm' => true]);
 
     $response->assertOk()
         ->assertJsonStructure(['message', 'client_secret']);

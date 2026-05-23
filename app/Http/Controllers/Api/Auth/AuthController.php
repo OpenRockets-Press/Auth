@@ -35,7 +35,10 @@ class AuthController extends Controller
 
                 $affected = \Illuminate\Support\Facades\DB::table('users')
                     ->where('id', $user->id)
-                    ->where('locked_until', '<=', now())
+                    ->where(function ($q) {
+                        $q->whereNull('locked_until')
+                            ->orWhere('locked_until', '<=', now());
+                    })
                     ->update([
                         'failed_login_attempts' => \Illuminate\Support\Facades\DB::raw('failed_login_attempts + 1'),
                     ]);

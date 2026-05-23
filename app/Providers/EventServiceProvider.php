@@ -12,19 +12,6 @@ use App\Listeners\LogUserLogout;
 use App\Listeners\SendParentalConsentNotification;
 use App\Listeners\TriggerConsentRevokedWebhooks;
 use App\Listeners\TriggerConsentWebhooks;
-use App\Models\Admin\WebhookEndpoint;
-use App\Models\Compliance\DataAccessRequest;
-use App\Models\DataHub\DataRequest;
-use App\Models\DataHub\DataSharingAgreement;
-use App\Models\OAuth\App;
-use App\Models\OAuth\ConsentRecord;
-use App\Models\User;
-use App\Policies\AppPolicy;
-use App\Policies\ConsentRecordPolicy;
-use App\Policies\DataAccessRequestPolicy;
-use App\Policies\DataSharingAgreementPolicy;
-use App\Policies\UserPolicy;
-use App\Policies\WebhookEndpointPolicy;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
@@ -45,16 +32,6 @@ class EventServiceProvider extends ServiceProvider
         ParentalConsentRequested::class => [
             SendParentalConsentNotification::class,
         ],
-    ];
-
-    protected $policies = [
-        App::class => AppPolicy::class,
-        User::class => UserPolicy::class,
-        DataAccessRequest::class => DataAccessRequestPolicy::class,
-        DataRequest::class => DataAccessRequestPolicy::class,
-        DataSharingAgreement::class => DataSharingAgreementPolicy::class,
-        WebhookEndpoint::class => WebhookEndpointPolicy::class,
-        ConsentRecord::class => ConsentRecordPolicy::class,
     ];
 
     public function boot(): void

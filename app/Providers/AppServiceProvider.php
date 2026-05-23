@@ -2,10 +2,24 @@
 
 namespace App\Providers;
 
+use App\Models\Admin\WebhookEndpoint;
+use App\Models\Compliance\DataAccessRequest;
+use App\Models\DataHub\DataRequest;
+use App\Models\DataHub\DataSharingAgreement;
+use App\Models\OAuth\App;
+use App\Models\OAuth\ConsentRecord;
+use App\Models\User;
+use App\Policies\AppPolicy;
+use App\Policies\ConsentRecordPolicy;
+use App\Policies\DataAccessRequestPolicy;
+use App\Policies\DataSharingAgreementPolicy;
+use App\Policies\UserPolicy;
+use App\Policies\WebhookEndpointPolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -23,6 +37,18 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
         $this->configurePassport();
         $this->configureRateLimiting();
+        $this->configurePolicies();
+    }
+
+    protected function configurePolicies(): void
+    {
+        Gate::policy(App::class, AppPolicy::class);
+        Gate::policy(User::class, UserPolicy::class);
+        Gate::policy(DataAccessRequest::class, DataAccessRequestPolicy::class);
+        Gate::policy(DataRequest::class, DataAccessRequestPolicy::class);
+        Gate::policy(DataSharingAgreement::class, DataSharingAgreementPolicy::class);
+        Gate::policy(WebhookEndpoint::class, WebhookEndpointPolicy::class);
+        Gate::policy(ConsentRecord::class, ConsentRecordPolicy::class);
     }
 
     protected function configureDefaults(): void

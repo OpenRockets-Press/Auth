@@ -101,7 +101,7 @@ test('user cannot grant consent for another users request', function () {
         ->postJson('/api/data-hub/requests/'.$dataRequest->id.'/grant');
 
     $response->assertForbidden()
-        ->assertJson(['message' => 'Unauthorized.']);
+        ->assertJson(['message' => 'This action is unauthorized.']);
 });
 
 test('user can exchange token with valid agreement', function () {
@@ -151,7 +151,8 @@ test('token exchange fails without agreement', function () {
             'scopes' => ['read'],
         ]);
 
-    $response->assertInternalServerError();
+    $response->assertForbidden()
+        ->assertJson(['message' => 'No active data sharing agreement exists.']);
 });
 
 test('user can list their data sharing agreements', function () {

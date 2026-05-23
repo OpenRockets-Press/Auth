@@ -65,7 +65,7 @@ test('user cannot revoke another users session', function () {
     $response->assertNotFound();
 });
 
-test('user can revoke all sessions', function () {
+test('user can revoke all other sessions', function () {
     $user = User::factory()->create();
     $user->createToken('session-1');
     $user->createToken('session-2');
@@ -75,9 +75,9 @@ test('user can revoke all sessions', function () {
         ->deleteJson('/api/sessions');
 
     $response->assertOk()
-        ->assertJson(['message' => 'All sessions revoked.']);
+        ->assertJson(['message' => 'All other sessions revoked.']);
 
-    expect($user->tokens()->count())->toBe(0);
+    expect($user->tokens()->count())->toBe(1);
 });
 
 test('sessions are ordered by creation date descending', function () {
