@@ -19,6 +19,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/requests/{dataRequest}/grant', [DataHubController::class, 'grantConsent']);
         Route::post('/requests/{dataRequest}/deny', [DataHubController::class, 'denyConsent']);
     });
-
-    Route::get('/data-hub/access/{userId}', [DataHubController::class, 'accessData']);
 });
+
+Route::get('/data-hub/access/{userId}', [DataHubController::class, 'accessData'])
+    ->middleware('throttle:30,1');

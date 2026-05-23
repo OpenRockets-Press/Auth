@@ -5,12 +5,13 @@ use App\Http\Controllers\Api\Auth\SessionController;
 use App\Http\Controllers\Api\Auth\TwoFactorController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/auth/login', [AuthController::class, 'login']);
-Route::post('/auth/register', [AuthController::class, 'register']);
+Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
+Route::post('/auth/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
 
 Route::middleware('auth:api')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/auth/me', [AuthController::class, 'me']);
+    Route::post('/auth/revoke-tokens', [AuthController::class, 'revokeAllTokens']);
 
     Route::prefix('2fa')->group(function () {
         Route::post('/enable', [TwoFactorController::class, 'enable']);
