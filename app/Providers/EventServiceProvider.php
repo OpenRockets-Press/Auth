@@ -14,10 +14,13 @@ use App\Listeners\TriggerConsentRevokedWebhooks;
 use App\Listeners\TriggerConsentWebhooks;
 use App\Models\Admin\WebhookEndpoint;
 use App\Models\Compliance\DataAccessRequest;
+use App\Models\DataHub\DataRequest;
 use App\Models\DataHub\DataSharingAgreement;
 use App\Models\OAuth\App;
+use App\Models\OAuth\ConsentRecord;
 use App\Models\User;
 use App\Policies\AppPolicy;
+use App\Policies\ConsentRecordPolicy;
 use App\Policies\DataAccessRequestPolicy;
 use App\Policies\DataSharingAgreementPolicy;
 use App\Policies\UserPolicy;
@@ -48,8 +51,10 @@ class EventServiceProvider extends ServiceProvider
         App::class => AppPolicy::class,
         User::class => UserPolicy::class,
         DataAccessRequest::class => DataAccessRequestPolicy::class,
+        DataRequest::class => DataAccessRequestPolicy::class,
         DataSharingAgreement::class => DataSharingAgreementPolicy::class,
         WebhookEndpoint::class => WebhookEndpointPolicy::class,
+        ConsentRecord::class => ConsentRecordPolicy::class,
     ];
 
     public function boot(): void

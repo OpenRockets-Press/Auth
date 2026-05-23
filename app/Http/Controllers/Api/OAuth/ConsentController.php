@@ -31,9 +31,7 @@ class ConsentController extends Controller
 
     public function revoke(Request $request, ConsentRecord $record): JsonResponse
     {
-        if ($record->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Unauthorized.'], 403);
-        }
+        $this->authorize('revoke', $record);
 
         $this->oauthService->revokeConsent($record);
 

@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\Compliance\DataAccessRequest;
+use App\Models\DataHub\DataRequest;
 use App\Models\User;
 
 class DataAccessRequestPolicy
@@ -20,5 +21,10 @@ class DataAccessRequestPolicy
     public function fulfill(User $user, DataAccessRequest $request): bool
     {
         return $user->hasPermission('data_requests.manage');
+    }
+
+    public function grantConsent(User $user, DataRequest $request): bool
+    {
+        return $user->id === $request->user_id;
     }
 }

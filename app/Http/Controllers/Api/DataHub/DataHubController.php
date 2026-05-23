@@ -80,9 +80,7 @@ class DataHubController extends Controller
 
     public function grantConsent(Request $request, DataRequest $dataRequest): JsonResponse
     {
-        if ($dataRequest->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Unauthorized.'], 403);
-        }
+        $this->authorize('grantConsent', $dataRequest);
 
         $agreement = $this->dataHubService->grantDataSharingConsent($dataRequest);
 
@@ -91,9 +89,7 @@ class DataHubController extends Controller
 
     public function denyConsent(Request $request, DataRequest $dataRequest): JsonResponse
     {
-        if ($dataRequest->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Unauthorized.'], 403);
-        }
+        $this->authorize('grantConsent', $dataRequest);
 
         $this->dataHubService->denyDataSharingConsent($dataRequest);
 
@@ -167,6 +163,8 @@ class DataHubController extends Controller
     public function revokeAgreement(Request $request, int $agreementId): JsonResponse
     {
         $agreement = $request->user()->dataSharingAgreements()->findOrFail($agreementId);
+
+        $this->authorize('revoke', $agreement);
 
         $this->dataHubService->revokeDataSharingAgreement($agreement);
 
