@@ -144,4 +144,14 @@ class AuthController extends Controller
             'created_at' => $user->created_at,
         ]);
     }
+
+    public function revokeAllTokens(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $currentTokenId = $user->currentAccessToken()->id;
+
+        $user->tokens()->where('id', '!=', $currentTokenId)->delete();
+
+        return response()->json(['message' => 'All other tokens revoked.']);
+    }
 }
