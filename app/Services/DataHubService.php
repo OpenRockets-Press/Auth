@@ -138,7 +138,7 @@ class DataHubService
         return $dataToken;
     }
 
-    public function accessSharedData(DataAccessToken $token, string $userId): array
+    public function accessSharedData(DataAccessToken $token, string $userId, ?array $requestedKeys = null): array
     {
         $agreement = DataSharingAgreement::where('user_id', $token->user_id)
             ->where('source_app_id', $token->granting_app_id)
@@ -151,8 +151,10 @@ class DataHubService
             throw new \RuntimeException('Data sharing agreement is no longer valid.');
         }
 
+        $allowedKeys = $requestedKeys ?? $agreement->data_keys;
+
         $data = [];
-        foreach ($agreement->data_keys as $key) {
+        foreach ($allowedKeys as $key) {
             $store = UserDataStore::where('user_id', $userId)
                 ->where('app_id', $token->granting_app_id)
                 ->where('key', $key)

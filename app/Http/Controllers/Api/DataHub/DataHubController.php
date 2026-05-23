@@ -136,7 +136,20 @@ class DataHubController extends Controller
             return response()->json(['message' => 'Token does not authorize access to this user data.'], 403);
         }
 
-        $data = $this->dataHubService->accessSharedData($dataToken, $userId);
+        $requestedKeys = $request->query('keys');
+        if ($requestedKeys) {
+            $requestedKeys = is_array($requestedKeys) ? $requestedKeys : explode(',', $requestedKeys);
+            $unauthorizedKeys = array_diff($requestedKeys, $dataToken->scopes);
+
+            if (! empty($unauthorizedKeys)) {
+                return response()->json([
+                    'message' => 'Token does not authorize access to requested keys.',
+                    'unauthorized_keys' => $unauthorizedKeys,
+                ], 403);
+            }
+        }
+
+        $data = $this->dataHubService->accessSharedData($dataToken, $userId, $requestedKeys);
 
         return response()->json(['data' => $data]);
     }

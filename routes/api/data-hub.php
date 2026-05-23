@@ -22,4 +22,4 @@ Route::middleware('auth:api')->group(function () {
 });
 
 Route::get('/data-hub/access/{userId}', [DataHubController::class, 'accessData'])
-    ->middleware('throttle:30,1');
+    ->middleware('throttle:10,1');
