@@ -68,34 +68,38 @@ test('security page renders without two factor when feature is disabled', functi
 });
 
 test('password can be updated', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create([
+        'password' => \Illuminate\Support\Facades\Hash::make('Xk9#mP2$vL5nQ8'),
+    ]);
 
     $response = $this
         ->actingAs($user)
         ->from(route('security.edit'))
         ->put(route('user-password.update'), [
-            'current_password' => 'password',
-            'password' => 'new-password',
-            'password_confirmation' => 'new-password',
+            'current_password' => 'Xk9#mP2$vL5nQ8',
+            'password' => 'Zr4@tN7&wK3xJ9',
+            'password_confirmation' => 'Zr4@tN7&wK3xJ9',
         ]);
 
     $response
         ->assertSessionHasNoErrors()
         ->assertRedirect(route('security.edit'));
 
-    expect(Hash::check('new-password', $user->refresh()->password))->toBeTrue();
+    expect(Hash::check('Zr4@tN7&wK3xJ9', $user->refresh()->password))->toBeTrue();
 });
 
 test('correct password must be provided to update password', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create([
+        'password' => \Illuminate\Support\Facades\Hash::make('Xk9#mP2$vL5nQ8'),
+    ]);
 
     $response = $this
         ->actingAs($user)
         ->from(route('security.edit'))
         ->put(route('user-password.update'), [
-            'current_password' => 'wrong-password',
-            'password' => 'new-password',
-            'password_confirmation' => 'new-password',
+            'current_password' => 'WrongPass#999',
+            'password' => 'Zr4@tN7&wK3xJ9',
+            'password_confirmation' => 'Zr4@tN7&wK3xJ9',
         ]);
 
     $response

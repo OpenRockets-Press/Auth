@@ -17,8 +17,8 @@ test('new users can register via web form', function () {
     $response = $this->post(route('register.store'), [
         'name' => 'Test User',
         'email' => 'test@example.com',
-        'password' => 'password',
-        'password_confirmation' => 'password',
+        'password' => 'Xk9#mP2$vL5nQ8',
+        'password_confirmation' => 'Xk9#mP2$vL5nQ8',
     ]);
 
     $this->assertAuthenticated();
@@ -29,8 +29,8 @@ test('api registration endpoint creates user and returns token', function () {
     $response = $this->postJson('/api/auth/register', [
         'name' => 'API User',
         'email' => 'apiuser@example.com',
-        'password' => 'securepassword',
-        'password_confirmation' => 'securepassword',
+        'password' => 'Zr4@tN7&wK3xJ9',
+        'password_confirmation' => 'Zr4@tN7&wK3xJ9',
     ]);
 
     $response->assertCreated()
