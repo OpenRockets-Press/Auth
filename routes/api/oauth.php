@@ -16,6 +16,8 @@ Route::middleware(['auth:api', 'app.active'])->group(function () {
         Route::post('/{app}/regenerate-secret', [AppsController::class, 'regenerateSecret']);
         Route::get('/{app}/consents', [AppsController::class, 'consents']);
         Route::delete('/{app}/consents', [AppsController::class, 'revokeConsents']);
+        Route::get('/{app}/scopes', [AppsController::class, 'scopes']);
+        Route::get('/{app}/stats', [AppsController::class, 'stats']);
     });
 
     Route::prefix('consent')->group(function () {

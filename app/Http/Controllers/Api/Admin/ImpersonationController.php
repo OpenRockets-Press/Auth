@@ -78,4 +78,26 @@ class ImpersonationController extends Controller
             'message' => 'Stopped impersonation.',
         ]);
     }
+
+    public function status(Request $request): JsonResponse
+    {
+        $token = $request->user()->currentAccessToken();
+        $tokenName = $token->name;
+
+        if (! str_starts_with($tokenName, 'impersonation-by-admin-')) {
+            return response()->json(['is_impersonating' => false]);
+        }
+
+        preg_match('/impersonation-by-admin-(\d+)/', $tokenName, $matches);
+        $adminId = $matches[1] ?? null;
+
+        $admin = $adminId ? User::find($adminId) : null;
+
+        return response()->json([
+            'is_impersonating' => true,
+            'admin_id' => $adminId,
+            'admin_name' => $admin?->name,
+            'admin_email' => $admin?->email,
+        ]);
+    }
 }
