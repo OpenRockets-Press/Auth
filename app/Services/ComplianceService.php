@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Events\Compliance\DataDeletionFulfilled;
+use App\Events\Compliance\DataExportFulfilled;
 use App\Exceptions\Compliance\InvalidConsentTokenException;
 use App\Models\Compliance\Country;
 use App\Models\Compliance\DataAccessRequest;
@@ -126,6 +128,10 @@ class ComplianceService
 
         $request->fulfill($path);
 
+        $downloadUrl = route('compliance.data-export.download-file', ['dataRequest' => $request->id]);
+
+        event(new DataExportFulfilled($request, $downloadUrl));
+
         return $path;
     }
 
@@ -134,8 +140,7 @@ class ComplianceService
         $user = $request->user;
 
         $userId = $user->id;
-        $userName = $user->name;
-        $userEmail = $user->email;
+        $userEmailHash = hash('sha256', $user->email);
 
         $user->tokens()->delete();
         $user->consentRecords()->delete();
@@ -150,21 +155,20 @@ class ComplianceService
         $user->parentalConsents()->delete();
         $user->profile?->delete();
 
-        $auditLogs = $user->auditLogs()->get()->toArray();
+        $auditLogCount = $user->auditLogs()->count();
         $user->auditLogs()->delete();
 
         $user->delete();
 
-        if (! empty($auditLogs)) {
+        if ($auditLogCount > 0) {
             $deletionRecord = [
                 'event_type' => 'compliance.data.deletion.executed',
                 'event_data' => [
                     'deleted_user_id' => $userId,
-                    'deleted_user_name' => $userName,
-                    'deleted_user_email' => $userEmail,
+                    'deleted_user_email_hash' => $userEmailHash,
                     'deletion_requested_at' => $request->created_at,
                     'deletion_fulfilled_at' => now(),
-                    'audit_log_count' => count($auditLogs),
+                    'audit_log_count' => $auditLogCount,
                 ],
                 'ip_address' => request()?->ip(),
                 'created_at' => now(),
@@ -175,6 +179,8 @@ class ComplianceService
         }
 
         $request->fulfill();
+
+        event(new DataDeletionFulfilled($request));
     }
 
     public function compileUserData(User $user): array

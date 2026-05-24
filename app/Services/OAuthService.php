@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\OAuth\AppRegistered;
 use App\Events\OAuth\ConsentGranted;
 use App\Events\OAuth\ConsentRevoked;
 use App\Models\OAuth\App;
@@ -46,6 +47,8 @@ class OAuthService
         ]);
 
         $this->auditService->logAppRegistered($app);
+
+        event(new AppRegistered($app));
 
         return $app;
     }

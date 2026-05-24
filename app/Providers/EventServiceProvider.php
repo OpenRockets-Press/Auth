@@ -2,13 +2,19 @@
 
 namespace App\Providers;
 
+use App\Events\Compliance\DataDeletionFulfilled;
+use App\Events\Compliance\DataExportFulfilled;
 use App\Events\Compliance\ParentalConsentRequested;
+use App\Events\OAuth\AppRegistered;
 use App\Events\OAuth\ConsentGranted;
 use App\Events\OAuth\ConsentRevoked;
 use App\Events\Security\UserLoggedIn;
 use App\Events\Security\UserLoggedOut;
 use App\Listeners\LogUserLogin;
 use App\Listeners\LogUserLogout;
+use App\Listeners\NotifyAdminsOfNewApp;
+use App\Listeners\SendDataDeletionNotification;
+use App\Listeners\SendDataExportNotification;
 use App\Listeners\SendParentalConsentNotification;
 use App\Listeners\TriggerConsentRevokedWebhooks;
 use App\Listeners\TriggerConsentWebhooks;
@@ -31,6 +37,15 @@ class EventServiceProvider extends ServiceProvider
         ],
         ParentalConsentRequested::class => [
             SendParentalConsentNotification::class,
+        ],
+        AppRegistered::class => [
+            NotifyAdminsOfNewApp::class,
+        ],
+        DataExportFulfilled::class => [
+            SendDataExportNotification::class,
+        ],
+        DataDeletionFulfilled::class => [
+            SendDataDeletionNotification::class,
         ],
     ];
 
