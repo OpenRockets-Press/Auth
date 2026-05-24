@@ -11,7 +11,9 @@
         "lint": "eslint . --fix",
         "lint:check": "eslint .",
         "types": "php artisan gen:types",
-        "types:check": "tsc --noEmit"
+        "types:check": "tsc --noEmit",
+        "swagger": "php artisan swagger:export",
+        "swagger:json": "php artisan swagger:export --format=json"
     },
     "devDependencies": {
         "@eslint/js": "^9.19.0",

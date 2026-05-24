@@ -17,9 +17,11 @@
         "laravel/passport": "^13.7",
         "laravel/socialite": "^5.27",
         "laravel/tinker": "^3.0",
-        "laravel/wayfinder": "^0.1.14"
+        "laravel/wayfinder": "^0.1.14",
+        "symfony/yaml": "^8.0"
     },
     "require-dev": {
+        "dedoc/scramble": "^0.13.23",
         "fakerphp/faker": "^1.24",
         "laravel/pail": "^1.2.5",
         "laravel/pao": "^1.0.6",

@@ -16,14 +16,18 @@ use App\Policies\DataSharingAgreementPolicy;
 use App\Policies\UserPolicy;
 use App\Policies\WebhookEndpointPolicy;
 use Carbon\CarbonImmutable;
+use Dedoc\Scramble\Generator;
+use Dedoc\Scramble\Scramble;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Laravel\Passport\Passport;
+use Symfony\Component\Yaml\Yaml;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -38,6 +42,36 @@ class AppServiceProvider extends ServiceProvider
         $this->configurePassport();
         $this->configureRateLimiting();
         $this->configurePolicies();
+        $this->configureSwagger();
+    }
+
+    protected function configureSwagger(): void
+    {
+        Scramble::ignoreDefaultRoutes();
+
+        Route::get('/swagger', function () {
+            return view('scramble::docs', [
+                'spec' => app(\Dedoc\Scramble\Generator::class)(Scramble::getGeneratorConfig(Scramble::DEFAULT_API)),
+                'config' => Scramble::getGeneratorConfig(Scramble::DEFAULT_API),
+            ]);
+        })->name('swagger.ui');
+
+        Route::get('/swagger.json', function () {
+            return response()->json(
+                app(\Dedoc\Scramble\Generator::class)(Scramble::getGeneratorConfig(Scramble::DEFAULT_API)),
+                options: JSON_PRETTY_PRINT,
+            );
+        })->name('swagger.json');
+
+        Route::get('/swagger.yaml', function () {
+            $generator = app(Generator::class);
+            $config = Scramble::getGeneratorConfig(Scramble::DEFAULT_API);
+            $spec = $generator($config);
+
+            return response(Yaml::dump($spec, 10, 2), 200, [
+                'Content-Type' => 'text/yaml',
+            ]);
+        })->name('swagger.yaml');
     }
 
     protected function configurePolicies(): void
