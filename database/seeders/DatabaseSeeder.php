@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,11 +12,7 @@ class DatabaseSeeder extends Seeder
             CountrySeeder::class,
             RoleSeeder::class,
             PassportClientSeeder::class,
-        ]);
-
-        User::factory()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
+            AdminUserSeeder::class,
         ]);
     }
 }
