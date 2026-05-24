@@ -43,7 +43,7 @@ class AuditRequest
                         null,
                         [
                             'method' => $request->method(),
-                            'url' => $request->fullUrl(),
+                            'path' => $request->path(),
                             'status' => $response->getStatusCode(),
                         ],
                         $request->ip(),
@@ -76,7 +76,7 @@ class AuditRequest
             return true;
         }
 
-        return rand(1, 100) <= ($sampleRate * 100);
+        return random_int(1, 100) <= ($sampleRate * 100);
     }
 
     protected function shouldSkipPath(string $path): bool

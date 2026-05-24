@@ -50,6 +50,8 @@ class AppsController extends Controller
 
     public function update(UpdateAppRequest $request, App $app): JsonResponse
     {
+        $this->authorize('update', $app);
+
         $app = $this->oauthService->updateApp($app, $request->validated());
 
         return response()->json(new AppResource($app));
@@ -85,8 +87,42 @@ class AppsController extends Controller
 
     public function revokeConsents(Request $request, App $app): JsonResponse
     {
+        $this->authorize('view', $app);
+
         $this->oauthService->revokeAllConsents($request->user(), $app);
 
         return response()->json(['message' => 'All consents revoked.']);
+    }
+
+    public function scopes(Request $request, App $app): JsonResponse
+    {
+        $this->authorize('view', $app);
+
+        $scopes = $app->scopes()->orderBy('name')->get();
+
+        return response()->json([
+            'scopes' => $scopes->map(fn ($scope) => [
+                'id' => $scope->id,
+                'name' => $scope->name,
+                'description' => $scope->description,
+                'is_required' => $scope->is_required,
+            ]),
+        ]);
+    }
+
+    public function stats(Request $request, App $app): JsonResponse
+    {
+        $this->authorize('view', $app);
+
+        $stats = [
+            'total_consents' => $app->consentRecords()->whereNull('revoked_at')->count(),
+            'active_consents' => $app->consentRecords()->whereNull('revoked_at')->count(),
+            'revoked_consents' => $app->consentRecords()->whereNotNull('revoked_at')->count(),
+            'total_scopes' => $app->scopes()->count(),
+            'created_at' => $app->created_at,
+            'last_consent_at' => $app->consentRecords()->latest()->value('granted_at'),
+        ];
+
+        return response()->json($stats);
     }
 }

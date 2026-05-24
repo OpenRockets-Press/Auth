@@ -13,9 +13,9 @@ Route::middleware('auth:api')->group(function () {
     Route::prefix('compliance')->group(function () {
         Route::get('/profile', [ComplianceController::class, 'getProfile']);
         Route::post('/profile', [ComplianceController::class, 'profile']);
-        Route::post('/parental-consent/request', [ComplianceController::class, 'requestParentalConsent']);
-        Route::post('/data-export', [ComplianceController::class, 'requestDataExport']);
-        Route::post('/data-deletion', [ComplianceController::class, 'requestDataDeletion']);
+        Route::post('/parental-consent/request', [ComplianceController::class, 'requestParentalConsent'])->middleware('throttle:3,60');
+        Route::post('/data-export', [ComplianceController::class, 'requestDataExport'])->middleware('throttle:2,60');
+        Route::post('/data-deletion', [ComplianceController::class, 'requestDataDeletion'])->middleware('throttle:3,60');
         Route::get('/data-export/{dataRequest}/download', DataExportDownloadController::class);
         Route::get('/data-export/{dataRequest}/file', [DataExportDownloadController::class, 'download'])
             ->name('compliance.data-export.download-file');

@@ -8,28 +8,34 @@ use Symfony\Component\HttpFoundation\Response;
 
 class VerifyWebhookSignature
 {
+    protected const ALLOWED_ALGORITHM = 'sha256';
+
     public function handle(Request $request, Closure $next): Response
     {
         $signature = $request->header('X-Webhook-Signature');
 
         if (! $signature) {
-            return response()->json(['message' => 'Webhook signature missing.'], 401);
+            return response()->json(['message' => 'Invalid signature.'], 401);
         }
 
         $payload = $request->getContent();
 
         [$algorithm, $signatureHash] = explode('=', $signature, 2) + [null, $signature];
 
+        if ($algorithm !== self::ALLOWED_ALGORITHM) {
+            return response()->json(['message' => 'Invalid signature algorithm.'], 401);
+        }
+
         $secret = config('services.webhook.secret');
 
         if (! $secret) {
-            return response()->json(['message' => 'Webhook secret not configured.'], 500);
+            return response()->json(['message' => 'Service unavailable.'], 500);
         }
 
-        $expectedHash = hash_hmac($algorithm ?? 'sha256', $payload, $secret);
+        $expectedHash = hash_hmac(self::ALLOWED_ALGORITHM, $payload, $secret);
 
         if (! hash_equals($expectedHash, $signatureHash)) {
-            return response()->json(['message' => 'Invalid webhook signature.'], 403);
+            return response()->json(['message' => 'Invalid signature.'], 403);
         }
 
         return $next($request);

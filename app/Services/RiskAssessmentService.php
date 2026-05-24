@@ -192,7 +192,7 @@ class RiskAssessmentService
     {
         try {
             $response = \Illuminate\Support\Facades\Http::timeout(5)
-                ->get("http://ip-api.com/json/{$ipAddress}");
+                ->get("https://ip-api.com/json/{$ipAddress}");
 
             if (! $response->ok()) {
                 return null;

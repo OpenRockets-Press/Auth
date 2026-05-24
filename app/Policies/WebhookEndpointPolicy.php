@@ -18,7 +18,7 @@ class WebhookEndpointPolicy
 
     public function create(User $user): bool
     {
-        return true;
+        return $user->hasPermission('webhooks.create') || $user->hasPermission('webhooks.manage');
     }
 
     public function update(User $user, WebhookEndpoint $endpoint): bool

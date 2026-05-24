@@ -8,6 +8,8 @@ use App\Http\Resources\Compliance\AuditLogResource;
 use App\Http\Resources\Compliance\CountryResource;
 use App\Http\Resources\Compliance\DataAccessRequestResource;
 use App\Http\Resources\OAuth\AppResource;
+use App\Http\Resources\OAuth\ConsentRecordResource;
+use App\Http\Resources\Social\SocialAccountResource;
 use App\Models\Compliance\AuditLog;
 use App\Models\Compliance\Country;
 use App\Models\Compliance\DataAccessRequest;
@@ -54,6 +56,54 @@ class AdminController extends Controller
         return response()->json(new UserResource($user));
     }
 
+    public function userConsents(User $user): JsonResponse
+    {
+        $consents = ConsentRecord::where('user_id', $user->id)
+            ->with('app')
+            ->latest()
+            ->paginate(20);
+
+        return response()->json(ConsentRecordResource::collection($consents));
+    }
+
+    public function userSocialAccounts(User $user): JsonResponse
+    {
+        $accounts = $user->socialAccounts()->latest()->get();
+
+        return response()->json(SocialAccountResource::collection($accounts));
+    }
+
+    public function userDataRequests(User $user): JsonResponse
+    {
+        $requests = DataAccessRequest::where('user_id', $user->id)
+            ->latest()
+            ->paginate(20);
+
+        return response()->json(DataAccessRequestResource::collection($requests));
+    }
+
+    public function userAuditLogs(User $user): JsonResponse
+    {
+        $logs = AuditLog::where('user_id', $user->id)
+            ->with('app')
+            ->latest()
+            ->paginate(50);
+
+        return response()->json(AuditLogResource::collection($logs));
+    }
+
+    public function unlockUser(Request $request, User $user): JsonResponse
+    {
+        $this->authorize('suspend', $user);
+
+        $user->update([
+            'locked_until' => null,
+            'failed_login_attempts' => 0,
+        ]);
+
+        return response()->json(['message' => 'User unlocked.']);
+    }
+
     public function suspendUser(Request $request, User $user): JsonResponse
     {
         $this->authorize('suspend', $user);
@@ -65,6 +115,8 @@ class AdminController extends Controller
 
     public function unsuspendUser(Request $request, User $user): JsonResponse
     {
+        $this->authorize('suspend', $user);
+
         $user->update(['status' => 'active']);
 
         return response()->json(['message' => 'User unsuspended.']);

@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\Admin\ApiKey;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class AuthenticateWithApiKey
@@ -28,6 +29,7 @@ class AuthenticateWithApiKey
         $request->merge(['api_key_model' => $apiKey]);
 
         if ($apiKey->user) {
+            Auth::setUser($apiKey->user);
             $request->setUserResolver(fn () => $apiKey->user);
         }
 

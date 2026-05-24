@@ -63,8 +63,7 @@ class AuthController extends Controller
 
         if ($user->isLocked()) {
             return response()->json([
-                'message' => 'Account is temporarily locked.',
-                'retry_after' => $user->locked_until->diffInSeconds(now()),
+                'message' => 'Account is temporarily locked. Please try again later.',
             ], 429);
         }
 
@@ -107,7 +106,10 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
             ],
-            'risk' => $risk['level'] === 'low' ? null : $risk,
+            'risk' => $risk['level'] === 'low' ? null : [
+                'level' => $risk['level'],
+                'require_step_up' => $risk['require_step_up'] ?? false,
+            ],
         ]);
     }
 
@@ -151,7 +153,7 @@ class AuthController extends Controller
 
     public function me(Request $request): JsonResponse
     {
-        $user = $request->user()->load(['profile', 'roles']);
+        $user = $request->user()->load(['profile.country', 'roles']);
 
         return response()->json([
             'id' => $user->id,
@@ -160,7 +162,15 @@ class AuthController extends Controller
             'email_verified_at' => $user->email_verified_at,
             'status' => $user->status,
             'last_login_at' => $user->last_login_at,
-            'profile' => $user->profile,
+            'two_factor_enabled' => $user->two_factor_confirmed_at !== null,
+            'profile' => $user->profile ? [
+                'date_of_birth' => $user->profile->date_of_birth,
+                'country_code' => $user->profile->country_code,
+                'country_name' => $user->profile->country?->name,
+                'age_verified' => $user->profile->age_verified,
+                'parental_consent_required' => $user->profile->parental_consent_required,
+                'parental_consent_status' => $user->profile->parental_consent_status,
+            ] : null,
             'roles' => $user->roles->pluck('name'),
             'created_at' => $user->created_at,
         ]);
@@ -174,5 +184,22 @@ class AuthController extends Controller
         $user->tokens()->where('id', '!=', $currentTokenId)->delete();
 
         return response()->json(['message' => 'All other tokens revoked.']);
+    }
+
+    public function complianceStatus(Request $request): JsonResponse
+    {
+        $user = $request->user()->load('profile.country');
+        $profile = $user->profile;
+
+        return response()->json([
+            'has_profile' => $profile !== null,
+            'is_minor' => $user->isMinor(),
+            'parental_consent_required' => $profile?->parental_consent_required ?? false,
+            'parental_consent_status' => $profile?->parental_consent_status,
+            'age_verified' => $profile?->age_verified ?? false,
+            'country_code' => $profile?->country_code,
+            'country_name' => $profile?->country?->name,
+            'can_proceed' => ! $profile || $profile->hasConsent(),
+        ]);
     }
 }

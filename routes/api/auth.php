@@ -11,13 +11,14 @@ Route::post('/auth/register', [AuthController::class, 'register'])->middleware('
 Route::middleware('auth:api')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/auth/me', [AuthController::class, 'me']);
+    Route::get('/auth/me/compliance', [AuthController::class, 'complianceStatus']);
     Route::post('/auth/revoke-other-tokens', [AuthController::class, 'revokeAllTokens']);
 
     Route::prefix('2fa')->group(function () {
-        Route::post('/enable', [TwoFactorController::class, 'enable']);
-        Route::post('/confirm', [TwoFactorController::class, 'confirm']);
-        Route::post('/disable', [TwoFactorController::class, 'disable']);
-        Route::get('/recovery-codes', [TwoFactorController::class, 'recoveryCodes']);
+        Route::post('/enable', [TwoFactorController::class, 'enable'])->middleware('throttle:5,1');
+        Route::post('/confirm', [TwoFactorController::class, 'confirm'])->middleware('throttle:10,1');
+        Route::post('/disable', [TwoFactorController::class, 'disable'])->middleware('throttle:5,1');
+        Route::get('/recovery-codes', [TwoFactorController::class, 'recoveryCodes'])->middleware('throttle:10,1');
     });
 
     Route::prefix('sessions')->group(function () {

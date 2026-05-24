@@ -16,6 +16,7 @@ class ApiKey extends Model
         'scopes' => 'array',
         'expires_at' => 'datetime',
         'last_used_at' => 'datetime',
+        'revoked_at' => 'datetime',
     ];
 
     protected $fillable = [
@@ -26,6 +27,7 @@ class ApiKey extends Model
         'scopes',
         'expires_at',
         'last_used_at',
+        'revoked_at',
     ];
 
     protected $hidden = [
@@ -49,7 +51,12 @@ class ApiKey extends Model
 
     public function isValid(): bool
     {
-        return ! $this->isExpired();
+        return $this->revoked_at === null && ! $this->isExpired();
+    }
+
+    public function revoke(): void
+    {
+        $this->update(['revoked_at' => now()]);
     }
 
     public function touchUsage(): void
