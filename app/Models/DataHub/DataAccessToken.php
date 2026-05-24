@@ -47,6 +47,10 @@ class DataAccessToken extends Model
 
     public function isExpired(): bool
     {
+        if (! $this->expires_at) {
+            return false;
+        }
+
         return $this->expires_at->isPast();
     }
 

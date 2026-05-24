@@ -4,6 +4,7 @@ namespace App\Models\Compliance;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Country extends Model
 {
@@ -32,6 +33,16 @@ class Country extends Model
         'data_retention_days' => 'integer',
         'requires_parental_consent_below_age' => 'integer',
     ];
+
+    public function userProfiles(): HasMany
+    {
+        return $this->hasMany(UserProfile::class, 'country_code', 'code');
+    }
+
+    public function dataRetentionPolicies(): HasMany
+    {
+        return $this->hasMany(DataRetentionPolicy::class, 'country_code', 'code');
+    }
 
     public function requiresParentalConsent(int $age): bool
     {
