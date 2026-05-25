@@ -23,6 +23,7 @@ A GDPR/COPPA-compliant identity provider with OAuth 2.1/OIDC, minor parental con
 - **Composer** >= 2.8
 - **Bun** >= 1.0 (or npm/pnpm)
 - **Node.js** >= 20
+- PHP must have the `pdo_pgsql` and `pgsql` extensions enabled for local PostgreSQL access.
 
 ## Quick Start
 
@@ -36,7 +37,10 @@ bun install
 
 # 3. Generate app key and create database
 php artisan key:generate
-createdb auth  # or use your preferred method
+
+# On Windows, `createdb` is only available if the PostgreSQL bin directory is on PATH.
+# If it is not, create the database with pgAdmin or:
+psql -U postgres -c "CREATE DATABASE auth;"
 
 # 4. Run migrations and seed
 php artisan migrate
@@ -50,6 +54,8 @@ composer run dev
 ```
 
 The app will be available at `http://localhost:8000`.
+
+If `php artisan migrate` fails with `could not find driver`, enable the PostgreSQL PDO extension in the PHP installation that runs Artisan, then restart your terminal or PHP service before retrying.
 
 ### Default Admin Account
 
