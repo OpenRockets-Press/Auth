@@ -6,6 +6,7 @@ use App\Http\Middleware\AuthenticateWithApiKey;
 use App\Http\Middleware\CheckAccountStatus;
 use App\Http\Middleware\EnsureAdmin;
 use App\Http\Middleware\EnsureAppIsActive;
+use App\Http\Middleware\EnsureOnboardingComplete;
 use App\Http\Middleware\EnsureParentalConsent;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -34,6 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(prepend: [
             SubstituteBindings::class,
             CheckAccountStatus::class,
+            EnsureOnboardingComplete::class,
         ]);
 
         $middleware->alias([

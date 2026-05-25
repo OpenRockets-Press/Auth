@@ -15,16 +15,21 @@ class UserProfile extends Model
         'date_of_birth' => 'date',
         'age_verified' => 'boolean',
         'parental_consent_required' => 'boolean',
+        'onboarding_completed_at' => 'datetime',
     ];
 
     protected $fillable = [
         'user_id',
         'date_of_birth',
         'country_code',
+        'state',
+        'city',
         'age_verified',
         'age_verification_method',
         'parental_consent_required',
         'parental_consent_status',
+        'onboarding_status',
+        'onboarding_completed_at',
     ];
 
     public function user(): BelongsTo

@@ -121,6 +121,8 @@ class AppServiceProvider extends ServiceProvider
             'address' => 'Access user physical address',
             'offline_access' => 'Access resources when user is offline',
         ]);
+
+
     }
 
     protected function configureRateLimiting(): void

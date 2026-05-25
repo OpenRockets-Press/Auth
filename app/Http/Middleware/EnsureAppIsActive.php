@@ -8,9 +8,18 @@ use Symfony\Component\HttpFoundation\Response;
 
 class EnsureAppIsActive
 {
+    public const ROUTE_PARAMETERS = ['app', 'app_id', 'application'];
+
     public function handle(Request $request, Closure $next): Response
     {
-        $app = $request->route('app') ?? $request->route('app_id');
+        $app = null;
+
+        foreach (self::ROUTE_PARAMETERS as $param) {
+            $app = $request->route($param);
+            if ($app !== null) {
+                break;
+            }
+        }
 
         if ($app && is_object($app) && method_exists($app, 'isSuspended')) {
             if ($app->isSuspended()) {

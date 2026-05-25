@@ -9,16 +9,18 @@ test('registerApp creates app and OAuth client', function () {
     $owner = User::factory()->create();
     $service = app(OAuthService::class);
 
-    $app = $service->registerApp($owner, [
+    $result = $service->registerApp($owner, [
         'name' => 'Test App',
         'redirect_uris' => ['https://example.com/callback'],
         'description' => 'A test app',
     ]);
 
-    expect($app)->toBeInstanceOf(App::class);
-    expect($app->name)->toBe('Test App');
-    expect($app->status)->toBe('pending');
-    expect($app->owner_id)->toBe($owner->id);
+    expect($result['app'])->toBeInstanceOf(App::class);
+    expect($result['app']->name)->toBe('Test App');
+    expect($result['app']->status)->toBe('pending');
+    expect($result['app']->owner_id)->toBe($owner->id);
+    expect($result['client_id'])->not->toBeNull();
+    expect($result['client_secret'])->not->toBeNull();
 
     $this->assertDatabaseHas('apps', [
         'name' => 'Test App',

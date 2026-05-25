@@ -140,4 +140,16 @@ class User extends Authenticatable implements PasskeyUser
 
         return $this->profile->date_of_birth->diffInYears(now()) < 18;
     }
+
+    public function hasCompletedOnboarding(): bool
+    {
+        if (! $this->profile) {
+            return true;
+        }
+
+        return $this->profile->onboarding_status === 'completed'
+            && $this->profile->country_code !== null
+            && $this->profile->state !== null
+            && $this->profile->date_of_birth !== null;
+    }
 }

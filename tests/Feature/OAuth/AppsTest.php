@@ -156,13 +156,13 @@ test('user can regenerate client secret', function () {
     $token = $user->createToken('test-token');
 
     // Create app through the service so it has an OAuth client
-    $app = app(OAuthService::class)->registerApp($user, [
+    $result = app(OAuthService::class)->registerApp($user, [
         'name' => 'Test App',
         'redirect_uris' => ['https://example.com/callback'],
     ]);
 
     $response = $this->withHeaders(['Authorization' => 'Bearer '.$token->accessToken])
-        ->postJson('/api/apps/'.$app->id.'/regenerate-secret', ['confirm' => true]);
+        ->postJson('/api/apps/'.$result['app']->id.'/regenerate-secret', ['confirm' => true]);
 
     $response->assertOk()
         ->assertJsonStructure(['message', 'client_secret']);

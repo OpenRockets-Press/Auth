@@ -6,6 +6,7 @@ use App\Models\Admin\WebhookDelivery;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 
 class DeliverWebhook implements ShouldQueue
 {
@@ -42,7 +43,14 @@ class DeliverWebhook implements ShouldQueue
             return;
         }
 
-        if (! $this->isUrlSafe($endpoint->url)) {
+        $resolvedIp = $this->resolveHostSafe($endpoint->url);
+        if ($resolvedIp === null) {
+            $this->delivery->markFailed(0, 'Webhook URL could not be resolved.');
+
+            return;
+        }
+
+        if (! $this->isIpAllowed($resolvedIp)) {
             $this->delivery->markFailed(0, 'Webhook URL resolved to a blocked IP address.');
 
             return;
@@ -61,6 +69,11 @@ class DeliverWebhook implements ShouldQueue
         try {
             $response = Http::timeout(config('auth-system.webhooks.timeout_seconds', 30))
                 ->withoutRedirecting()
+                ->withOptions([
+                    'curl' => [
+                        CURLOPT_RESOLVE => [parse_url($endpoint->url, PHP_URL_HOST).':'.$this->getUriPort($endpoint->url).':'.$resolvedIp],
+                    ],
+                ])
                 ->withHeaders([
                     'Content-Type' => 'application/json',
                     'X-Webhook-Signature' => 'sha256='.$signature,
@@ -93,20 +106,40 @@ class DeliverWebhook implements ShouldQueue
         }
     }
 
-    protected function isUrlSafe(string $url): bool
+    protected function getUriPort(string $url): int
+    {
+        $parsed = parse_url($url);
+
+        return $parsed['port'] ?? (($parsed['scheme'] ?? 'https') === 'https' ? 443 : 80);
+    }
+
+    protected function resolveHostSafe(string $url): ?string
     {
         $host = parse_url($url, PHP_URL_HOST);
 
         if (! $host) {
-            return false;
+            return null;
         }
 
-        $ip = gethostbyname($host);
+        $cacheKey = 'webhook_dns_'.md5($host);
 
-        if ($ip === $host) {
-            return false;
-        }
+        return Cache::remember($cacheKey, 300, function () use ($host) {
+            $ip = @gethostbyname($host);
 
+            if ($ip === $host) {
+                return null;
+            }
+
+            if (! filter_var($ip, FILTER_VALIDATE_IP)) {
+                return null;
+            }
+
+            return $ip;
+        });
+    }
+
+    protected function isIpAllowed(string $ip): bool
+    {
         foreach ($this->blockedRanges as $range) {
             if ($this->ipInRange($ip, $range)) {
                 return false;

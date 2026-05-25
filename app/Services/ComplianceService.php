@@ -117,14 +117,17 @@ class ComplianceService
         $user = $request->user;
         $exportData = $this->compileUserData($user);
 
-        $path = 'data-exports/'.$user->id.'/'.$request->id.'.json';
+        $safeUserId = preg_replace('/[^0-9]/', '', (string) $user->id);
+        $safeRequestId = preg_replace('/[^0-9]/', '', (string) $request->id);
+
+        $path = 'data-exports/'.$safeUserId.'/'.$safeRequestId.'.json';
         $directory = dirname($path);
 
         if (! Storage::exists($directory)) {
             Storage::makeDirectory($directory);
         }
 
-        Storage::put($path, json_encode($exportData, JSON_PRETTY_PRINT));
+        Storage::put($path, json_encode($exportData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
         $request->fulfill($path);
 
@@ -240,15 +243,21 @@ class ComplianceService
             return [];
         }
 
-        $sensitiveKeys = ['password', 'token', 'secret', 'access_token', 'refresh_token'];
+        $sensitiveKeys = ['password', 'token', 'secret', 'access_token', 'refresh_token', 'client_secret', 'authorization_code'];
 
-        return collect($data)->mapWithKeys(function ($value, $key) use ($sensitiveKeys) {
-            if (in_array(strtolower($key), $sensitiveKeys, true)) {
-                return [$key => '[redacted]'];
+        $sanitize = function ($value, $key) use (&$sanitize, $sensitiveKeys) {
+            if (is_array($value)) {
+                return array_map(fn ($v, $k) => $sanitize($v, $k), $value, array_keys($value));
             }
 
-            return [$key => $value];
-        })->toArray();
+            if (in_array(strtolower((string) $key), $sensitiveKeys, true)) {
+                return '[redacted]';
+            }
+
+            return $value;
+        };
+
+        return array_map(fn ($value, $key) => $sanitize($value, $key), $data, array_keys($data));
     }
 
     public function canUserProceed(User $user): bool

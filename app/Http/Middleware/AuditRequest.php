@@ -76,7 +76,10 @@ class AuditRequest
             return true;
         }
 
-        return random_int(1, 100) <= ($sampleRate * 100);
+        $sampleKey = crc32($request->method().'|'.$request->path().'|'.$request->ip());
+        $normalized = abs($sampleKey % 10000) / 100;
+
+        return $normalized <= $sampleRate * 100;
     }
 
     protected function shouldSkipPath(string $path): bool

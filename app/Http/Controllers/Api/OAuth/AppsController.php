@@ -34,9 +34,16 @@ class AppsController extends Controller
 
     public function store(StoreAppRequest $request): JsonResponse
     {
-        $app = $this->oauthService->registerApp($request->user(), $request->validated());
+        $result = $this->oauthService->registerApp($request->user(), $request->validated());
 
-        return response()->json(new AppResource($app), 201);
+        return response()->json(array_merge(
+            (new AppResource($result['app']))->resolve(),
+            [
+                'client_id' => $result['client_id'],
+                'client_secret' => $result['client_secret'],
+                'client_secret_preview' => substr($result['client_secret'], 0, 8).'...',
+            ]
+        ), 201);
     }
 
     public function show(App $app): JsonResponse

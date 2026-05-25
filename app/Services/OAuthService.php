@@ -18,13 +18,15 @@ class OAuthService
         protected AuditService $auditService,
     ) {}
 
-    public function registerApp(User $owner, array $data): App
+    public function registerApp(User $owner, array $data): array
     {
+        $plainSecret = Str::random(40);
+
         $client = Passport::client()->forceCreate([
             'owner_type' => User::class,
             'owner_id' => $owner->id,
             'name' => $data['name'],
-            'secret' => Str::random(40),
+            'secret' => $plainSecret,
             'provider' => 'users',
             'redirect_uris' => $data['redirect_uris'],
             'grant_types' => ['authorization_code', 'refresh_token'],
@@ -50,7 +52,11 @@ class OAuthService
 
         event(new AppRegistered($app));
 
-        return $app;
+        return [
+            'app' => $app,
+            'client_id' => $client->id,
+            'client_secret' => $plainSecret,
+        ];
     }
 
     public function updateApp(App $app, array $data): App
@@ -75,10 +81,11 @@ class OAuthService
             throw new \RuntimeException('App has no associated OAuth client.');
         }
 
-        $app->client->secret = Str::random(40);
+        $plainSecret = Str::random(40);
+        $app->client->secret = $plainSecret;
         $app->client->save();
 
-        return $app->client->secret;
+        return $plainSecret;
     }
 
     public function verifyApp(App $app, User $admin): App
