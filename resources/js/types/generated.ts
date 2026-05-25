@@ -8,6 +8,7 @@ export interface ApiKeyModel {
   scopes: Record<string, unknown>
   expires_at: string
   last_used_at: string
+  revoked_at?: string
   id: number
 }
 export interface RoleModel {
@@ -96,10 +97,14 @@ export interface UserProfileModel {
   user_id: number
   date_of_birth: string
   country_code: unknown
+  state: unknown
+  city: unknown
   age_verified: boolean
   age_verification_method: unknown
   parental_consent_required: boolean
   parental_consent_status: unknown
+  onboarding_status: unknown
+  onboarding_completed_at: string
   id: number
 }
 export interface DataAccessTokenModel {
@@ -278,6 +283,8 @@ export interface UserProfile {
 }
 export interface DataRequest {
   id: unknown
+  requesting_app_id: unknown
+  target_app_id: unknown
   requesting_app: unknown
   target_app: unknown
   data_keys: unknown

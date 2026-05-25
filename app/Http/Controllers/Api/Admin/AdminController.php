@@ -10,6 +10,8 @@ use App\Http\Resources\Compliance\DataAccessRequestResource;
 use App\Http\Resources\OAuth\AppResource;
 use App\Http\Resources\OAuth\ConsentRecordResource;
 use App\Http\Resources\Social\SocialAccountResource;
+use App\Jobs\FulfillDataDeletion;
+use App\Jobs\FulfillDataExport;
 use App\Models\Compliance\AuditLog;
 use App\Models\Compliance\Country;
 use App\Models\Compliance\DataAccessRequest;
@@ -37,10 +39,11 @@ class AdminController extends Controller
         }
 
         if ($request->has('search')) {
-            $search = $request->string('search')->limit(100);
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
+            $search = $request->string('search')->limit(100)->toString();
+            $escaped = str_replace(['%', '_'], ['\\%', '\\_'], $search);
+            $query->where(function ($q) use ($escaped) {
+                $q->where('name', 'like', "%{$escaped}%")
+                    ->orWhere('email', 'like', "%{$escaped}%");
             });
         }
 
@@ -217,18 +220,17 @@ class AdminController extends Controller
         $this->authorize('fulfill', $dataRequest);
 
         if ($dataRequest->isExport()) {
-            $path = $this->complianceService->fulfillDataExport($dataRequest);
+            FulfillDataExport::dispatch($dataRequest);
 
             return response()->json([
-                'message' => 'Data export fulfilled.',
-                'export_path' => $path,
+                'message' => 'Data export fulfillment queued.',
             ]);
         }
 
         if ($dataRequest->isDeletion()) {
-            $this->complianceService->fulfillDataDeletion($dataRequest);
+            FulfillDataDeletion::dispatch($dataRequest);
 
-            return response()->json(['message' => 'Data deletion fulfilled.']);
+            return response()->json(['message' => 'Data deletion fulfillment queued.']);
         }
 
         return response()->json(['message' => 'Unknown request type.'], 400);

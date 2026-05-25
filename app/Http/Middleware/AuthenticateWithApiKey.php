@@ -12,10 +12,14 @@ class AuthenticateWithApiKey
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $key = $request->header('X-API-Key') ?? $request->query('api_key');
+        $key = $request->header('X-API-Key');
 
         if (! $key) {
-            return response()->json(['message' => 'API key required.'], 401);
+            return response()->json(['message' => 'API key required. Provide via X-API-Key header.'], 401);
+        }
+
+        if (strlen($key) > 256 || ! ctype_xdigit($key)) {
+            return response()->json(['message' => 'Invalid API key format.'], 401);
         }
 
         $apiKey = ApiKey::findByPlainKey($key);

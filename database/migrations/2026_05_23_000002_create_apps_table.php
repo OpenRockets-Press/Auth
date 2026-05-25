@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('apps', function (Blueprint $table) {
             $table->id();
             $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
-            $table->unsignedBigInteger('client_id')->nullable()->unique();
+            $table->uuid('client_id')->nullable()->unique();
             $table->string('name');
             $table->text('description')->nullable();
             $table->string('icon_url')->nullable();
@@ -25,8 +25,6 @@ return new class extends Migration
             $table->timestamp('verified_at')->nullable();
             $table->timestamp('suspended_at')->nullable();
             $table->timestamps();
-
-            $table->foreign('client_id')->references('id')->on('oauth_clients')->nullOnDelete();
             $table->index('status');
             $table->index('is_system');
         });

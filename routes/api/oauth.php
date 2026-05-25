@@ -1,11 +1,17 @@
 <?php
 
 use App\Http\Controllers\Api\OAuth\AppsController;
+use App\Http\Controllers\Api\OAuth\AuthorizationController;
 use App\Http\Controllers\Api\OAuth\ConsentController;
 use App\Http\Controllers\Api\OAuth\OidcDiscoveryController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/.well-known/openid-configuration', OidcDiscoveryController::class);
+
+Route::prefix('oauth')->group(function () {
+    Route::get('/authorize', [AuthorizationController::class, 'startAuthorization']);
+    Route::post('/authorize/consent', [AuthorizationController::class, 'consent'])->middleware('auth:api');
+});
 
 Route::middleware(['auth:api', 'app.active'])->group(function () {
     Route::prefix('apps')->group(function () {

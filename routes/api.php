@@ -7,3 +7,4 @@ require __DIR__.'/api/data-hub.php';
 require __DIR__.'/api/social.php';
 require __DIR__.'/api/admin.php';
 require __DIR__.'/api/settings.php';
+require __DIR__.'/api/onboarding.php';

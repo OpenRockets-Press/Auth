@@ -11,6 +11,7 @@ use App\Services\RiskAssessmentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 
 class AuthController extends Controller
 {
@@ -115,6 +116,18 @@ class AuthController extends Controller
 
     public function register(Request $request): JsonResponse
     {
+        $throttleKey = 'register:'.$request->ip();
+        $maxAttempts = 3;
+
+        if (RateLimiter::tooManyAttempts($throttleKey, $maxAttempts)) {
+            return response()->json([
+                'message' => 'Too many registration attempts. Please try again later.',
+                'retry_after' => RateLimiter::availableIn($throttleKey),
+            ], 429);
+        }
+
+        RateLimiter::hit($throttleKey, 3600);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],
@@ -163,13 +176,17 @@ class AuthController extends Controller
             'status' => $user->status,
             'last_login_at' => $user->last_login_at,
             'two_factor_enabled' => $user->two_factor_confirmed_at !== null,
+            'onboarding_completed' => $user->hasCompletedOnboarding(),
             'profile' => $user->profile ? [
-                'date_of_birth' => $user->profile->date_of_birth,
+                'date_of_birth' => $user->profile->date_of_birth?->format('Y-m-d'),
                 'country_code' => $user->profile->country_code,
                 'country_name' => $user->profile->country?->name,
+                'state' => $user->profile->state,
+                'city' => $user->profile->city,
                 'age_verified' => $user->profile->age_verified,
                 'parental_consent_required' => $user->profile->parental_consent_required,
                 'parental_consent_status' => $user->profile->parental_consent_status,
+                'onboarding_status' => $user->profile->onboarding_status,
             ] : null,
             'roles' => $user->roles->pluck('name'),
             'created_at' => $user->created_at,
