@@ -1,19 +1,53 @@
 import { Form, Head } from '@inertiajs/react';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
+import SocialLogin from '@/components/social-login';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import {
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    DialogDescription,
+    DialogClose,
+} from '@/components/ui/dialog';
 import { login } from '@/routes';
 import { store } from '@/routes/register';
+import { useState } from 'react';
+
 
 type Props = {
     passwordRules: string;
 };
 
 export default function Register({ passwordRules }: Props) {
+
+    function createSavePassword() {
+        let result = '';
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+=-/.,;[]?><":{}| ';
+        const lenght = Math.floor(Math.random() * (20 - 8 + 1) + 8)
+        const charactersLength = characters.length;
+
+        for ( let i = 0; i < lenght; i++ ) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+
+        setConfirmPassword(result)
+        setPassword(result)
+        try {
+            navigator.clipboard.writeText(result)
+        } catch (e) {
+        }
+        setPopupOpen(true)
+    }
+
+    const [password, setPassword] = useState<string>("")
+    const [confirmPassword, setConfirmPassword] = useState<string>("")
+    const [isPopupOpen, setPopupOpen] = useState<boolean>(false)
+
     return (
         <>
             <Head title="Register" />
@@ -26,6 +60,37 @@ export default function Register({ passwordRules }: Props) {
                 {({ processing, errors }) => (
                     <>
                         <div className="grid gap-6">
+                            
+                            <Dialog open={isPopupOpen} onOpenChange={setPopupOpen}>
+                                <DialogContent>
+                                    <DialogTitle>Generated password</DialogTitle>
+                                    <DialogDescription>
+                                        <div className="break-words">{password || '—'}</div>
+                                    </DialogDescription>
+                                    <div className="mt-4 flex gap-2 justify-end">
+                                        <Button
+                                            onClick={() => {
+                                                try {
+                                                    navigator.clipboard.writeText(password)
+                                                    setPopupOpen(false)
+                                                } catch (e) {}
+                                            }}
+                                        >
+                                            Copy
+                                        </Button>
+                                        <DialogClose asChild>
+                                            <Button variant="ghost" onClick={() => setPopupOpen(false)}>
+                                                Close
+                                            </Button>
+                                        </DialogClose>
+                                    </div>
+                                </DialogContent>
+                            </Dialog>
+
+                            <div>
+                                <SocialLogin provider='Google' image='data:image/png;base64,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'/>
+                            </div>
+
                             <div className="grid gap-2">
                                 <Label htmlFor="name">Name</Label>
                                 <Input
@@ -68,7 +133,14 @@ export default function Register({ passwordRules }: Props) {
                                     name="password"
                                     placeholder="Password"
                                     passwordrules={passwordRules}
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                 />
+                                <div className="flex gap-2">
+                                    <Button type="button" variant="outline" onClick={createSavePassword} className="mt-2">
+                                        Generate password
+                                    </Button>
+                                </div>
                                 <InputError message={errors.password} />
                             </div>
 
@@ -84,6 +156,8 @@ export default function Register({ passwordRules }: Props) {
                                     name="password_confirmation"
                                     placeholder="Confirm password"
                                     passwordrules={passwordRules}
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
                                 />
                                 <InputError
                                     message={errors.password_confirmation}
@@ -115,6 +189,6 @@ export default function Register({ passwordRules }: Props) {
 }
 
 Register.layout = {
-    title: 'Create an account',
-    description: 'Enter your details below to create your account',
+    title: 'Create an new Zero-Profit account',
+    description: 'Enter your details below to create your new Zero-Profit account',
 };
