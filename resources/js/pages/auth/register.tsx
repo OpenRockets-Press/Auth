@@ -1,12 +1,10 @@
 import { Form, Head } from '@inertiajs/react';
+import { useState } from 'react';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import SocialLogin from '@/components/social-login';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Spinner } from '@/components/ui/spinner';
 import {
     Dialog,
     DialogContent,
@@ -14,9 +12,11 @@ import {
     DialogDescription,
     DialogClose,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
 import { login } from '@/routes';
 import { store } from '@/routes/register';
-import { useState } from 'react';
 
 
 type Props = {
@@ -25,22 +25,30 @@ type Props = {
 
 export default function Register({ passwordRules }: Props) {
 
-    function createSavePassword() {
-        let result = '';
-        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+=-/.,;[]?><":{}| ';
-        const lenght = Math.floor(Math.random() * (20 - 8 + 1) + 8)
-        const charactersLength = characters.length;
+    const createSavePassword = () => {
+        const generatePassword = () => {
+            let result = '';
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+=-/.,;[]?><":{}| ';
+            const lenght = Math.floor(Math.random() * (20 - 8 + 1) + 8)
+            const charactersLength = characters.length;
 
-        for ( let i = 0; i < lenght; i++ ) {
-            result += characters.charAt(Math.floor(Math.random() * charactersLength));
-        }
+            for ( let i = 0; i < lenght; i++ ) {
+                result += characters.charAt(Math.floor(Math.random() * charactersLength));
+            }
 
-        setConfirmPassword(result)
-        setPassword(result)
+            return result;
+        };
+
+        const password = generatePassword();
+        setConfirmPassword(password)
+        setPassword(password)
+
         try {
-            navigator.clipboard.writeText(result)
-        } catch (e) {
+            navigator.clipboard.writeText(password)
+        } catch {
+            // empty
         }
+
         setPopupOpen(true)
     }
 
@@ -73,7 +81,9 @@ export default function Register({ passwordRules }: Props) {
                                                 try {
                                                     navigator.clipboard.writeText(password)
                                                     setPopupOpen(false)
-                                                } catch (e) {}
+                                                } catch {
+                                                    // empty
+                                                }
                                             }}
                                         >
                                             Copy
