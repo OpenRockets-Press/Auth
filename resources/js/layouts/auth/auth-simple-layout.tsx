@@ -11,7 +11,7 @@ export default function AuthSimpleLayout({
     return (
         <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10">
             <div className="w-full max-w-sm">
-                <div className="flex flex-col gap-8">
+                <div className="transition-opacity duration-100 flex flex-col gap-8 border-2 rounded-md border-primary border-opacity-20 p-4 hover:border-opacity-100 ease-in-out">
                     <div className="flex flex-col items-center gap-4">
                         <Link
                             href={home()}
@@ -30,7 +30,10 @@ export default function AuthSimpleLayout({
                             </p>
                         </div>
                     </div>
-                    {children}
+                    <div className='p-3'>
+                        {children}                        
+                    </div>
+
                 </div>
             </div>
         </div>

@@ -141,3 +141,7 @@
         @apply bg-background text-foreground;
     }
 }
+
+.icon {
+    @apply max-w-5 max-h-5 rounded-full border-0;
+}
