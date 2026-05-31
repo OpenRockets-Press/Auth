@@ -2,346 +2,205 @@
 // Do not edit manually. Run `bun types` to regenerate.
 // === Models ===
 export interface ApiKeyModel {
-  user_id: number
-  app_id: number
-  name: unknown
-  scopes: Record<string, unknown>
-  expires_at: string
-  last_used_at: string
-  revoked_at?: string
-  id: number
+    user_id: number;
+    app_id: number;
+    name: unknown;
+    scopes: Record<string, unknown>;
+    expires_at: string;
+    last_used_at: string;
+    revoked_at?: string;
+    id: number;
 }
 export interface RoleModel {
-  name: unknown
-  description: unknown
-  permissions: Record<string, unknown>
-  id: number
+    name: unknown;
+    description: unknown;
+    permissions: Record<string, unknown>;
+    id: number;
 }
 export interface TrustedDeviceModel {
-  user_id: number
-  device_fingerprint: unknown
-  device_name: unknown
-  ip_address: unknown
-  user_agent: unknown
-  trusted_at: string
-  last_used_at: string
-  id: number
+    user_id: number;
+    device_fingerprint: unknown;
+    device_name: unknown;
+    ip_address: unknown;
+    user_agent: unknown;
+    trusted_at: string;
+    last_used_at: string;
+    id: number;
 }
 export interface WebhookDeliveryModel {
-  webhook_endpoint_id: number
-  event_type: unknown
-  payload: Record<string, unknown>
-  status: unknown
-  attempts: unknown
-  last_attempt_at: string
-  response_code: number
-  response_body: unknown
-  id: number
+    webhook_endpoint_id: number;
+    event_type: unknown;
+    payload: Record<string, unknown>;
+    status: unknown;
+    attempts: unknown;
+    last_attempt_at: string;
+    response_code: number;
+    response_body: unknown;
+    id: number;
 }
 export interface WebhookEndpointModel {
-  app_id: number
-  url: unknown
-  events: Record<string, unknown>
-  is_active: boolean
-  id: number
+    app_id: number;
+    url: unknown;
+    events: Record<string, unknown>;
+    is_active: boolean;
+    id: number;
 }
 export interface AuditLogModel {
-  user_id: number
-  app_id: number
-  event_type: unknown
-  event_data: Record<string, unknown>
-  ip_address: unknown
-  user_agent: unknown
-  id: number
-  created_at: string
+    user_id: number;
+    app_id: number;
+    event_type: unknown;
+    event_data: Record<string, unknown>;
+    ip_address: unknown;
+    user_agent: unknown;
+    id: number;
+    created_at: string;
 }
 export interface CountryModel {
-  code: unknown
-  name: unknown
-  age_of_digital_consent: number
-  gdpr_applicable: boolean
-  coppa_applicable: boolean
-  data_retention_days: number
-  requires_parental_consent_below_age: number
+    code: unknown;
+    name: unknown;
+    age_of_digital_consent: number;
+    gdpr_applicable: boolean;
+    coppa_applicable: boolean;
+    data_retention_days: number;
+    requires_parental_consent_below_age: number;
 }
 export interface DataAccessRequestModel {
-  user_id: number
-  request_type: unknown
-  status: unknown
-  requested_by: unknown
-  fulfilled_at?: string
-  data_export_path: unknown
-  id: number
+    user_id: number;
+    request_type: unknown;
+    status: unknown;
+    requested_by: unknown;
+    fulfilled_at?: string;
+    data_export_path: unknown;
+    id: number;
 }
 export interface DataRetentionPolicyModel {
-  country_code: unknown
-  data_type: unknown
-  retention_days: number
-  auto_delete: boolean
-  id: number
+    country_code: unknown;
+    data_type: unknown;
+    retention_days: number;
+    auto_delete: boolean;
+    id: number;
 }
 export interface ParentalConsentModel {
-  user_id: number
-  parent_email: unknown
-  parent_name: unknown
-  consent_method: unknown
-  consent_status: unknown
-  verification_token: unknown
-  verified_at?: string
-  granted_at?: string
-  revoked_at?: string
-  ip_address: unknown
-  id: number
+    user_id: number;
+    parent_email: unknown;
+    parent_name: unknown;
+    consent_method: unknown;
+    consent_status: unknown;
+    verification_token: unknown;
+    verified_at?: string;
+    granted_at?: string;
+    revoked_at?: string;
+    ip_address: unknown;
+    id: number;
 }
 export interface UserProfileModel {
-  user_id: number
-  date_of_birth: string
-  country_code: unknown
-  state: unknown
-  city: unknown
-  age_verified: boolean
-  age_verification_method: unknown
-  parental_consent_required: boolean
-  parental_consent_status: unknown
-  onboarding_status: unknown
-  onboarding_completed_at: string
-  id: number
+    user_id: number;
+    date_of_birth: string;
+    country_code: unknown;
+    state: unknown;
+    city: unknown;
+    age_verified: boolean;
+    age_verification_method: unknown;
+    parental_consent_required: boolean;
+    parental_consent_status: unknown;
+    onboarding_status: unknown;
+    onboarding_completed_at: string;
+    id: number;
 }
 export interface DataAccessTokenModel {
-  user_id: number
-  requesting_app_id: number
-  granting_app_id: number
-  scopes: Record<string, unknown>
-  expires_at: string
-  id: number
+    user_id: number;
+    requesting_app_id: number;
+    granting_app_id: number;
+    scopes: Record<string, unknown>;
+    expires_at: string;
+    id: number;
 }
 export interface DataRequestModel {
-  user_id: number
-  requesting_app_id: number
-  target_app_id: number
-  data_keys: Record<string, unknown>
-  status: unknown
-  user_consent_status: unknown
-  id: number
+    user_id: number;
+    requesting_app_id: number;
+    target_app_id: number;
+    data_keys: Record<string, unknown>;
+    status: unknown;
+    user_consent_status: unknown;
+    id: number;
 }
 export interface DataSharingAgreementModel {
-  user_id: number
-  source_app_id: number
-  target_app_id: number
-  data_keys: Record<string, unknown>
-  consent_status: unknown
-  granted_at?: string
-  revoked_at?: string
-  id: number
+    user_id: number;
+    source_app_id: number;
+    target_app_id: number;
+    data_keys: Record<string, unknown>;
+    consent_status: unknown;
+    granted_at?: string;
+    revoked_at?: string;
+    id: number;
 }
 export interface SocialAccountModel {
-  user_id: number
-  provider: unknown
-  provider_id: number
-  token_expires_at: string
-  avatar_url: unknown
-  email: unknown
-  name: unknown
-  linked_at: string
-  id: number
+    user_id: number;
+    provider: unknown;
+    provider_id: number;
+    token_expires_at: string;
+    avatar_url: unknown;
+    email: unknown;
+    name: unknown;
+    linked_at: string;
+    id: number;
 }
 export interface UserDataStoreModel {
-  user_id: number
-  app_id: number
-  key: unknown
-  value: Record<string, unknown>
-  id: number
+    user_id: number;
+    app_id: number;
+    key: unknown;
+    value: Record<string, unknown>;
+    id: number;
 }
 export interface AppModel {
-  owner_id: number
-  client_id: number
-  name: unknown
-  description: unknown
-  icon_url: unknown
-  status: unknown
-  is_system: boolean
-  redirect_uris: Record<string, unknown>
-  homepage_url: unknown
-  privacy_policy_url: unknown
-  terms_url: unknown
-  category: unknown
-  verified_at?: string
-  suspended_at?: string
-  id: number
-  deleted_at?: string
+    owner_id: number;
+    client_id: number;
+    name: unknown;
+    description: unknown;
+    icon_url: unknown;
+    status: unknown;
+    is_system: boolean;
+    redirect_uris: Record<string, unknown>;
+    homepage_url: unknown;
+    privacy_policy_url: unknown;
+    terms_url: unknown;
+    category: unknown;
+    verified_at?: string;
+    suspended_at?: string;
+    id: number;
+    deleted_at?: string;
 }
 export interface AppScopeModel {
-  app_id: number
-  name: unknown
-  description: unknown
-  is_required: boolean
-  id: number
+    app_id: number;
+    name: unknown;
+    description: unknown;
+    is_required: boolean;
+    id: number;
 }
 export interface ConsentRecordModel {
-  user_id: number
-  app_id: number
-  scopes: Record<string, unknown>
-  consent_method: unknown
-  ip_address: unknown
-  user_agent: unknown
-  granted_at?: string
-  revoked_at?: string
-  id: number
-  deleted_at?: string
+    user_id: number;
+    app_id: number;
+    scopes: Record<string, unknown>;
+    consent_method: unknown;
+    ip_address: unknown;
+    user_agent: unknown;
+    granted_at?: string;
+    revoked_at?: string;
+    id: number;
+    deleted_at?: string;
 }
 export interface UserModel {
-  name: unknown
-  email: unknown
-  status: unknown
-  last_login_at?: string
-  login_method: unknown
-  failed_login_attempts: unknown
-  locked_until: string
-  id: number
-  deleted_at?: string
-  email_verified_at?: string
-  two_factor_confirmed_at: string
+    name: unknown;
+    email: unknown;
+    status: unknown;
+    last_login_at?: string;
+    login_method: unknown;
+    failed_login_attempts: unknown;
+    locked_until: string;
+    id: number;
+    deleted_at?: string;
+    email_verified_at?: string;
+    two_factor_confirmed_at: string;
 }
-
 
 // === API Resources ===
-export interface User {
-  id: unknown
-  name: unknown
-  email: unknown
-  email_verified_at: unknown
-  status: unknown
-  last_login_at: unknown
-  roles: unknown
-  created_at: unknown
-  updated_at: unknown
-}
-export interface WebhookDelivery {
-  id: unknown
-  event_type: unknown
-  status: unknown
-  attempts: unknown
-  last_attempt_at: unknown
-  response_code: unknown
-  created_at: unknown
-}
-export interface WebhookEndpoint {
-  id: unknown
-  app_id: unknown
-  url: unknown
-  events: unknown
-  is_active: unknown
-  last_delivery_at: unknown
-  created_at: unknown
-  updated_at: unknown
-}
-export interface Session {
-  id: unknown
-  name: unknown
-  last_used_at: unknown
-  expires_at: unknown
-  is_current: unknown
-  created_at: unknown
-}
-export interface AuditLog {
-  id: unknown
-  event_type: unknown
-  event_data: unknown
-  ip_address: unknown
-  user: unknown
-  app: unknown
-  created_at: unknown
-}
-export interface Country {
-  code: unknown
-  name: unknown
-  age_of_digital_consent: unknown
-  gdpr_applicable: unknown
-  coppa_applicable: unknown
-  data_retention_days: unknown
-  requires_parental_consent_below_age: unknown
-}
-export interface DataAccessRequest {
-  id: unknown
-  request_type: unknown
-  status: unknown
-  requested_by: unknown
-  fulfilled_at: unknown
-  data_export_path: unknown
-  user: unknown
-  created_at: unknown
-  updated_at: unknown
-}
-export interface UserProfile {
-  date_of_birth: unknown
-  country_code: unknown
-  age: unknown
-  age_verified: unknown
-  parental_consent_required: unknown
-  parental_consent_status: unknown
-  has_consent: unknown
-}
-export interface DataRequest {
-  id: unknown
-  requesting_app_id: unknown
-  target_app_id: unknown
-  requesting_app: unknown
-  target_app: unknown
-  data_keys: unknown
-  status: unknown
-  user_consent_status: unknown
-  created_at: unknown
-  updated_at: unknown
-}
-export interface DataSharingAgreement {
-  id: unknown
-  source_app: unknown
-  target_app: unknown
-  data_keys: unknown
-  consent_status: unknown
-  granted_at: unknown
-  revoked_at: unknown
-  is_active: boolean
-}
-export interface App {
-  id: unknown
-  name: unknown
-  description: unknown
-  icon_url: unknown
-  status: unknown
-  is_system: unknown
-  redirect_uris: unknown
-  homepage_url: unknown
-  privacy_policy_url: unknown
-  terms_url: unknown
-  category: unknown
-  verified_at: unknown
-  owner: unknown
-  created_at: unknown
-  updated_at: unknown
-}
-export interface ConsentRecord {
-  id: unknown
-  app: unknown
-  scopes: unknown
-  consent_method: unknown
-  granted_at: unknown
-  revoked_at: unknown
-  is_active: unknown
-}
-export interface TrustedDevice {
-  id: unknown
-  device_name: unknown
-  trusted_at: unknown
-  last_used_at: unknown
-  is_current: unknown
-}
-export interface SocialAccount {
-  id: unknown
-  provider: unknown
-  email: unknown
-  name: unknown
-  avatar_url: unknown
-  linked_at: unknown
-  is_token_expired: boolean
-}
