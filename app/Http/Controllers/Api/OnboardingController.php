@@ -4,10 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Compliance\Country;
+use App\Models\Compliance\UserProfile;
 use App\Services\AuditService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class OnboardingController extends Controller
 {
@@ -15,26 +19,26 @@ class OnboardingController extends Controller
         protected AuditService $auditService,
     ) {}
 
-    public function getStatus(Request $request): JsonResponse
+    public function show(Request $request): Response
     {
         $user = $request->user();
         $profile = $user->profile;
 
-        return response()->json([
+        return Inertia::render('auth/onboarding', [
+            'countries' => Country::orderBy('name')->get(),
             'onboarding_status' => $profile?->onboarding_status ?? 'incomplete',
-            'onboarding_completed_at' => $profile?->onboarding_completed_at,
-            'profile' => $profile ? [
-                'country_code' => $profile->country_code,
-                'state' => $profile->state,
-                'city' => $profile->city,
-                'date_of_birth' => $profile->date_of_birth?->format('Y-m-d'),
-            ] : null,
             'required_fields' => ['country_code', 'state', 'date_of_birth'],
             'optional_fields' => ['city'],
+            'profile' => $profile,
         ]);
     }
 
-    public function complete(Request $request): JsonResponse
+    public function getStatus(Request $request): JsonResponse
+    {
+        return response()->json($this->payload($request));
+    }
+
+    public function complete(Request $request): JsonResponse|RedirectResponse
     {
         $validated = $request->validate([
             'country_code' => ['required', 'string', 'size:2', 'exists:countries,code'],
@@ -49,7 +53,7 @@ class OnboardingController extends Controller
         $age = Carbon::parse($validated['date_of_birth'])->diffInYears(now());
         $needsConsent = $country->requiresParentalConsent($age);
 
-        $profile = $user->profile ?? new \App\Models\Compliance\UserProfile;
+        $profile = $user->profile ?? new UserProfile;
         $profile->user_id = $user->id;
         $profile->country_code = $validated['country_code'];
         $profile->state = $validated['state'];
@@ -68,11 +72,33 @@ class OnboardingController extends Controller
             'state' => $validated['state'],
         ]);
 
-        return response()->json([
-            'message' => 'Onboarding completed successfully.',
-            'onboarding_status' => 'completed',
-            'parental_consent_required' => $needsConsent,
-            'parental_consent_status' => $profile->parental_consent_status,
-        ]);
+        if ($request->expectsJson() || str_starts_with($request->path(), 'api/')) {
+            return response()->json([
+                'message' => 'Onboarding completed successfully.',
+                'onboarding_status' => 'completed',
+                'parental_consent_required' => $needsConsent,
+                'parental_consent_status' => $profile->parental_consent_status,
+            ]);
+        }
+
+        return to_route('dashboard');
+    }
+
+    private function payload(Request $request): array
+    {
+        $profile = $request->user()->profile;
+
+        return [
+            'onboarding_status' => $profile?->onboarding_status ?? 'incomplete',
+            'onboarding_completed_at' => $profile?->onboarding_completed_at,
+            'profile' => $profile ? [
+                'country_code' => $profile->country_code,
+                'state' => $profile->state,
+                'city' => $profile->city,
+                'date_of_birth' => $profile->date_of_birth?->format('Y-m-d'),
+            ] : null,
+            'required_fields' => ['country_code', 'state', 'date_of_birth'],
+            'optional_fields' => ['city'],
+        ];
     }
 }

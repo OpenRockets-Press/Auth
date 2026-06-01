@@ -1,14 +1,13 @@
 import { Head, useForm } from '@inertiajs/react';
-import { motion } from 'motion/react';
-import { AnimatePresence } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
+import type { ReactNode } from 'react';
 import { useState } from 'react';
-import Datepicker from 'react-tailwindcss-datepicker';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
-    DropdownMenuTrigger,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,14 +24,21 @@ type Props = {
     profile?: UserProfileModel;
 };
 
+type Step = {
+    id: number;
+    title: string;
+    content: ReactNode;
+};
+
 export default function Onboarding(props: Props) {
-    const { countries } = props;
+    const { countries = [] } = props;
 
     const [active, setActive] = useState(0);
     const [countryCode, setCountryCode] = useState('');
     const [province, setProvince] = useState('');
     const [city, setCity] = useState('');
-    const [date, setDate] = useState<Date | null>(null);
+    const [dateOfBirth, setDateOfBirth] = useState('');
+
     const form = useForm({
         country_code: '',
         state: '',
@@ -40,63 +46,71 @@ export default function Onboarding(props: Props) {
         date_of_birth: '',
     });
 
-    const pages = [
+    const pages: Step[] = [
         {
             id: 1,
             title: 'Select your country',
             content: (
-                <motion.div className="grid gap-2" layoutId="1">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button type="button" variant="outline">
-                                {countryCode || 'select country'}
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                            {countries.map((country, idx) => {
-                                return (
+                <div className="grid gap-4">
+                    <div className="grid gap-2">
+                        <Label htmlFor="country">Country</Label>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    className="w-full justify-between"
+                                >
+                                    <span className="truncate">
+                                        {countryCode || 'Select country'}
+                                    </span>
+                                    <span className="text-muted-foreground">
+                                        ▾
+                                    </span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                                side="bottom"
+                                align="start"
+                                sideOffset={8}
+                                className="max-h-64 w-[var(--radix-dropdown-menu-trigger-width)] overflow-y-auto"
+                            >
+                                {countries.map((country, idx) => (
                                     <DropdownMenuItem
                                         key={String(country.code ?? idx)}
                                         onSelect={() => {
-                                            const value = String(
-                                                country.code ?? '',
-                                            );
+                                            const value = String(country.code ?? '');
                                             setCountryCode(value);
                                             form.setData('country_code', value);
                                         }}
                                     >
                                         {String(country.name)}
                                     </DropdownMenuItem>
-                                );
-                            })}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                    <div>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            className="mt-4 w-full"
-                            onClick={() => {
-                                setActive(active + 1);
-                            }}
-                        >
-                            next
+                                ))}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+
+                    <div className="flex justify-end">
+                        <Button type="button" onClick={() => setActive(active + 1)}>
+                            Next
                         </Button>
                     </div>
-                </motion.div>
+                </div>
             ),
         },
         {
             id: 2,
-            title: 'select your adress',
+            title: 'Select your address',
             content: (
-                <motion.div className="grid gap-2" layoutId="2">
-                    <div>
-                        <Label htmlFor="state">Enter your State/Province</Label>
+                <div className="grid gap-4">
+                    <div className="grid gap-2">
+                        <Label htmlFor="state">State / Province</Label>
                         <Input
+                            id="state"
                             value={province}
                             type="text"
-                            placeholder="(max 255 symbols)"
+                            placeholder="Enter your state or province"
                             onChange={(e) => {
                                 const value = e.target.value;
                                 setProvince(value);
@@ -104,12 +118,16 @@ export default function Onboarding(props: Props) {
                             }}
                         />
                     </div>
-                    <div>
-                        <Label htmlFor="city">Enter your City (optional)</Label>
+
+                    <div className="grid gap-2">
+                        <Label htmlFor="city">
+                            City <span className="text-muted-foreground">(optional)</span>
+                        </Label>
                         <Input
+                            id="city"
                             value={city}
                             type="text"
-                            placeholder="(max 255 symbols)"
+                            placeholder="Enter your city"
                             onChange={(e) => {
                                 const value = e.target.value;
                                 setCity(value);
@@ -117,105 +135,79 @@ export default function Onboarding(props: Props) {
                             }}
                         />
                     </div>
-                    <div>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            className="mt-4 w-full"
-                            onClick={() => {
-                                setActive(active - 1);
-                            }}
-                        >
-                            back
+
+                    <div className="grid grid-cols-2 gap-3">
+                        <Button type="button" variant="outline" onClick={() => setActive(active - 1)}>
+                            Back
                         </Button>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            className="mt-4 w-full"
-                            onClick={() => {
-                                setActive(active + 1);
-                            }}
-                        >
-                            next
+                        <Button type="button" onClick={() => setActive(active + 1)}>
+                            Next
                         </Button>
                     </div>
-                </motion.div>
+                </div>
             ),
         },
         {
             id: 3,
-            title: 'personal information',
+            title: 'Personal information',
             content: (
-                <motion.div className="grid gap-2" layoutId="3">
-                    <div>
-                        <Label htmlFor="date_of_birth">
-                            Enter your date of birth (YYYY-MM-DD)
-                        </Label>
-                        <Datepicker
-                            asSingle
-                            value={
-                                date
-                                    ? { startDate: date, endDate: date }
-                                    : { startDate: null, endDate: null }
-                            }
-                            onChange={(value) => {
-                                const selectedDate = value?.startDate ?? null;
-                                setDate(selectedDate);
-                                form.setData(
-                                    'date_of_birth',
-                                    selectedDate
-                                        ? selectedDate
-                                              .toISOString()
-                                              .slice(0, 10)
-                                        : '',
-                                );
+                <div className="grid gap-4">
+                    <div className="grid gap-2">
+                        <Label htmlFor="date_of_birth">Date of birth</Label>
+                        <Input
+                            id="date_of_birth"
+                            type="date"
+                            value={dateOfBirth}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                setDateOfBirth(value);
+                                form.setData('date_of_birth', value);
                             }}
-                            displayFormat="YYYY-MM-DD"
-                            inputClassName="w-full rounded-md border px-3 py-2"
                         />
                     </div>
-                    <div>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            className="mt-4 w-full"
-                            onClick={() => {
-                                setActive(active - 1);
-                            }}
-                        >
-                            back
+
+                    <div className="grid grid-cols-2 gap-3">
+                        <Button type="button" variant="outline" onClick={() => setActive(active - 1)}>
+                            Back
                         </Button>
-                        <Button
-                            type="submit"
-                            className="mt-4 w-full"
-                            tabIndex={4}
-                            disabled={form.processing}
-                        >
+                        <Button type="submit" disabled={form.processing}>
                             {form.processing ? 'Saving...' : 'Finish'}
                         </Button>
                     </div>
-                </motion.div>
+                </div>
             ),
         },
     ];
+
+    const activeStep = pages[active];
 
     return (
         <>
             <Head title="onboarding" />
 
             <form
+                className="flex flex-col gap-6"
                 onSubmit={(event) => {
                     event.preventDefault();
                     form.post(window.location.pathname);
                 }}
             >
-                <div>
-                    <AnimatePresence mode="wait">
-                        <h2>{pages[active].title}</h2>
-                        {pages[active].content}
-                        <p>{`${pages[active].id} of ${pages.length}`}</p>
-                    </AnimatePresence>
-                </div>
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={activeStep.id}
+                        initial={{ opacity: 0, x: 12, filter: 'blur(4px)' }}
+                        animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+                        exit={{ opacity: 0, x: -12, filter: 'blur(4px)' }}
+                        transition={{ duration: 0.25, ease: 'easeOut' }}
+                        className="space-y-6"
+                    >
+                        {activeStep.content}
+                    </motion.div>
+                </AnimatePresence>
+
+                <p className="text-center text-xs uppercase tracking-[0.25em] text-muted-foreground">
+                    Step {activeStep.id} of {pages.length}
+                </p>
             </form>
         </>
     );
