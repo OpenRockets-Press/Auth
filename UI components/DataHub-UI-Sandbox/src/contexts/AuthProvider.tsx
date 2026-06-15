@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
-import { User } from '../models/types';
+import type { User } from '../models/types';
 import { MicrosoftLoadingDots } from '../components/MicrosoftLoadingDots';
 
 interface AuthContextType {
