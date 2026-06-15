@@ -10,7 +10,7 @@ interface HomeDashboardProps {
 
 const mockUser: User = {
   id: 1,
-  name: "R.K de Silva",
+  name: "OpenRockets Inc.",
   email: "enterprise@openrockets.com",
   status: "active",
   last_login_at: new Date().toISOString(),
