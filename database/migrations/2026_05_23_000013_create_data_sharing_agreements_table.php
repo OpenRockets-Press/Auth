@@ -19,7 +19,7 @@ return new class extends Migration
             $table->timestamp('revoked_at')->nullable();
             $table->timestamps();
 
-            $table->index(['user_id', 'source_app_id', 'target_app_id']);
+            $table->index(['user_id', 'source_app_id', 'target_app_id'], 'dsa_user_src_tgt_index');
             $table->index('consent_status');
         });
     }
