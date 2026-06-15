@@ -1,72 +1,52 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { MicrosoftLoadingDots } from './MicrosoftLoadingDots';
 import { AmbientBackground } from './AmbientBackground';
 
 // Import assets
 import logoPath from '../assets/openrocketsvc1.png';
 
-import type { User } from '../models/types';
+import type {  User  } from '../models/types';
 
 interface PrivacyCenterProps {
   user?: User;
 }
-
-const api = axios.create({
-  baseURL: 'https://openrocketsauth.alwaysdata.net',
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  }
-});
 
 export const PrivacyCenterScreen: React.FC<PrivacyCenterProps> = ({ 
   user = { id: 1, name: "John Doe", email: "john.doe@example.com", status: 'active', created_at: '2026-06-15', updated_at: '2026-06-15' } as User
 }) => {
   const [status, setStatus] = useState<'idle' | 'loading_export' | 'loading_delete' | 'success_export' | 'error'>('idle');
 
-  const handleExport = async () => {
+  // Simulated backend POST to /api/compliance/data/export
+  const handleExport = () => {
     setStatus('loading_export');
     
-    try {
-      const response = await api.post('/api/compliance/data-export', { user_id: user.id });
+    setTimeout(() => {
       setStatus('success_export');
-      console.log('Export requested successfully', response.data);
+      console.log(`POST /api/compliance/data/export`);
       // Revert to idle after showing success
       setTimeout(() => setStatus('idle'), 3000);
-    } catch (error) {
-      console.error('Export API Error', error);
-      // Fallback
-      setStatus('success_export');
-      setTimeout(() => setStatus('idle'), 3000);
-    }
+    }, 2400);
   };
 
-  const handleDelete = async () => {
+  // Simulated backend POST to /api/compliance/data/delete
+  const handleDelete = () => {
     setStatus('loading_delete');
     
-    try {
-      const response = await api.post('/api/compliance/data-deletion', { user_id: user.id });
+    setTimeout(() => {
       setStatus('error'); // Trigger the red theme for destructive action confirmation
-      console.log('Account deletion requested', response.data);
+      console.log(`POST /api/compliance/data/delete`);
+      
       setTimeout(() => {
         console.log("Account deleted. Logging out...");
       }, 1500);
-    } catch (error) {
-      console.error('Delete API Error', error);
-      // Fallback
-      setStatus('error');
-      setTimeout(() => {
-        console.log("Account deleted. Logging out...");
-      }, 1500);
-    }
+    }, 2000);
   };
 
   return (
     <>
       <AmbientBackground />
       
-      <div className={`ms-card ${status === 'error' || status === 'loading_delete' ? 'theme-error' : ''}`}>
+      <div className={`ms-card ${status === 'error' || status === 'loading_delete' ? 'theme-error' : ''}`} style={{ position: 'relative', overflow: 'hidden' }}>
         {(status === 'loading_export' || status === 'loading_delete' || status === 'error') && (
           <div className={`ms-loader-overlay ${status === 'loading_delete' || status === 'error' ? 'fast-loader' : ''}`}>
             <MicrosoftLoadingDots />
@@ -74,7 +54,7 @@ export const PrivacyCenterScreen: React.FC<PrivacyCenterProps> = ({
         )}
 
         <div className="ms-logo-container">
-          <img src={logoPath} alt="OpenRockets Logo" className="ms-logo-img" />
+          <img src={logoPath} alt="Open Rockets VC1 Logo" className="ms-logo-img" />
         </div>
 
         <h1 className="ms-title">Privacy & Data Rights</h1>
@@ -88,7 +68,7 @@ export const PrivacyCenterScreen: React.FC<PrivacyCenterProps> = ({
         </div>
 
         <p className="ms-description" style={{ marginBottom: '24px' }}>
-          Manage your personal data in accordance with the <strong>General Data Protection Regulation (GDPR)</strong>.
+          Manage your personal data in accordance with the <strong>General Data Protection Regulation</strong>.
         </p>
 
         {status !== 'idle' && (
@@ -99,8 +79,8 @@ export const PrivacyCenterScreen: React.FC<PrivacyCenterProps> = ({
               <line x1="12" y1="8" x2="12.01" y2="8"></line>
             </svg>
             {status === 'loading_export' && <span>Preparing your data export...</span>}
-            {status === 'success_export' && <span>Your data is being exported. Check your email.</span>}
-            {status === 'loading_delete' && <span>Processing account deletion...</span>}
+            {status === 'success_export' && <span>Your data is being exported.</span>}
+            {status === 'loading_delete' && <span>Deleting your account...</span>}
             {status === 'error' && <span>Account deleted. Logging out...</span>}
           </div>
         )}
@@ -108,32 +88,32 @@ export const PrivacyCenterScreen: React.FC<PrivacyCenterProps> = ({
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '32px' }}>
           
           {/* Data Export Box */}
-          <div className="action-box">
+          <div style={{ border: '1px solid var(--ms-border)', padding: '16px', borderRadius: '4px' }}>
             <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '4px' }}>Export your data</h3>
-            <p style={{ fontSize: '13px', color: 'var(--ms-text-secondary)', marginBottom: '16px' }}>
+            <p style={{ fontSize: '13px', color: 'var(--ms-text-secondary)', marginBottom: '12px' }}>
               Download a copy of all your personal data, linked accounts, and activity logs.
             </p>
             <button 
               className="ms-button ms-button-primary"
               onClick={handleExport}
               disabled={status !== 'idle'}
-              style={{ padding: '8px 20px', fontSize: '13px', minWidth: 'auto' }}
+              style={{ padding: '6px 16px', fontSize: '13px', minWidth: 'auto' }}
             >
               Request Data Export
             </button>
           </div>
 
           {/* Account Deletion Box */}
-          <div className="action-box danger">
+          <div style={{ border: '1px solid var(--ms-border)', padding: '16px', borderRadius: '4px', borderColor: 'var(--ms-red)' }}>
             <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '4px', color: 'var(--ms-red)' }}>Erase your account</h3>
-            <p style={{ fontSize: '13px', color: 'var(--ms-text-secondary)', marginBottom: '16px' }}>
+            <p style={{ fontSize: '13px', color: 'var(--ms-text-secondary)', marginBottom: '12px' }}>
               Permanently delete your account and wipe all Personally Identifiable Information (PII) from our systems.
             </p>
             <button 
-              className="ms-button ms-button-danger"
+              className="ms-button ms-button-secondary"
               onClick={handleDelete}
               disabled={status !== 'idle'}
-              style={{ padding: '8px 20px', fontSize: '13px', minWidth: 'auto' }}
+              style={{ padding: '6px 16px', fontSize: '13px', minWidth: 'auto', backgroundColor: '#fcebea', color: 'var(--ms-red)' }}
             >
               Delete Account
             </button>
@@ -141,13 +121,13 @@ export const PrivacyCenterScreen: React.FC<PrivacyCenterProps> = ({
 
         </div>
 
-        <div className="ms-footer-links">
+        <div className="ms-footer-links" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
           <div>
             <a href="https://press.openrockets.com/legal/terms" target="_blank" rel="noopener noreferrer">Terms of use</a> 
-            &nbsp;·&nbsp; 
+            &nbsp;|&nbsp; 
             <a href="https://press.openrockets.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy & cookies</a>
           </div>
-          <div style={{ fontSize: '11px', opacity: 0.7 }}>
+          <div style={{ fontSize: '11px' }}>
             &copy; {new Date().getFullYear()} OpenRockets Inc.
           </div>
         </div>
