@@ -177,6 +177,25 @@ body {
   box-shadow: var(--ms-card-shadow);
   display: flex;
   flex-direction: column;
+  transition: max-height 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), padding 0.6s ease;
+  max-height: 1000px;
+}
+
+.ms-card.is-loading-initial {
+  max-height: 130px;
+  overflow: hidden;
+}
+
+.ms-card-content {
+  transition: opacity 0.5s ease 0.3s, transform 0.5s ease 0.3s;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ms-card.is-loading-initial .ms-card-content {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
 }
 
 .ms-logo-container {

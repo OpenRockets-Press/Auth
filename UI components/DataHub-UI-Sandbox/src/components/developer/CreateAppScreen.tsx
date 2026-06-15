@@ -2,6 +2,16 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Check, Copy, Plus, Trash2 } from 'lucide-react';
 import { MicrosoftLoadingDots } from '../MicrosoftLoadingDots';
+import axios from 'axios';
+
+// Create a custom axios instance pointing to the live backend
+const api = axios.create({
+  baseURL: 'https://openrocketsauth.alwaysdata.net',
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json',
+  }
+});
 
 export const CreateAppScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -63,19 +73,34 @@ export const CreateAppScreen: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
     setIsSubmitting(true);
-    // Mock API Submission
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSuccessData({
-        client_id: 'app_' + Math.random().toString(36).substring(2, 10),
-        client_secret: 'sec_' + Math.random().toString(36).substring(2, 30),
+    
+    try {
+      // Send comma separated URIs or array depending on Laravel Passport requirement.
+      // Passport typically accepts comma-separated string for redirect
+      const redirectUriString = formData.redirect_uris.filter(u => u.trim() !== '').join(',');
+      
+      const response = await api.post('/oauth/clients', {
+        name: formData.name,
+        redirect: redirectUriString,
+        description: formData.description,
+        homepage_url: formData.homepage_url,
       });
-    }, 1200);
+
+      setSuccessData({
+        client_id: response.data.id || response.data.client_id || 'Unknown',
+        client_secret: response.data.secret || response.data.client_secret || 'Unknown',
+      });
+    } catch (err: any) {
+      console.error('Error creating OAuth client:', err);
+      alert('Failed to create application. Ensure your backend has Passport configured and you are authenticated.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const copySecret = () => {

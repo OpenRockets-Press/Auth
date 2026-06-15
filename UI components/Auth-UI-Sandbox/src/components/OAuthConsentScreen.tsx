@@ -1,84 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import { MicrosoftLoadingDots } from './MicrosoftLoadingDots';
 
 // Import assets
 import logoPath from '../assets/openrocketsvc1.png';
-import libertyBg from '../assets/wp-content/statue_of_liberty_new_york_monument_manhattan_liberty_statue_skyline_usa-986669.png';
-import museumBg from '../assets/wp-content/American_Museum_of_Natural_History_New_York_us_non-editorial_bpxph4.png';
-import type {  User, App, Scope  } from '../models/types';
 
-// Background images and their extracted ambient colors + locations
-const BACKGROUNDS = [
-  {
-    src: libertyBg,
-    ambientColor: '#6b9eb5', 
-    alt: 'Statue of Liberty New York',
-    location: 'New York City'
-  },
-  {
-    src: museumBg,
-    ambientColor: '#8c7b6d', 
-    alt: 'American Museum of Natural History',
-    location: 'New York City'
-  }
-];
-
-const AmbientBackground: React.FC = () => {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [bgInfo, setBgInfo] = useState(BACKGROUNDS[0]);
-
-  useEffect(() => {
-    // Randomly select a background on mount
-    const selectedBg = BACKGROUNDS[Math.floor(Math.random() * BACKGROUNDS.length)];
-    setBgInfo(selectedBg);
-
-    const img = new Image();
-    img.src = selectedBg.src;
-    img.onload = () => {
-      // Shorter timeout to make it feel snappier
-      setTimeout(() => setIsLoaded(true), 50);
-    };
-  }, []);
-
-  return (
-    <div className="ambient-bg-container">
-      {/* The ambient color layer blending out */}
-      <div 
-        className={`ambient-color-layer ${isLoaded ? 'fade-out' : ''}`}
-        style={{ backgroundColor: bgInfo.ambientColor }}
-      />
-      {/* The high-res image layer blending in */}
-      <img 
-        src={bgInfo.src} 
-        alt={bgInfo.alt} 
-        className={`ambient-image-layer ${isLoaded ? 'fade-in' : ''}`}
-      />
-      
-      {/* Location Badge */}
-      <div className={`ms-location-badge ${isLoaded ? 'fade-in' : ''}`}>
-        <svg className="ms-location-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-          <circle cx="12" cy="10" r="3"></circle>
-        </svg>
-        {bgInfo.location}
-      </div>
-    </div>
-  );
-};
-
-// A simple SVG checkmark
-const CheckIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="20 6 9 17 4 12"></polyline>
-  </svg>
-);
+import type { App, User } from '../models/types';
 
 interface OAuthConsentProps {
-  user?: User;
   app?: App;
-  requestedScopes?: Scope[];
-  redirectUri?: string;
+  user?: User;
+  scopes?: string[];
+  token?: string;
 }
 
 const api = axios.create({
@@ -89,120 +22,145 @@ const api = axios.create({
   }
 });
 
-export const OAuthConsentScreen: React.FC<OAuthConsentProps> = ({
-  user = { id: 1, name: "John Doe", email: "john.doe@example.com", status: 'active', created_at: '2026-06-15', updated_at: '2026-06-15' } as User,
-  app = { id: 1, client_id: 'c1', name: "Auth System Sandbox", description: null, status: 'verified' } as App,
-  requestedScopes = [
-    { id: 'profile', description: 'View your basic profile (Allows the app to see your name, email, and avatar.)' },
-    { id: 'email', description: 'Access your email address (Allows the app to communicate with you.)' }
-  ],
-  redirectUri = 'https://community.openrockets.com/callback'
+export const OAuthConsentScreen: React.FC<OAuthConsentProps> = ({ 
+  app = { id: 1, name: "OpenRockets Community", owner: { name: "OpenRockets Inc." } } as App,
+  user = { id: 1, name: "John Doe", email: "john.doe@example.com" } as User,
+  scopes = ['profile', 'email', 'telemetry.read'],
+  token = "mock-token-abc"
 }) => {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
-  const handleAction = async (action: 'authorize' | 'cancel') => {
+  // Microsoft-style initial load stagger
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsInitialLoading(false);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleAction = async (action: 'grant' | 'deny') => {
     setStatus('loading');
     
     try {
-      if (action === 'cancel') {
+      await api.post(`/api/oauth/authorize`, { 
+        client_id: app.id,
+        action,
+        token
+      });
+      
+      if (action === 'deny') {
         setStatus('error');
-        setTimeout(() => console.log("Redirecting back to app with access_denied..."), 1500);
       } else {
-        await api.post('/api/oauth/authorize/consent', {
-          client_id: app.client_id,
-          scopes: requestedScopes.map(s => s.id),
-          redirect_uri: redirectUri,
-          action: 'approve'
-        });
         setStatus('success');
       }
     } catch (error) {
-      console.error('OAuth Consent API Error:', error);
+      console.error('OAuth API Error:', error);
       setStatus('error');
-      // Simulated fallback for sandbox UI test if backend is unavailable
       setTimeout(() => setStatus('idle'), 2000);
     }
   };
 
   return (
     <>
-      <AmbientBackground />
-      
-      <div className={`ms-card ${status === 'error' ? 'theme-error' : ''}`} style={{ position: 'relative', overflow: 'hidden' }}>
-        {/* Absolute positioned loader overlay at the top of the card */}
-        {status === 'loading' && (
+      <div className={`ms-card ${status === 'error' ? 'theme-error' : ''} ${isInitialLoading ? 'is-loading-initial' : ''}`} style={{ position: 'relative' }}>
+        {(status === 'loading' || isInitialLoading) && (
           <div className="ms-loader-overlay">
             <MicrosoftLoadingDots />
           </div>
         )}
 
-        {/* Custom Logo (replacing Microsoft Logo) */}
         <div className="ms-logo-container">
           <img src={logoPath} alt="Open Rockets VC1 Logo" className="ms-logo-img" />
         </div>
 
-        <h1 className="ms-title">Let this app access your info?</h1>
+        <div className="ms-card-content">
+          <h1 className="ms-title">Let this app access your info?</h1>
 
-        <div className="ms-user-badge">
-          <div className="ms-avatar">{user.name.substring(0, 2).toUpperCase()}</div>
-          <div className="ms-user-info">
-            <span className="ms-user-name">{user.name}</span>
-            <span className="ms-user-email">{user.email}</span>
+          <div className="ms-user-badge">
+            <div className="ms-avatar">{user.name.substring(0, 2).toUpperCase()}</div>
+            <div className="ms-user-info">
+              <span className="ms-user-name">{user.name}</span>
+              <span className="ms-user-email">{user.email}</span>
+            </div>
           </div>
-        </div>
 
-        <p className="ms-description">
-          <strong>{app.name}</strong> needs your permission to:
-        </p>
+          <p className="ms-description">
+            <strong>{app.name}</strong> (published by {app.owner?.name || 'Unknown'}) needs your permission to:
+          </p>
 
-        <ul className="ms-scope-list">
-          {requestedScopes.map(scope => {
-            const parts = scope.description.split('(');
-            const title = parts[0].trim();
-            const desc = parts[1] ? parts[1].replace(')', '').trim() : '';
-            return (
-              <li className="ms-scope-item" key={scope.id}>
+          <ul className="ms-scope-list">
+            {scopes.includes('profile') && (
+              <li className="ms-scope-item">
                 <div className="ms-verified-tick">
-                  <CheckIcon />
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
                 </div>
                 <div>
-                  <strong>{title}</strong>
-                  {desc && <div style={{ color: 'var(--ms-text-secondary)' }}>{desc}</div>}
+                  <strong>View your basic profile</strong>
+                  <div style={{ color: 'var(--ms-text-secondary)' }}>Name, avatar, and public account information.</div>
                 </div>
               </li>
-            );
-          })}
-        </ul>
+            )}
+            {scopes.includes('email') && (
+              <li className="ms-scope-item">
+                <div className="ms-verified-tick">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </div>
+                <div>
+                  <strong>View your email address</strong>
+                  <div style={{ color: 'var(--ms-text-secondary)' }}>Allows the app to see the email associated with your account.</div>
+                </div>
+              </li>
+            )}
+            {scopes.includes('telemetry.read') && (
+              <li className="ms-scope-item">
+                <div className="ms-verified-tick">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </div>
+                <div>
+                  <strong>Read telemetry data</strong>
+                  <div style={{ color: 'var(--ms-text-secondary)' }}>Access your historical vehicle metrics and flight logs.</div>
+                </div>
+              </li>
+            )}
+          </ul>
 
-        <p className="ms-description" style={{ fontSize: '13px', color: 'var(--ms-text-secondary)', marginBottom: '32px' }}>
-          By clicking Next, you allow this application and OpenRockets to use your information in accordance with their respective terms of service and privacy policies. You can change these permissions at any time.
-        </p>
+          <p className="ms-description" style={{ fontSize: '13px', color: 'var(--ms-text-secondary)' }}>
+            You can revoke these permissions at any time from your OpenRockets account settings.
+          </p>
 
-        <div className="ms-button-group">
-          <button 
-            className="ms-button ms-button-secondary"
-            onClick={() => handleAction('cancel')}
-            disabled={status !== 'idle'}
-          >
-            Go Back
-          </button>
-          <button 
-            className="ms-button ms-button-primary"
-            onClick={() => handleAction('authorize')}
-            disabled={status !== 'idle'}
-          >
-            Next
-          </button>
-        </div>
-
-        <div className="ms-footer-links" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <div>
-            <a href="https://press.openrockets.com/legal/terms" target="_blank" rel="noopener noreferrer">Terms of use</a> 
-            &nbsp;|&nbsp; 
-            <a href="https://press.openrockets.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy & cookies</a>
+          <div className="ms-button-group">
+            <button 
+              className="ms-button ms-button-secondary"
+              onClick={() => handleAction('deny')}
+              disabled={status !== 'idle'}
+            >
+              Cancel
+            </button>
+            <button 
+              className="ms-button ms-button-primary"
+              onClick={() => handleAction('grant')}
+              disabled={status !== 'idle'}
+            >
+              Accept
+            </button>
           </div>
-          <div style={{ fontSize: '11px' }}>
-            &copy; {new Date().getFullYear()} OpenRockets Inc.
+
+          <div className="ms-footer-links" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <div>
+              <a href="https://press.openrockets.com/legal/terms" target="_blank" rel="noopener noreferrer">Terms of use</a> 
+              &nbsp;|&nbsp; 
+              <a href="https://press.openrockets.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy & cookies</a>
+            </div>
+            <div style={{ fontSize: '11px' }}>
+              &copy; {new Date().getFullYear()} OpenRockets Inc.
+            </div>
           </div>
         </div>
       </div>
