@@ -3,13 +3,7 @@ import { Plus, Copy, Check } from 'lucide-react';
 import { MicrosoftLoadingDots } from '../MicrosoftLoadingDots';
 import axios from 'axios';
 
-const api = axios.create({
-  baseURL: 'https://openrocketsauth.alwaysdata.net',
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json',
-  }
-});
+import { useAuth } from '../../contexts/AuthProvider';
 
 export const ApiKeysScreen: React.FC = () => {
   const [isCreating, setIsCreating] = useState(false);
@@ -17,18 +11,20 @@ export const ApiKeysScreen: React.FC = () => {
   const [successData, setSuccessData] = useState<{ token: string, name: string } | null>(null);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { token } = useAuth();
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!tokenName.trim()) return;
+    if (!tokenName.trim() || !token) return;
 
     setIsCreating(true);
     setError(null);
     
     try {
-      // Typically posts to a custom endpoint that calls auth()->user()->createToken($request->name)
-      const response = await api.post('/api/personal-access-tokens', {
+      const response = await axios.post('https://openrocketsauth.alwaysdata.net/api/personal-access-tokens', {
         name: tokenName
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
       });
 
       setSuccessData({

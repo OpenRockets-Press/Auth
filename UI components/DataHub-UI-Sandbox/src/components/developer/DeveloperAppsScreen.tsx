@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Shield, Users, Activity } from 'lucide-react';
 import { MicrosoftLoadingDots } from '../MicrosoftLoadingDots';
+import axios from 'axios';
+import { useAuth } from '../../contexts/AuthProvider';
 
 import type {  App  } from '../../models/types';
 
@@ -9,34 +11,23 @@ export const DeveloperAppsScreen: React.FC = () => {
   const navigate = useNavigate();
   const [apps, setApps] = useState<App[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { token } = useAuth();
 
   useEffect(() => {
-    // Mock API Call - Will be replaced by developerApi.ts
-    setTimeout(() => {
-      setApps([
-        {
-          id: 1,
-          owner_id: 1,
-          client_id: '12345-abcde',
-          name: 'My Custom Integration',
-          description: 'Used for sinking data between our ERP and DataHub.',
-          status: 'verified',
-          is_system: false,
-          redirect_uris: [],
-          homepage_url: 'https://my-erp-integration.com',
-          privacy_policy_url: null,
-          terms_url: null,
-          category: null,
-          icon_url: null,
-          verified_at: '2026-05-20T10:00:00Z',
-          suspended_at: null,
-          created_at: '2026-05-20T10:00:00Z',
-          updated_at: '2026-05-20T10:00:00Z'
-        }
-      ]);
+    if (!token) return;
+
+    axios.get('https://openrocketsauth.alwaysdata.net/oauth/clients', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    .then(res => {
+      setApps(res.data);
       setIsLoading(false);
-    }, 800);
-  }, []);
+    })
+    .catch(err => {
+      console.error('Failed to fetch apps', err);
+      setIsLoading(false);
+    });
+  }, [token]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
