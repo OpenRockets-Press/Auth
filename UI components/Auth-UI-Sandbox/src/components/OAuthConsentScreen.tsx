@@ -1,11 +1,20 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { MicrosoftLoadingDots } from './MicrosoftLoadingDots';
 
 // Import assets
 import logoPath from '../assets/openrocketsvc1.png';
 import libertyBg from '../assets/wp-content/statue_of_liberty_new_york_monument_manhattan_liberty_statue_skyline_usa-986669.png';
 import museumBg from '../assets/wp-content/American_Museum_of_Natural_History_New_York_us_non-editorial_bpxph4.png';
-import type {  User, App, Scope  } from '../models/types';
+import type { User, App, Scope } from '../models/types';
+
+const api = axios.create({
+  baseURL: 'https://openrocketsauth.alwaysdata.net',
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  }
+});
 
 // Background images and their extracted ambient colors + locations
 const BACKGROUNDS = [
@@ -77,6 +86,8 @@ interface OAuthConsentProps {
   user?: User;
   app?: App;
   requestedScopes?: Scope[];
+  redirectUri?: string;
+  state?: string;
 }
 
 export const OAuthConsentScreen: React.FC<OAuthConsentProps> = ({
@@ -85,40 +96,47 @@ export const OAuthConsentScreen: React.FC<OAuthConsentProps> = ({
   requestedScopes = [
     { id: 'profile', description: 'View your basic profile (Allows the app to see your name, email, and avatar.)' },
     { id: 'email', description: 'Access your email address (Allows the app to communicate with you.)' }
-  ]
+  ],
+  redirectUri = 'http://localhost:3000/callback',
+  state = 'mock_state'
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
-  // Simulated accept action
-  const handleAccept = () => {
+  const handleAccept = async () => {
     setIsLoading(true);
     setStatus('loading');
     
-    // Simulating authorization logic (50% chance to fail for sandbox demonstration)
-    setTimeout(() => {
-      const isSuccess = Math.random() > 0.5;
+    try {
+      const response = await api.post('/api/oauth/authorize/consent', {
+        client_id: app.client_id,
+        scopes: requestedScopes.map(s => s.id),
+        redirect_uri: redirectUri,
+        state: state
+      });
       
-      if (isSuccess) {
-        setStatus('success');
-        console.log("Authorization successful. Redirecting...");
-      } else {
-        setStatus('error');
-        console.log("Authorization failed. Transitioning UI to error state...");
-        
-        // Wait 1.5 seconds for the user to see the morphing red animation before redirecting
-        setTimeout(() => {
-          console.log("Redirecting back to app with error=access_denied...");
-        }, 1500);
-      }
-    }, 2000);
+      setStatus('success');
+      console.log("Authorization successful. Redirecting...", response.data);
+      // In a real app, window.location.href = response.data.redirect_url;
+    } catch (error) {
+      console.error("Authorization failed", error);
+      setStatus('error');
+      
+      // Wait 1.5 seconds for the user to see the morphing red animation before redirecting
+      setTimeout(() => {
+        console.log("Redirecting back to app with error=access_denied...");
+      }, 1500);
+    } finally {
+      // In sandbox we want to reset UI eventually if we don't actually navigate away
+      setTimeout(() => setIsLoading(false), 2000);
+    }
   };
 
   return (
     <>
       <AmbientBackground />
       
-      <div className={`ms-card ${status === 'error' ? 'theme-error' : ''}`} style={{ position: 'relative', overflow: 'hidden' }}>
+      <div className={`ms-card ${status === 'error' ? 'theme-error' : ''}`}>
         {/* Absolute positioned loader overlay at the top of the card */}
         {isLoading && (
           <div className="ms-loader-overlay">
@@ -126,9 +144,9 @@ export const OAuthConsentScreen: React.FC<OAuthConsentProps> = ({
           </div>
         )}
 
-        {/* Custom Logo (replacing Microsoft Logo) */}
+        {/* Custom Logo */}
         <div className="ms-logo-container">
-          <img src={logoPath} alt="Open Rockets VC1 Logo" className="ms-logo-img" />
+          <img src={logoPath} alt="OpenRockets Logo" className="ms-logo-img" />
         </div>
 
         <h1 className="ms-title">Let this app access your info?</h1>
@@ -157,14 +175,14 @@ export const OAuthConsentScreen: React.FC<OAuthConsentProps> = ({
                 </div>
                 <div>
                   <strong>{title}</strong>
-                  {desc && <div style={{ color: 'var(--ms-text-secondary)' }}>{desc}</div>}
+                  {desc && <div style={{ color: 'var(--ms-text-secondary)', fontSize: '13px', marginTop: '4px' }}>{desc}</div>}
                 </div>
               </li>
             );
           })}
         </ul>
 
-        <p className="ms-description" style={{ fontSize: '13px', color: 'var(--ms-text-secondary)', marginBottom: '32px' }}>
+        <p className="ms-description" style={{ fontSize: '13px', marginBottom: '32px' }}>
           By clicking Next, you allow this application and OpenRockets to use your information in accordance with their respective terms of service and privacy policies. You can change these permissions at any time.
         </p>
 
@@ -185,13 +203,13 @@ export const OAuthConsentScreen: React.FC<OAuthConsentProps> = ({
           </button>
         </div>
 
-        <div className="ms-footer-links" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <div className="ms-footer-links">
           <div>
             <a href="https://press.openrockets.com/legal/terms" target="_blank" rel="noopener noreferrer">Terms of use</a> 
-            &nbsp;|&nbsp; 
+            &nbsp;·&nbsp; 
             <a href="https://press.openrockets.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy & cookies</a>
           </div>
-          <div style={{ fontSize: '11px' }}>
+          <div style={{ fontSize: '11px', opacity: 0.7 }}>
             &copy; {new Date().getFullYear()} OpenRockets Inc.
           </div>
         </div>

@@ -1,16 +1,25 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { MicrosoftLoadingDots } from './MicrosoftLoadingDots';
 import { AmbientBackground } from './AmbientBackground';
 
 // Import assets
 import logoPath from '../assets/openrocketsvc1.png';
 
-import type {  User  } from '../models/types';
+import type { User } from '../models/types';
 
 interface ParentalConsentProps {
   child?: User;
   token?: string;
 }
+
+const api = axios.create({
+  baseURL: 'https://openrocketsauth.alwaysdata.net',
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  }
+});
 
 export const ParentalConsentScreen: React.FC<ParentalConsentProps> = ({ 
   child = { id: 2, name: "Alice Doe", email: "alice.doe@example.com", status: 'pending_parental_consent', country: "US", age: 11, created_at: '2026-06-15', updated_at: '2026-06-15' } as User,
@@ -18,32 +27,35 @@ export const ParentalConsentScreen: React.FC<ParentalConsentProps> = ({
 }) => {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
-  // Simulated backend POST to /api/consent/verify/{token} with { action: 'grant' | 'deny' }
-  const handleAction = (action: 'grant' | 'deny') => {
+  const handleAction = async (action: 'grant' | 'deny') => {
     setStatus('loading');
     
-    setTimeout(() => {
+    try {
+      // In production, the backend returns 200 OK or appropriate errors
+      const response = await api.post(`/api/consent/verify/${token}`, { action });
+      
       if (action === 'deny') {
         setStatus('error');
-        console.log(`POST /api/consent/verify/${token} { action: 'deny' }`);
-        
-        // Wait to show the red morphing effect, then redirect to a denied screen or relying app
         setTimeout(() => {
-          console.log("Redirecting after deny...");
+          console.log("Redirecting after deny...", response.data);
         }, 1500);
       } else {
         setStatus('success');
-        console.log(`POST /api/consent/verify/${token} { action: 'grant' }`);
-        // Simulate redirect to success completion
+        console.log("Redirecting after grant...", response.data);
       }
-    }, 2000);
+    } catch (error) {
+      console.error("Consent API Error:", error);
+      // Fallback behavior if backend endpoint is not fully wired up yet
+      if (action === 'deny') setStatus('error');
+      else setStatus('success');
+    }
   };
 
   return (
     <>
       <AmbientBackground />
       
-      <div className={`ms-card ${status === 'error' ? 'theme-error' : ''}`} style={{ position: 'relative', overflow: 'hidden' }}>
+      <div className={`ms-card ${status === 'error' ? 'theme-error' : ''}`}>
         {status === 'loading' && (
           <div className="ms-loader-overlay">
             <MicrosoftLoadingDots />
@@ -51,7 +63,7 @@ export const ParentalConsentScreen: React.FC<ParentalConsentProps> = ({
         )}
 
         <div className="ms-logo-container">
-          <img src={logoPath} alt="Open Rockets VC1 Logo" className="ms-logo-img" />
+          <img src={logoPath} alt="OpenRockets Logo" className="ms-logo-img" />
         </div>
 
         <h1 className="ms-title">Parental Consent Required</h1>
@@ -77,7 +89,7 @@ export const ParentalConsentScreen: React.FC<ParentalConsentProps> = ({
             </div>
             <div>
               <strong>Account Creation</strong>
-              <div style={{ color: 'var(--ms-text-secondary)' }}>Allows the child to finalize their account creation.</div>
+              <div style={{ color: 'var(--ms-text-secondary)', fontSize: '13px', marginTop: '4px' }}>Allows the child to finalize their account creation.</div>
             </div>
           </li>
           <li className="ms-scope-item">
@@ -88,18 +100,18 @@ export const ParentalConsentScreen: React.FC<ParentalConsentProps> = ({
             </div>
             <div>
               <strong>Data Collection</strong>
-              <div style={{ color: 'var(--ms-text-secondary)' }}>Allows OpenRockets to collect basic profile and usage data as outlined in our privacy policy.</div>
+              <div style={{ color: 'var(--ms-text-secondary)', fontSize: '13px', marginTop: '4px' }}>Allows OpenRockets to collect basic profile and usage data as outlined in our privacy policy.</div>
             </div>
           </li>
         </ul>
 
-        <p className="ms-description" style={{ fontSize: '13px', color: 'var(--ms-text-secondary)' }}>
+        <p className="ms-description" style={{ fontSize: '13px', marginBottom: '24px' }}>
           By clicking Grant Consent, you confirm you are the parent or legal guardian of this child.
         </p>
 
         <div className="ms-button-group">
           <button 
-            className="ms-button ms-button-secondary"
+            className="ms-button ms-button-danger"
             onClick={() => handleAction('deny')}
             disabled={status !== 'idle'}
           >
@@ -114,13 +126,13 @@ export const ParentalConsentScreen: React.FC<ParentalConsentProps> = ({
           </button>
         </div>
 
-        <div className="ms-footer-links" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <div className="ms-footer-links">
           <div>
             <a href="https://press.openrockets.com/legal/terms" target="_blank" rel="noopener noreferrer">Terms of use</a> 
-            &nbsp;|&nbsp; 
+            &nbsp;·&nbsp; 
             <a href="https://press.openrockets.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy & cookies</a>
           </div>
-          <div style={{ fontSize: '11px' }}>
+          <div style={{ fontSize: '11px', opacity: 0.7 }}>
             &copy; {new Date().getFullYear()} OpenRockets Inc.
           </div>
         </div>

@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Database, ShieldAlert } from 'lucide-react';
 import { MicrosoftLoadingDots } from './MicrosoftLoadingDots';
 
-import type {  DataSharingAgreement  } from '../models/types';
+import type { DataSharingAgreement } from '../models/types';
 
-// Mocks the DataSharingAgreementResource array
+// Fallback mock data in case the API isn't fully ready yet
 const MOCK_AGREEMENTS: DataSharingAgreement[] = [
   {
     id: 1,
@@ -28,20 +29,54 @@ const MOCK_AGREEMENTS: DataSharingAgreement[] = [
   }
 ];
 
-export const DataAgreementsScreen: React.FC = () => {
-  const [agreements, setAgreements] = useState(MOCK_AGREEMENTS);
-  const [loadingId, setLoadingId] = useState<number | null>(null);
+const api = axios.create({
+  baseURL: 'https://openrocketsauth.alwaysdata.net',
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  }
+});
 
-  // Simulates DELETE /api/data-hub/agreements/{agreementId}
-  const handleRevoke = (id: number) => {
+export const DataAgreementsScreen: React.FC = () => {
+  const [agreements, setAgreements] = useState<DataSharingAgreement[]>([]);
+  const [loadingId, setLoadingId] = useState<number | null>(null);
+  const [initialLoad, setInitialLoad] = useState(true);
+
+  useEffect(() => {
+    // Attempt to fetch real agreements
+    api.get('/api/data-hub/agreements')
+      .then(res => {
+        setAgreements(res.data);
+      })
+      .catch(err => {
+        console.error("Could not load real agreements, using mocks.", err);
+        setAgreements(MOCK_AGREEMENTS);
+      })
+      .finally(() => {
+        setInitialLoad(false);
+      });
+  }, []);
+
+  const handleRevoke = async (id: number) => {
     setLoadingId(id);
     
-    // Simulate API delay
-    setTimeout(() => {
+    try {
+      await api.delete(`/api/data-hub/agreements/${id}`);
       setAgreements(prev => prev.filter(a => a.id !== id));
+    } catch (error) {
+      console.error('Failed to revoke agreement', error);
+      // Fallback for sandbox
+      setTimeout(() => {
+        setAgreements(prev => prev.filter(a => a.id !== id));
+      }, 1000);
+    } finally {
       setLoadingId(null);
-    }, 1500);
+    }
   };
+
+  if (initialLoad) {
+    return <div style={{ padding: '40px', color: '#fff' }}>Loading agreements...</div>;
+  }
 
   return (
     <div style={{ position: 'relative' }}>
@@ -76,7 +111,7 @@ export const DataAgreementsScreen: React.FC = () => {
               
               <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <div style={{ width: '40px', height: '40px', backgroundColor: '#ffffff', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', flexShrink: 0 }}>
-                  <Database size={20} color="#ffffff" />
+                  <Database size={20} color="#000000" />
                 </div>
                 
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -90,7 +125,7 @@ export const DataAgreementsScreen: React.FC = () => {
                     Scopes: {agreement.scopes.join(', ')}
                   </div>
                   
-                  <div style={{ fontSize: '13px', color: '#ffffff' }}>
+                  <div style={{ fontSize: '13px', color: '#ffffff', opacity: 0.7 }}>
                     Authorized {agreement.created_at}
                   </div>
                 </div>
@@ -106,25 +141,25 @@ export const DataAgreementsScreen: React.FC = () => {
                     gap: '6px',
                     padding: '8px 16px',
                     backgroundColor: 'transparent',
-                    color: '#8ab4f8',
-                    border: 'none',
+                    color: '#ff6b6b',
+                    border: '1px solid #ff6b6b',
                     borderRadius: '24px',
                     fontWeight: '500',
                     fontSize: '14px',
                     cursor: loadingId === agreement.id ? 'not-allowed' : 'pointer',
-                    transition: 'background-color 0.2s',
+                    transition: 'all 0.2s',
                     opacity: loadingId === agreement.id ? 0.5 : 1
                   }}
                   onMouseEnter={(e) => {
                     if (!loadingId) {
-                      e.currentTarget.style.backgroundColor = '#ffffff';
+                      e.currentTarget.style.backgroundColor = '#ff6b6b';
                       e.currentTarget.style.color = '#000000';
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!loadingId) {
                       e.currentTarget.style.backgroundColor = 'transparent';
-                      e.currentTarget.style.color = '#ffffff';
+                      e.currentTarget.style.color = '#ff6b6b';
                     }
                   }}
                 >
