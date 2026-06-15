@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
-import { User } from '../models/types';
+import type { User } from '../models/types';
 import { MicrosoftLoadingDots } from '../components/MicrosoftLoadingDots';
 
 interface AuthContextType {
@@ -26,7 +26,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     if (!token) {
-      window.location.href = 'https://auth.openrockets.com/login?redirect_uri=' + encodeURIComponent(window.location.href);
+      window.location.href = 'https://accounts.openrockets.com/login?redirect_uri=' + encodeURIComponent(window.location.href);
       return;
     }
 
@@ -40,13 +40,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }).catch(err => {
       console.error('Failed to fetch user:', err);
       localStorage.removeItem('openrockets_token');
-      window.location.href = 'https://auth.openrockets.com/login?redirect_uri=' + encodeURIComponent(window.location.href);
+      window.location.href = 'https://accounts.openrockets.com/login?redirect_uri=' + encodeURIComponent(window.location.href);
     });
   }, [token]);
 
   const logout = () => {
     localStorage.removeItem('openrockets_token');
-    window.location.href = 'https://auth.openrockets.com/login';
+    window.location.href = 'https://accounts.openrockets.com/login';
   };
 
   if (isLoading) {

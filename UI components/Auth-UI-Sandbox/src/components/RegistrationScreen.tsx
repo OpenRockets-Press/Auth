@@ -68,7 +68,7 @@ export const RegistrationScreen: React.FC = () => {
           window.location.href = redirectUri;
         } else {
           // Fallback to OpenRockets main or DataHub
-          window.location.href = 'https://accounts.openrockets.com';
+          window.location.href = 'https://myaccount.openrockets.com';
         }
       }, 1500);
 
