@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Shield, Globe, Users, Activity } from 'lucide-react';
+import { Plus, Shield, Users, Activity } from 'lucide-react';
 import { MicrosoftLoadingDots } from '../MicrosoftLoadingDots';
 
 import type {  App  } from '../../models/types';
@@ -27,6 +27,7 @@ export const DeveloperAppsScreen: React.FC = () => {
           privacy_policy_url: null,
           terms_url: null,
           category: null,
+          icon_url: null,
           verified_at: '2026-05-20T10:00:00Z',
           suspended_at: null,
           created_at: '2026-05-20T10:00:00Z',
@@ -87,7 +88,7 @@ export const DeveloperAppsScreen: React.FC = () => {
           borderRadius: '24px',
           backgroundColor: '#000000'
         }}>
-          <AppWindow size={48} color="#ffffff" style={{ marginBottom: '16px' }} />
+          <Shield size={48} color="#ffffff" style={{ marginBottom: '16px' }} />
           <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', color: '#ffffff', fontWeight: '500' }}>No Applications Yet</h3>
           <p style={{ margin: '0 0 24px 0', color: '#ffffff', textAlign: 'center', maxWidth: '400px' }}>
             Build custom integrations to securely request and sync user data via our OAuth 2.0 API.

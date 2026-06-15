@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Laptop, Smartphone, XCircle, ShieldCheck } from 'lucide-react';
+import { Smartphone, Laptop, ShieldCheck } from 'lucide-react';
 import { MicrosoftLoadingDots } from './MicrosoftLoadingDots';
 
 import type {  TrustedDevice  } from '../models/types';

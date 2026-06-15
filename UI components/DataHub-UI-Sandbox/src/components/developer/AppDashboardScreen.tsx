@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, Activity, Settings, Shield, Webhook, AlertTriangle, 
-  Copy, Check, Users, ShieldAlert 
+  Copy, Check, Users 
 } from 'lucide-react';
 import { MicrosoftLoadingDots } from '../MicrosoftLoadingDots';
 
@@ -32,6 +32,7 @@ export const AppDashboardScreen: React.FC = () => {
         privacy_policy_url: null,
         terms_url: null,
         category: null,
+        icon_url: null,
         verified_at: '2026-05-20T10:00:00Z',
         suspended_at: null,
         created_at: '2026-05-20T10:00:00Z',
@@ -217,7 +218,7 @@ const SettingsTab: React.FC<{ app: App }> = ({ app }) => {
         </div>
         <div>
           <label style={{ display: 'block', fontSize: '14px', marginBottom: '8px' }}>Description</label>
-          <textarea defaultValue={app.description} style={{ width: '100%', padding: '12px 16px', backgroundColor: '#000000', border: '1px solid #444', borderRadius: '8px', color: '#ffffff', minHeight: '100px', boxSizing: 'border-box' }} />
+          <textarea defaultValue={app.description || ''} style={{ width: '100%', padding: '12px 16px', backgroundColor: '#000000', border: '1px solid #444', borderRadius: '8px', color: '#ffffff', minHeight: '100px', boxSizing: 'border-box' }} />
         </div>
         <div>
           <label style={{ display: 'block', fontSize: '14px', marginBottom: '8px' }}>Redirect URIs</label>
@@ -233,7 +234,7 @@ const SettingsTab: React.FC<{ app: App }> = ({ app }) => {
   );
 };
 
-const WebhooksTab: React.FC<{ app: App }> = ({ app }) => {
+const WebhooksTab: React.FC<{ app: App }> = () => {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
@@ -251,7 +252,7 @@ const WebhooksTab: React.FC<{ app: App }> = ({ app }) => {
   );
 };
 
-const ConsentsTab: React.FC<{ app: App }> = ({ app }) => {
+const ConsentsTab: React.FC<{ app: App }> = () => {
   return (
     <div>
       <h2 style={{ margin: '0 0 24px 0', fontSize: '20px', fontWeight: '500' }}>Active Consents</h2>
@@ -279,7 +280,7 @@ const ConsentsTab: React.FC<{ app: App }> = ({ app }) => {
   );
 };
 
-const DangerTab: React.FC<{ app: App }> = ({ app }) => {
+const DangerTab: React.FC<{ app: App }> = () => {
   return (
     <div>
       <h2 style={{ margin: '0 0 24px 0', fontSize: '20px', fontWeight: '500', color: '#ff4444' }}>Danger Zone</h2>

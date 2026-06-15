@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, AppWindow, Users, Activity, Plus } from 'lucide-react';
+import { Activity, Users, Shield, Plus } from 'lucide-react';
 import { MicrosoftLoadingDots } from '../MicrosoftLoadingDots';
 
 import type {  DeveloperStats  } from '../../models/types';
@@ -68,7 +68,7 @@ export const DeveloperOverviewScreen: React.FC = () => {
         <div style={{ backgroundColor: '#000000', border: '1px solid #ffffff', borderRadius: '16px', padding: '24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <h3 style={{ margin: 0, fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px', opacity: 0.8 }}>My Apps</h3>
-            <AppWindow size={20} />
+            <Shield size={20} />
           </div>
           <div style={{ fontSize: '36px', fontWeight: '500', marginBottom: '8px' }}>{stats.total_apps}</div>
           <div style={{ fontSize: '13px', opacity: 0.8 }}>Active OAuth Clients</div>

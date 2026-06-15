@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import { ParentalConsentScreen } from './components/ParentalConsentScreen';
 import { PrivacyCenterScreen } from './components/PrivacyCenterScreen';

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Database, ShieldAlert, XCircle } from 'lucide-react';
+import { Database, ShieldAlert } from 'lucide-react';
 import { MicrosoftLoadingDots } from './MicrosoftLoadingDots';
 
 import type {  DataSharingAgreement  } from '../models/types';

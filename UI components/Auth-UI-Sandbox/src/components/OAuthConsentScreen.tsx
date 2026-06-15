@@ -74,9 +74,9 @@ const CheckIcon = () => (
 );
 
 interface OAuthConsentProps {
-  user: User;
-  app: App;
-  requestedScopes: Scope[];
+  user?: User;
+  app?: App;
+  requestedScopes?: Scope[];
 }
 
 export const OAuthConsentScreen: React.FC<OAuthConsentProps> = ({

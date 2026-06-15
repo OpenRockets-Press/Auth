@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, ChevronRight, Key, Search } from 'lucide-react';
+import { Shield, ChevronRight, Key } from 'lucide-react';
 import { MicrosoftLoadingDots } from './MicrosoftLoadingDots';
 
 import type {  App, UserDataStore  } from '../models/types';

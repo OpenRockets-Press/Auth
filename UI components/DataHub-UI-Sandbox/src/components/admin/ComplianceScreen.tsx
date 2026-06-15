@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, FileWarning, Shield, CheckCircle, Database } from 'lucide-react';
+import { Search, FileWarning, Shield, Database } from 'lucide-react';
 import { MicrosoftLoadingDots } from '../MicrosoftLoadingDots';
 
 // Mock Interfaces

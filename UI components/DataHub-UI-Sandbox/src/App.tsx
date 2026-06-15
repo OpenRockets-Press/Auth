@@ -1,5 +1,4 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AppLayout } from './components/AppLayout';
 import { ConnectedAppsScreen } from './components/ConnectedAppsScreen';
 import { DataAgreementsScreen } from './components/DataAgreementsScreen';

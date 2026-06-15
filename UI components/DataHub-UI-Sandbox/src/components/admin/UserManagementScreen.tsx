@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, MoreVertical, Lock, Unlock, Eye, ShieldAlert } from 'lucide-react';
+import { Search, MoreVertical, Lock, Eye, ShieldAlert } from 'lucide-react';
 import { MicrosoftLoadingDots } from '../MicrosoftLoadingDots';
 
 import type {  User  } from '../../models/types';

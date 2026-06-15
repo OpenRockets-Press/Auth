@@ -8,7 +8,7 @@ import logoPath from '../assets/openrocketsvc1.png';
 import type {  User  } from '../models/types';
 
 interface PrivacyCenterProps {
-  user: User;
+  user?: User;
 }
 
 export const PrivacyCenterScreen: React.FC<PrivacyCenterProps> = ({ 
