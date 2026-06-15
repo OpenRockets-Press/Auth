@@ -26,4 +26,15 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/{tokenId}', [SessionController::class, 'destroy']);
         Route::delete('/', [SessionController::class, 'destroyAll']);
     });
+
+    Route::post('/personal-access-tokens', function (Illuminate\Http\Request $request) {
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+        $token = $request->user()->createToken($request->name);
+        return response()->json([
+            'token' => $token->accessToken,
+            'name' => $request->name
+        ]);
+    });
 });
