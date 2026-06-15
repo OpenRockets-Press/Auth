@@ -211,17 +211,26 @@ body {
   object-fit: contain;
 }
 
-@media (min-width: 768px) {
-  .ms-logo-img {
-    height: 45px;
-  }
+.ms-header {
+  margin-bottom: 24px;
+}
+
+.ms-logo {
+  height: 36px;
+  margin-bottom: 16px;
 }
 
 .ms-title {
   font-size: 24px;
   font-weight: 600;
-  margin-bottom: 24px;
+  margin-bottom: 8px; /* Was 24px before, but subtitle is next */
   line-height: 28px;
+}
+
+.ms-subtitle {
+  font-size: 15px;
+  color: var(--ms-text);
+  margin-bottom: 24px;
 }
 
 .ms-user-badge {
@@ -377,4 +386,126 @@ body {
   height: 4px;
   background-color: transparent;
   z-index: 10;
+}
+
+/* Form Styles */
+.ms-form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.ms-input-group {
+  width: 100%;
+}
+
+.ms-input {
+  width: 100%;
+  padding: 8px 0;
+  font-size: 15px;
+  border: none;
+  border-bottom: 1px solid var(--ms-text);
+  outline: none;
+  background-color: transparent;
+  color: var(--ms-text);
+  font-family: inherit;
+  transition: border-bottom-color 0.2s ease;
+}
+
+.ms-input:focus {
+  border-bottom: 2px solid var(--theme-primary);
+  padding-bottom: 7px; /* compensate for thicker border */
+}
+
+.ms-input::placeholder {
+  color: var(--ms-text-secondary);
+}
+
+.ms-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ms-link {
+  color: var(--theme-primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.ms-link:hover {
+  color: var(--theme-primary-hover);
+  text-decoration: underline;
+}
+
+.ms-success-animation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}
+
+.checkmark {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: block;
+  stroke-width: 2;
+  stroke: var(--theme-primary);
+  stroke-miterlimit: 10;
+  box-shadow: inset 0px 0px 0px var(--theme-primary);
+  animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+}
+
+.checkmark-circle {
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  stroke-width: 2;
+  stroke-miterlimit: 10;
+  stroke: var(--theme-primary);
+  fill: none;
+  animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.checkmark-check {
+  transform-origin: 50% 50%;
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+}
+
+@keyframes stroke {
+  100% { stroke-dashoffset: 0; }
+}
+@keyframes scale {
+  0%, 100% { transform: none; }
+  50% { transform: scale3d(1.1, 1.1, 1); }
+}
+@keyframes fill {
+  100% { box-shadow: inset 0px 0px 0px 30px transparent; }
+}
+
+.ms-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.ms-button.primary {
+  background-color: var(--theme-primary);
+  color: white;
+}
+
+.ms-button.primary:hover {
+  background-color: var(--theme-primary-hover);
+}
+
+.ms-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ms-error-text {
+  color: #e81123;
+  font-size: 14px;
 }
