@@ -5,22 +5,16 @@ import { AmbientBackground } from './AmbientBackground';
 // Import assets
 import logoPath from '../assets/openrocketsvc1.png';
 
-// Simulate the backend prop structure coming from Laravel/Inertia
-interface ChildProfile {
-  name: string;
-  email: string;
-  country: string;
-  age: number;
-}
+import type {  User  } from '../models/types';
 
 interface ParentalConsentProps {
-  child: ChildProfile;
+  child: User;
   consentId: string;
   token: string;
 }
 
 export const ParentalConsentScreen: React.FC<ParentalConsentProps> = ({ 
-  child = { name: "Alice Doe", email: "alice.doe@example.com", country: "US", age: 11 },
+  child = { id: 2, name: "Alice Doe", email: "alice.doe@example.com", status: 'pending_parental_consent', country: "US", age: 11, created_at: '2026-06-15', updated_at: '2026-06-15' } as User,
   consentId = "cons_12345",
   token = "tok_xyz"
 }) => {

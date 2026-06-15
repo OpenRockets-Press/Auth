@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { Laptop, Smartphone, XCircle, ShieldCheck } from 'lucide-react';
 import { MicrosoftLoadingDots } from './MicrosoftLoadingDots';
 
+import type {  TrustedDevice  } from '../models/types';
+
 // Mocks the TrustedDeviceResource array from GET /api/settings/devices
-const MOCK_DEVICES = [
+const MOCK_DEVICES: TrustedDevice[] = [
   {
     id: 1,
     name: 'Windows PC',
@@ -31,7 +33,7 @@ const MOCK_DEVICES = [
 ];
 
 export const SettingsScreen: React.FC = () => {
-  const [devices, setDevices] = useState(MOCK_DEVICES);
+  const [devices, setDevices] = useState<TrustedDevice[]>(MOCK_DEVICES);
   const [loadingId, setLoadingId] = useState<number | null>(null);
 
   // Simulates DELETE /api/settings/devices/{device}

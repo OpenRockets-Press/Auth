@@ -5,6 +5,7 @@ import { MicrosoftLoadingDots } from './MicrosoftLoadingDots';
 import logoPath from '../assets/openrocketsvc1.png';
 import libertyBg from '../assets/wp-content/statue_of_liberty_new_york_monument_manhattan_liberty_statue_skyline_usa-986669.png';
 import museumBg from '../assets/wp-content/American_Museum_of_Natural_History_New_York_us_non-editorial_bpxph4.png';
+import type {  User, App, Scope  } from '../models/types';
 
 // Background images and their extracted ambient colors + locations
 const BACKGROUNDS = [
@@ -72,7 +73,20 @@ const CheckIcon = () => (
   </svg>
 );
 
-export const OAuthConsentScreen: React.FC = () => {
+interface OAuthConsentProps {
+  user: User;
+  app: App;
+  requestedScopes: Scope[];
+}
+
+export const OAuthConsentScreen: React.FC<OAuthConsentProps> = ({
+  user = { id: 1, name: "John Doe", email: "john.doe@example.com", status: 'active', created_at: '2026-06-15', updated_at: '2026-06-15' } as User,
+  app = { id: 1, client_id: 'c1', name: "Auth System Sandbox", description: null, status: 'verified' } as App,
+  requestedScopes = [
+    { id: 'profile', description: 'View your basic profile (Allows the app to see your name, email, and avatar.)' },
+    { id: 'email', description: 'Access your email address (Allows the app to communicate with you.)' }
+  ]
+}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
@@ -120,36 +134,34 @@ export const OAuthConsentScreen: React.FC = () => {
         <h1 className="ms-title">Let this app access your info?</h1>
 
         <div className="ms-user-badge">
-          <div className="ms-avatar">JD</div>
+          <div className="ms-avatar">{user.name.substring(0, 2).toUpperCase()}</div>
           <div className="ms-user-info">
-            <span className="ms-user-name">John Doe</span>
-            <span className="ms-user-email">john.doe@example.com</span>
+            <span className="ms-user-name">{user.name}</span>
+            <span className="ms-user-email">{user.email}</span>
           </div>
         </div>
 
         <p className="ms-description">
-          <strong>Auth System Sandbox</strong> needs your permission to:
+          <strong>{app.name}</strong> needs your permission to:
         </p>
 
         <ul className="ms-scope-list">
-          <li className="ms-scope-item">
-            <div className="ms-verified-tick">
-              <CheckIcon />
-            </div>
-            <div>
-              <strong>View your basic profile</strong>
-              <div style={{ color: 'var(--ms-text-secondary)' }}>Allows the app to see your name, email, and avatar.</div>
-            </div>
-          </li>
-          <li className="ms-scope-item">
-            <div className="ms-verified-tick">
-              <CheckIcon />
-            </div>
-            <div>
-              <strong>Access your email address</strong>
-              <div style={{ color: 'var(--ms-text-secondary)' }}>Allows the app to communicate with you.</div>
-            </div>
-          </li>
+          {requestedScopes.map(scope => {
+            const parts = scope.description.split('(');
+            const title = parts[0].trim();
+            const desc = parts[1] ? parts[1].replace(')', '').trim() : '';
+            return (
+              <li className="ms-scope-item" key={scope.id}>
+                <div className="ms-verified-tick">
+                  <CheckIcon />
+                </div>
+                <div>
+                  <strong>{title}</strong>
+                  {desc && <div style={{ color: 'var(--ms-text-secondary)' }}>{desc}</div>}
+                </div>
+              </li>
+            );
+          })}
         </ul>
 
         <p className="ms-description" style={{ fontSize: '13px', color: 'var(--ms-text-secondary)', marginBottom: '32px' }}>

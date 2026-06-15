@@ -3,21 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, Shield, Globe, Users, Activity } from 'lucide-react';
 import { MicrosoftLoadingDots } from '../MicrosoftLoadingDots';
 
-// Mock interface based on AppResource backend
-interface OAuthApp {
-  id: number;
-  client_id: string;
-  name: string;
-  description: string | null;
-  status: string;
-  is_system: boolean;
-  homepage_url: string | null;
-  created_at: string;
-}
+import type {  App  } from '../../models/types';
 
 export const DeveloperAppsScreen: React.FC = () => {
   const navigate = useNavigate();
-  const [apps, setApps] = useState<OAuthApp[]>([]);
+  const [apps, setApps] = useState<App[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -26,13 +16,21 @@ export const DeveloperAppsScreen: React.FC = () => {
       setApps([
         {
           id: 1,
+          owner_id: 1,
           client_id: '12345-abcde',
           name: 'My Custom Integration',
           description: 'Used for sinking data between our ERP and DataHub.',
           status: 'verified',
           is_system: false,
+          redirect_uris: [],
           homepage_url: 'https://my-erp-integration.com',
-          created_at: '2026-05-20T10:00:00Z'
+          privacy_policy_url: null,
+          terms_url: null,
+          category: null,
+          verified_at: '2026-05-20T10:00:00Z',
+          suspended_at: null,
+          created_at: '2026-05-20T10:00:00Z',
+          updated_at: '2026-05-20T10:00:00Z'
         }
       ]);
       setIsLoading(false);

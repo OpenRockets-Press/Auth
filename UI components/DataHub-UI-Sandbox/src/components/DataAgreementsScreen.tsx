@@ -2,22 +2,28 @@ import React, { useState } from 'react';
 import { Database, ShieldAlert, XCircle } from 'lucide-react';
 import { MicrosoftLoadingDots } from './MicrosoftLoadingDots';
 
+import type {  DataSharingAgreement  } from '../models/types';
+
 // Mocks the DataSharingAgreementResource array
-const MOCK_AGREEMENTS = [
+const MOCK_AGREEMENTS: DataSharingAgreement[] = [
   {
     id: 1,
-    source_app: { name: 'Telemetry Dashboard', publisher: 'SpaceY Data' },
-    target_app: { name: 'OpenRockets Community', publisher: 'OpenRockets Inc.' },
+    source_app_id: 2,
+    target_app_id: 1,
+    source_app: { id: 2, owner_id: 2, client_id: 'c2', name: 'Telemetry Dashboard', description: null, icon_url: null, status: 'verified', is_system: false, redirect_uris: [], homepage_url: null, privacy_policy_url: null, terms_url: null, category: null, verified_at: null, suspended_at: null, created_at: '2026-06-15T10:00:00Z', updated_at: '2026-06-15T10:00:00Z', owner: { id: 2, name: 'SpaceY Data', email: 'admin@spacey.com', status: 'active', failed_login_attempts: 0, login_method: null, last_login_at: null, locked_until: null, created_at: '2026-06-15T10:00:00Z', updated_at: '2026-06-15T10:00:00Z' } },
+    target_app: { id: 1, owner_id: 1, client_id: 'c1', name: 'OpenRockets Community', description: null, icon_url: null, status: 'verified', is_system: false, redirect_uris: [], homepage_url: null, privacy_policy_url: null, terms_url: null, category: null, verified_at: null, suspended_at: null, created_at: '2026-06-15T10:00:00Z', updated_at: '2026-06-15T10:00:00Z', owner: { id: 1, name: 'OpenRockets Inc.', email: 'admin@openrockets.com', status: 'active', failed_login_attempts: 0, login_method: null, last_login_at: null, locked_until: null, created_at: '2026-06-15T10:00:00Z', updated_at: '2026-06-15T10:00:00Z' } },
     scopes: ['read_profile', 'read_telemetry'],
-    created_at: '2026-06-01',
+    created_at: '2026-06-01T10:00:00Z',
     status: 'active'
   },
   {
     id: 2,
-    source_app: { name: 'HR Portal', publisher: 'Internal Tools' },
-    target_app: { name: 'OpenRockets Community', publisher: 'OpenRockets Inc.' },
+    source_app_id: 3,
+    target_app_id: 1,
+    source_app: { id: 3, owner_id: 3, client_id: 'c3', name: 'HR Portal', description: null, icon_url: null, status: 'verified', is_system: true, redirect_uris: [], homepage_url: null, privacy_policy_url: null, terms_url: null, category: null, verified_at: null, suspended_at: null, created_at: '2026-06-15T10:00:00Z', updated_at: '2026-06-15T10:00:00Z', owner: { id: 3, name: 'Internal Tools', email: 'hr@openrockets.com', status: 'active', failed_login_attempts: 0, login_method: null, last_login_at: null, locked_until: null, created_at: '2026-06-15T10:00:00Z', updated_at: '2026-06-15T10:00:00Z' } },
+    target_app: { id: 1, owner_id: 1, client_id: 'c1', name: 'OpenRockets Community', description: null, icon_url: null, status: 'verified', is_system: false, redirect_uris: [], homepage_url: null, privacy_policy_url: null, terms_url: null, category: null, verified_at: null, suspended_at: null, created_at: '2026-06-15T10:00:00Z', updated_at: '2026-06-15T10:00:00Z', owner: { id: 1, name: 'OpenRockets Inc.', email: 'admin@openrockets.com', status: 'active', failed_login_attempts: 0, login_method: null, last_login_at: null, locked_until: null, created_at: '2026-06-15T10:00:00Z', updated_at: '2026-06-15T10:00:00Z' } },
     scopes: ['read_profile'],
-    created_at: '2026-05-15',
+    created_at: '2026-05-15T10:00:00Z',
     status: 'active'
   }
 ];
@@ -75,9 +81,9 @@ export const DataAgreementsScreen: React.FC = () => {
                 
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    <span style={{ fontWeight: '500', color: '#ffffff', fontSize: '16px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{agreement.source_app.name}</span>
+                    <span style={{ fontWeight: '500', color: '#ffffff', fontSize: '16px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{agreement.source_app?.name}</span>
                     <span style={{ color: '#ffffff', fontSize: '14px', flexShrink: 0 }}>→</span>
-                    <span style={{ fontWeight: '500', color: '#ffffff', fontSize: '16px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{agreement.target_app.name}</span>
+                    <span style={{ fontWeight: '500', color: '#ffffff', fontSize: '16px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{agreement.target_app?.name}</span>
                   </div>
                   
                   <div style={{ fontSize: '14px', color: '#ffffff', marginBottom: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>

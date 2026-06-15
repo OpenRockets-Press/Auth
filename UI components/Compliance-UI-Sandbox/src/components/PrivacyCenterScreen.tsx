@@ -5,17 +5,14 @@ import { AmbientBackground } from './AmbientBackground';
 // Import assets
 import logoPath from '../assets/openrocketsvc1.png';
 
-interface UserProfile {
-  name: string;
-  email: string;
-}
+import type {  User  } from '../models/types';
 
 interface PrivacyCenterProps {
-  user: UserProfile;
+  user: User;
 }
 
 export const PrivacyCenterScreen: React.FC<PrivacyCenterProps> = ({ 
-  user = { name: "John Doe", email: "john.doe@example.com" }
+  user = { id: 1, name: "John Doe", email: "john.doe@example.com", status: 'active', created_at: '2026-06-15', updated_at: '2026-06-15' } as User
 }) => {
   const [status, setStatus] = useState<'idle' | 'loading_export' | 'loading_delete' | 'success_export' | 'error'>('idle');
 

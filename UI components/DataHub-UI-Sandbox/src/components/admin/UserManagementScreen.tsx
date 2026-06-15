@@ -2,15 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, MoreVertical, Lock, Unlock, Eye, ShieldAlert } from 'lucide-react';
 import { MicrosoftLoadingDots } from '../MicrosoftLoadingDots';
 
-// Mock Interfaces
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  status: 'active' | 'suspended';
-  locked_until: string | null;
-  created_at: string;
-}
+import type {  User  } from '../../models/types';
 
 export const UserManagementScreen: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -25,9 +17,9 @@ export const UserManagementScreen: React.FC = () => {
     // Mock API Fetch
     setTimeout(() => {
       setUsers([
-        { id: 1, name: 'Alice Smith', email: 'alice@example.com', status: 'active', locked_until: null, created_at: '2025-01-10T10:00:00Z' },
-        { id: 2, name: 'Bob Jones', email: 'bob@example.com', status: 'suspended', locked_until: null, created_at: '2025-02-14T10:00:00Z' },
-        { id: 3, name: 'Charlie Brown', email: 'charlie@example.com', status: 'active', locked_until: '2026-06-20T10:00:00Z', created_at: '2026-01-10T10:00:00Z' },
+        { id: 1, name: 'Alice Smith', email: 'alice@example.com', status: 'active', failed_login_attempts: 0, login_method: null, last_login_at: null, updated_at: '2025-01-10T10:00:00Z', locked_until: null, created_at: '2025-01-10T10:00:00Z' },
+        { id: 2, name: 'Bob Jones', email: 'bob@example.com', status: 'suspended', failed_login_attempts: 0, login_method: null, last_login_at: null, updated_at: '2025-02-14T10:00:00Z', locked_until: null, created_at: '2025-02-14T10:00:00Z' },
+        { id: 3, name: 'Charlie Brown', email: 'charlie@example.com', status: 'active', failed_login_attempts: 0, login_method: null, last_login_at: null, updated_at: '2026-06-20T10:00:00Z', locked_until: '2026-06-20T10:00:00Z', created_at: '2026-01-10T10:00:00Z' },
       ]);
       setIsLoading(false);
     }, 800);

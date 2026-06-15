@@ -2,17 +2,19 @@ import React, { useState } from 'react';
 import { Shield, ChevronRight, Key, Search } from 'lucide-react';
 import { MicrosoftLoadingDots } from './MicrosoftLoadingDots';
 
+import type {  App, UserDataStore  } from '../models/types';
+
 // Mock data based on Laravel's expected App model and DataHub data
-const MOCK_APPS = [
-  { id: 'app_1', name: 'OpenRockets Community', publisher: 'OpenRockets Inc.', lastActive: '2 hours ago', iconColor: '#0067b8' },
-  { id: 'app_2', name: 'Telemetry Dashboard', publisher: 'SpaceY Data', lastActive: 'Yesterday', iconColor: '#107c10' },
-  { id: 'app_3', name: 'HR Portal', publisher: 'Internal Tools', lastActive: '3 days ago', iconColor: '#d13438' },
+const MOCK_APPS: App[] = [
+  { id: 1, owner_id: 1, client_id: 'c1', name: 'OpenRockets Community', description: null, icon_url: null, status: 'verified', is_system: false, redirect_uris: [], homepage_url: null, privacy_policy_url: null, terms_url: null, category: null, verified_at: null, suspended_at: null, created_at: '2026-06-15T10:00:00Z', updated_at: '2026-06-15T10:00:00Z', owner: { id: 1, name: 'OpenRockets Inc.', email: 'admin@openrockets.com', status: 'active', failed_login_attempts: 0, login_method: null, last_login_at: null, locked_until: null, created_at: '2026-06-15T10:00:00Z', updated_at: '2026-06-15T10:00:00Z' } },
+  { id: 2, owner_id: 2, client_id: 'c2', name: 'Telemetry Dashboard', description: null, icon_url: null, status: 'verified', is_system: false, redirect_uris: [], homepage_url: null, privacy_policy_url: null, terms_url: null, category: null, verified_at: null, suspended_at: null, created_at: '2026-06-15T10:00:00Z', updated_at: '2026-06-15T10:00:00Z', owner: { id: 2, name: 'SpaceY Data', email: 'admin@spacey.com', status: 'active', failed_login_attempts: 0, login_method: null, last_login_at: null, locked_until: null, created_at: '2026-06-15T10:00:00Z', updated_at: '2026-06-15T10:00:00Z' } },
+  { id: 3, owner_id: 3, client_id: 'c3', name: 'HR Portal', description: null, icon_url: null, status: 'verified', is_system: true, redirect_uris: [], homepage_url: null, privacy_policy_url: null, terms_url: null, category: null, verified_at: null, suspended_at: null, created_at: '2026-06-15T10:00:00Z', updated_at: '2026-06-15T10:00:00Z', owner: { id: 3, name: 'Internal Tools', email: 'hr@openrockets.com', status: 'active', failed_login_attempts: 0, login_method: null, last_login_at: null, locked_until: null, created_at: '2026-06-15T10:00:00Z', updated_at: '2026-06-15T10:00:00Z' } },
 ];
 
 export const ConnectedAppsScreen: React.FC = () => {
-  const [selectedApp, setSelectedApp] = useState<any>(null);
+  const [selectedApp, setSelectedApp] = useState<App | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [appData, setAppData] = useState<any[]>([]);
+  const [appData, setAppData] = useState<UserDataStore[]>([]);
   const [deletingKey, setDeletingKey] = useState<string | null>(null);
 
   const handleDelete = (key: string) => {
@@ -24,15 +26,15 @@ export const ConnectedAppsScreen: React.FC = () => {
   };
 
   // Simulates GET /api/data-hub/{app}/data
-  const handleAppClick = (app: any) => {
+  const handleAppClick = (app: App) => {
     setIsLoading(true);
     setSelectedApp(app);
     
     setTimeout(() => {
       // Mocked key-value data stored by the app in the Data Hub
       setAppData([
-        { key: 'theme_preference', value: 'dark', updated_at: '2026-06-12 10:00:00' },
-        { key: 'dashboard_layout', value: '{"panels":["telemetry","alerts"]}', updated_at: '2026-06-10 15:30:00' }
+        { id: 1, user_id: 1, app_id: app.id, key: 'theme_preference', value: 'dark', updated_at: '2026-06-12T10:00:00Z' },
+        { id: 2, user_id: 1, app_id: app.id, key: 'dashboard_layout', value: '{"panels":["telemetry","alerts"]}', updated_at: '2026-06-10T15:30:00Z' }
       ]);
       setIsLoading(false);
     }, 1000);
@@ -47,7 +49,7 @@ export const ConnectedAppsScreen: React.FC = () => {
           </div>
           <div>
             <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '600', color: 'var(--ms-text)' }}>{selectedApp.name}</h1>
-            <div style={{ fontSize: '13px', color: 'var(--ms-text-secondary)' }}>Publisher: {selectedApp.publisher}</div>
+            <div style={{ fontSize: '13px', color: 'var(--ms-text-secondary)' }}>Publisher: {selectedApp.owner?.name}</div>
           </div>
         </div>
 
@@ -184,7 +186,7 @@ export const ConnectedAppsScreen: React.FC = () => {
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <h3 style={{ margin: '0 0 4px 0', fontSize: '16px', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{app.name}</h3>
-              <div style={{ fontSize: '14px', color: '#ffffff' }}>{app.publisher}</div>
+              <div style={{ fontSize: '14px', color: '#ffffff' }}>{app.owner?.name}</div>
             </div>
             <ChevronRight color="#ffffff" />
           </div>

@@ -2,17 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Search, Shield, CheckCircle, XCircle, PauseCircle } from 'lucide-react';
 import { MicrosoftLoadingDots } from '../MicrosoftLoadingDots';
 
-// Mock Interfaces
-interface AppModel {
-  id: number;
-  name: string;
-  owner: { name: string; email: string };
-  status: 'verified' | 'pending' | 'suspended' | 'rejected';
-  created_at: string;
-}
+import type {  App  } from '../../models/types';
 
 export const AppModerationScreen: React.FC = () => {
-  const [apps, setApps] = useState<AppModel[]>([]);
+  const [apps, setApps] = useState<App[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
 
@@ -20,9 +13,9 @@ export const AppModerationScreen: React.FC = () => {
     // Mock API Fetch
     setTimeout(() => {
       setApps([
-        { id: 1, name: 'ERP Sync Tool', owner: { name: 'Alice Smith', email: 'alice@example.com' }, status: 'verified', created_at: '2026-05-10T10:00:00Z' },
-        { id: 2, name: 'Sketchy Data Miner', owner: { name: 'Bad Actor', email: 'bad@example.com' }, status: 'pending', created_at: '2026-06-12T10:00:00Z' },
-        { id: 3, name: 'Old Integration', owner: { name: 'Charlie', email: 'charlie@example.com' }, status: 'suspended', created_at: '2025-01-10T10:00:00Z' },
+        { id: 1, owner_id: 1, client_id: "c_1", description: null, icon_url: null, is_system: false, redirect_uris: [], homepage_url: null, privacy_policy_url: null, terms_url: null, category: null, verified_at: '2026-05-10T10:00:00Z', suspended_at: null, updated_at: '2026-05-10T10:00:00Z', name: 'ERP Sync Tool', owner: { id: 1, name: 'Alice Smith', email: 'alice@example.com', status: 'active', failed_login_attempts: 0, login_method: null, last_login_at: null, locked_until: null, created_at: '2025-01-10T10:00:00Z', updated_at: '2025-01-10T10:00:00Z' }, status: 'verified', created_at: '2026-05-10T10:00:00Z' },
+        { id: 2, owner_id: 2, client_id: "c_2", description: null, icon_url: null, is_system: false, redirect_uris: [], homepage_url: null, privacy_policy_url: null, terms_url: null, category: null, verified_at: null, suspended_at: null, updated_at: '2026-06-12T10:00:00Z', name: 'Sketchy Data Miner', owner: { id: 2, name: 'Bad Actor', email: 'bad@example.com', status: 'active', failed_login_attempts: 0, login_method: null, last_login_at: null, locked_until: null, created_at: '2025-01-10T10:00:00Z', updated_at: '2025-01-10T10:00:00Z' }, status: 'development', created_at: '2026-06-12T10:00:00Z' },
+        { id: 3, owner_id: 3, client_id: "c_3", description: null, icon_url: null, is_system: false, redirect_uris: [], homepage_url: null, privacy_policy_url: null, terms_url: null, category: null, verified_at: null, suspended_at: '2025-01-10T10:00:00Z', updated_at: '2025-01-10T10:00:00Z', name: 'Old Integration', owner: { id: 3, name: 'Charlie', email: 'charlie@example.com', status: 'active', failed_login_attempts: 0, login_method: null, last_login_at: null, locked_until: null, created_at: '2025-01-10T10:00:00Z', updated_at: '2025-01-10T10:00:00Z' }, status: 'suspended', created_at: '2025-01-10T10:00:00Z' },
       ]);
       setIsLoading(false);
     }, 800);
@@ -30,7 +23,7 @@ export const AppModerationScreen: React.FC = () => {
 
   const filteredApps = apps.filter(a => 
     a.name.toLowerCase().includes(search.toLowerCase()) || 
-    a.owner.email.toLowerCase().includes(search.toLowerCase())
+    (a.owner?.email || '').toLowerCase().includes(search.toLowerCase())
   );
 
   const getStatusColor = (status: string) => {
@@ -94,8 +87,8 @@ export const AppModerationScreen: React.FC = () => {
                     </div>
                   </td>
                   <td style={{ padding: '16px 24px' }}>
-                    <div style={{ fontWeight: '500', fontSize: '14px' }}>{app.owner.name}</div>
-                    <div style={{ fontSize: '13px', opacity: 0.6 }}>{app.owner.email}</div>
+                    <div style={{ fontWeight: '500', fontSize: '14px' }}>{app.owner?.name}</div>
+                    <div style={{ fontSize: '13px', opacity: 0.6 }}>{app.owner?.email}</div>
                   </td>
                   <td style={{ padding: '16px 24px' }}>
                     <span style={{ 

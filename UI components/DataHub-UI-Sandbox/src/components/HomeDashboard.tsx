@@ -2,8 +2,26 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Network, Database, Shield, Search, ArrowRight, Terminal, Lock } from 'lucide-react';
 import { MicrosoftLoadingDots } from './MicrosoftLoadingDots';
+import type {  User  } from '../models/types';
 
-export const HomeDashboard: React.FC = () => {
+interface HomeDashboardProps {
+  user?: User;
+}
+
+const mockUser: User = {
+  id: 1,
+  name: "R.K de Silva",
+  email: "enterprise@openrockets.com",
+  status: "active",
+  last_login_at: new Date().toISOString(),
+  login_method: "password",
+  failed_login_attempts: 0,
+  locked_until: null,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString()
+};
+
+export const HomeDashboard: React.FC<HomeDashboardProps> = ({ user = mockUser }) => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -36,11 +54,11 @@ export const HomeDashboard: React.FC = () => {
             fontWeight: '400',
             fontSize: '36px'
           }}>
-            R
+            {user.name.charAt(0).toUpperCase()}
           </div>
         </div>
-        <h1 style={{ margin: '0 0 4px 0', fontSize: '24px', fontWeight: '400', color: '#ffffff' }}>R.K de Silva</h1>
-        <div style={{ fontSize: '14px', color: '#ffffff' }}>enterprise@openrockets.com</div>
+        <h1 style={{ margin: '0 0 4px 0', fontSize: '24px', fontWeight: '400', color: '#ffffff' }}>{user.name}</h1>
+        <div style={{ fontSize: '14px', color: '#ffffff' }}>{user.email}</div>
       </div>
 
       {/* Search Bar */}

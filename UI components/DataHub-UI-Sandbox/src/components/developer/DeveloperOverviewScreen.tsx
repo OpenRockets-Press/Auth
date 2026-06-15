@@ -3,14 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { LayoutDashboard, AppWindow, Users, Activity, Plus } from 'lucide-react';
 import { MicrosoftLoadingDots } from '../MicrosoftLoadingDots';
 
-// Mock Interface
-interface DeveloperStats {
-  total_apps: number;
-  total_consents: number;
-  total_api_requests: number;
-  active_webhooks: number;
-  recent_activity: { id: number, action: string, date: string, app: string }[];
-}
+import type {  DeveloperStats  } from '../../models/types';
 
 export const DeveloperOverviewScreen: React.FC = () => {
   const navigate = useNavigate();

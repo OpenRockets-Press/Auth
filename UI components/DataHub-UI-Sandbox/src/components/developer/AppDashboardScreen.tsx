@@ -6,22 +6,13 @@ import {
 } from 'lucide-react';
 import { MicrosoftLoadingDots } from '../MicrosoftLoadingDots';
 
-// Mock interface for App data
-interface AppDetails {
-  id: number;
-  client_id: string;
-  name: string;
-  description: string;
-  status: string;
-  redirect_uris: string[];
-  created_at: string;
-}
+import type {  App  } from '../../models/types';
 
 export const AppDashboardScreen: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
-  const [app, setApp] = useState<AppDetails | null>(null);
+  const [app, setApp] = useState<App | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [copiedId, setCopiedId] = useState(false);
 
@@ -30,12 +21,21 @@ export const AppDashboardScreen: React.FC = () => {
     setTimeout(() => {
       setApp({
         id: Number(id) || 1,
+        owner_id: 1,
         client_id: '12345-abcde-67890-fghij',
         name: 'My Custom Integration',
         description: 'Used for sinking data between our ERP and DataHub.',
         status: 'verified',
+        is_system: false,
         redirect_uris: ['https://my-erp-integration.com/callback'],
-        created_at: '2026-05-20T10:00:00Z'
+        homepage_url: null,
+        privacy_policy_url: null,
+        terms_url: null,
+        category: null,
+        verified_at: '2026-05-20T10:00:00Z',
+        suspended_at: null,
+        created_at: '2026-05-20T10:00:00Z',
+        updated_at: '2026-05-20T10:00:00Z'
       });
       setIsLoading(false);
     }, 800);
@@ -174,7 +174,7 @@ export const AppDashboardScreen: React.FC = () => {
 
 // Sub-components for Tabs
 
-const OverviewTab: React.FC<{ app: AppDetails }> = ({ app }) => {
+const OverviewTab: React.FC<{ app: App }> = ({ app }) => {
   return (
     <div>
       <h2 style={{ margin: '0 0 24px 0', fontSize: '20px', fontWeight: '500' }}>Analytics Overview</h2>
@@ -203,7 +203,7 @@ const OverviewTab: React.FC<{ app: AppDetails }> = ({ app }) => {
   );
 };
 
-const SettingsTab: React.FC<{ app: AppDetails }> = ({ app }) => {
+const SettingsTab: React.FC<{ app: App }> = ({ app }) => {
   return (
     <div>
       <h2 style={{ margin: '0 0 24px 0', fontSize: '20px', fontWeight: '500' }}>Application Settings</h2>
@@ -233,7 +233,7 @@ const SettingsTab: React.FC<{ app: AppDetails }> = ({ app }) => {
   );
 };
 
-const WebhooksTab: React.FC<{ app: AppDetails }> = ({ app }) => {
+const WebhooksTab: React.FC<{ app: App }> = ({ app }) => {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
@@ -251,7 +251,7 @@ const WebhooksTab: React.FC<{ app: AppDetails }> = ({ app }) => {
   );
 };
 
-const ConsentsTab: React.FC<{ app: AppDetails }> = ({ app }) => {
+const ConsentsTab: React.FC<{ app: App }> = ({ app }) => {
   return (
     <div>
       <h2 style={{ margin: '0 0 24px 0', fontSize: '20px', fontWeight: '500' }}>Active Consents</h2>
@@ -279,7 +279,7 @@ const ConsentsTab: React.FC<{ app: AppDetails }> = ({ app }) => {
   );
 };
 
-const DangerTab: React.FC<{ app: AppDetails }> = ({ app }) => {
+const DangerTab: React.FC<{ app: App }> = ({ app }) => {
   return (
     <div>
       <h2 style={{ margin: '0 0 24px 0', fontSize: '20px', fontWeight: '500', color: '#ff4444' }}>Danger Zone</h2>
