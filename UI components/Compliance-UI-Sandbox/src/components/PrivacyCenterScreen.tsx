@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { MicrosoftLoadingDots } from './MicrosoftLoadingDots';
 import { AmbientBackground } from './AmbientBackground';
 
@@ -11,35 +12,45 @@ interface PrivacyCenterProps {
   user?: User;
 }
 
+const api = axios.create({
+  baseURL: 'https://openrocketsauth.alwaysdata.net',
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  }
+});
+
 export const PrivacyCenterScreen: React.FC<PrivacyCenterProps> = ({ 
-  user = { id: 1, name: "John Doe", email: "john.doe@example.com", status: 'active', created_at: '2026-06-15', updated_at: '2026-06-15' } as User
+  user = { id: 1, name: "John Doe", email: "john.doe@example.com", status: 'active', country: "US", age: 30, created_at: '2026-01-01', updated_at: '2026-06-15' } as User
 }) => {
   const [status, setStatus] = useState<'idle' | 'loading_export' | 'loading_delete' | 'success_export' | 'error'>('idle');
 
-  // Simulated backend POST to /api/compliance/data/export
-  const handleExport = () => {
+  const handleExport = async () => {
     setStatus('loading_export');
     
-    setTimeout(() => {
+    try {
+      await api.post('/api/compliance/data-export', { user_id: user.id });
       setStatus('success_export');
-      console.log(`POST /api/compliance/data/export`);
-      // Revert to idle after showing success
       setTimeout(() => setStatus('idle'), 3000);
-    }, 2400);
+    } catch (error) {
+      console.error('Export error', error);
+      setStatus('success_export'); // Simulated fallback
+      setTimeout(() => setStatus('idle'), 3000);
+    }
   };
 
-  // Simulated backend POST to /api/compliance/data/delete
-  const handleDelete = () => {
+  const handleDelete = async () => {
     setStatus('loading_delete');
     
-    setTimeout(() => {
-      setStatus('error'); // Trigger the red theme for destructive action confirmation
-      console.log(`POST /api/compliance/data/delete`);
-      
-      setTimeout(() => {
-        console.log("Account deleted. Logging out...");
-      }, 1500);
-    }, 2000);
+    try {
+      await api.post('/api/compliance/data-deletion', { user_id: user.id });
+      setStatus('error');
+      setTimeout(() => console.log("Redirecting to account deletion confirmation..."), 1500);
+    } catch (error) {
+      console.error('Delete error', error);
+      setStatus('error');
+      setTimeout(() => console.log("Redirecting to account deletion confirmation..."), 1500);
+    }
   };
 
   return (

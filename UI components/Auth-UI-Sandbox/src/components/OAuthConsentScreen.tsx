@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { MicrosoftLoadingDots } from './MicrosoftLoadingDots';
 
 // Import assets
@@ -77,7 +78,16 @@ interface OAuthConsentProps {
   user?: User;
   app?: App;
   requestedScopes?: Scope[];
+  redirectUri?: string;
 }
+
+const api = axios.create({
+  baseURL: 'https://openrocketsauth.alwaysdata.net',
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  }
+});
 
 export const OAuthConsentScreen: React.FC<OAuthConsentProps> = ({
   user = { id: 1, name: "John Doe", email: "john.doe@example.com", status: 'active', created_at: '2026-06-15', updated_at: '2026-06-15' } as User,
@@ -85,33 +95,33 @@ export const OAuthConsentScreen: React.FC<OAuthConsentProps> = ({
   requestedScopes = [
     { id: 'profile', description: 'View your basic profile (Allows the app to see your name, email, and avatar.)' },
     { id: 'email', description: 'Access your email address (Allows the app to communicate with you.)' }
-  ]
+  ],
+  redirectUri = 'https://community.openrockets.com/callback'
 }) => {
-  const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
-  // Simulated accept action
-  const handleAccept = () => {
-    setIsLoading(true);
+  const handleAction = async (action: 'authorize' | 'cancel') => {
     setStatus('loading');
     
-    // Simulating authorization logic (50% chance to fail for sandbox demonstration)
-    setTimeout(() => {
-      const isSuccess = Math.random() > 0.5;
-      
-      if (isSuccess) {
-        setStatus('success');
-        console.log("Authorization successful. Redirecting...");
-      } else {
+    try {
+      if (action === 'cancel') {
         setStatus('error');
-        console.log("Authorization failed. Transitioning UI to error state...");
-        
-        // Wait 1.5 seconds for the user to see the morphing red animation before redirecting
-        setTimeout(() => {
-          console.log("Redirecting back to app with error=access_denied...");
-        }, 1500);
+        setTimeout(() => console.log("Redirecting back to app with access_denied..."), 1500);
+      } else {
+        await api.post('/api/oauth/authorize/consent', {
+          client_id: app.client_id,
+          scopes: requestedScopes.map(s => s.id),
+          redirect_uri: redirectUri,
+          action: 'approve'
+        });
+        setStatus('success');
       }
-    }, 2000);
+    } catch (error) {
+      console.error('OAuth Consent API Error:', error);
+      setStatus('error');
+      // Simulated fallback for sandbox UI test if backend is unavailable
+      setTimeout(() => setStatus('idle'), 2000);
+    }
   };
 
   return (
@@ -120,7 +130,7 @@ export const OAuthConsentScreen: React.FC<OAuthConsentProps> = ({
       
       <div className={`ms-card ${status === 'error' ? 'theme-error' : ''}`} style={{ position: 'relative', overflow: 'hidden' }}>
         {/* Absolute positioned loader overlay at the top of the card */}
-        {isLoading && (
+        {status === 'loading' && (
           <div className="ms-loader-overlay">
             <MicrosoftLoadingDots />
           </div>
@@ -171,15 +181,15 @@ export const OAuthConsentScreen: React.FC<OAuthConsentProps> = ({
         <div className="ms-button-group">
           <button 
             className="ms-button ms-button-secondary"
-            onClick={() => console.log("Redirecting back...")}
-            disabled={isLoading}
+            onClick={() => handleAction('cancel')}
+            disabled={status !== 'idle'}
           >
             Go Back
           </button>
           <button 
             className="ms-button ms-button-primary"
-            onClick={handleAccept}
-            disabled={isLoading}
+            onClick={() => handleAction('authorize')}
+            disabled={status !== 'idle'}
           >
             Next
           </button>

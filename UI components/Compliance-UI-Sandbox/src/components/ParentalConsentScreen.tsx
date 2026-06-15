@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { MicrosoftLoadingDots } from './MicrosoftLoadingDots';
 import { AmbientBackground } from './AmbientBackground';
 
@@ -12,31 +13,39 @@ interface ParentalConsentProps {
   token?: string;
 }
 
+const api = axios.create({
+  baseURL: 'https://openrocketsauth.alwaysdata.net',
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  }
+});
+
 export const ParentalConsentScreen: React.FC<ParentalConsentProps> = ({ 
   child = { id: 2, name: "Alice Doe", email: "alice.doe@example.com", status: 'pending_parental_consent', country: "US", age: 11, created_at: '2026-06-15', updated_at: '2026-06-15' } as User,
   token = "mock-token-abc"
 }) => {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
-  // Simulated backend POST to /api/consent/verify/{token} with { action: 'grant' | 'deny' }
-  const handleAction = (action: 'grant' | 'deny') => {
+  const handleAction = async (action: 'grant' | 'deny') => {
     setStatus('loading');
     
-    setTimeout(() => {
+    try {
+      await api.post(`/api/consent/verify/${token}`, { action });
       if (action === 'deny') {
         setStatus('error');
-        console.log(`POST /api/consent/verify/${token} { action: 'deny' }`);
-        
-        // Wait to show the red morphing effect, then redirect to a denied screen or relying app
         setTimeout(() => {
           console.log("Redirecting after deny...");
         }, 1500);
       } else {
         setStatus('success');
-        console.log(`POST /api/consent/verify/${token} { action: 'grant' }`);
-        // Simulate redirect to success completion
       }
-    }, 2000);
+    } catch (error) {
+      console.error('Consent API Error:', error);
+      setStatus('error');
+      // Simulated fallback for sandbox UI test if backend is unavailable
+      setTimeout(() => setStatus('idle'), 2000);
+    }
   };
 
   return (
