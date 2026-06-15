@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { MicrosoftLoadingDots } from './MicrosoftLoadingDots';
+import { AmbientBackground } from './AmbientBackground';
 
 // Import assets
 import logoPath from '../assets/openrocketsvc1.png';
@@ -63,6 +64,7 @@ export const OAuthConsentScreen: React.FC<OAuthConsentProps> = ({
 
   return (
     <>
+      <AmbientBackground />
       <div className={`ms-card ${status === 'error' ? 'theme-error' : ''} ${isInitialLoading ? 'is-loading-initial' : ''}`} style={{ position: 'relative' }}>
         {(status === 'loading' || isInitialLoading) && (
           <div className="ms-loader-overlay">
