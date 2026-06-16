@@ -15,14 +15,8 @@ class EnsureAdmin
             return response()->json(['message' => 'Unauthenticated.'], 401);
         }
 
-        $user = Auth::user();
-        if (! $user->isAdmin()) {
+        if (! Auth::user()->isAdmin()) {
             return response()->json(['message' => 'Admin access required.'], 403);
-        }
-
-        // Secondary strict domain check to prevent any non-employee from accessing
-        if (!str_ends_with($user->email, '@openrockets.com')) {
-            return response()->json(['message' => 'Admin access restricted to @openrockets.com domain.'], 403);
         }
 
         return $next($request);

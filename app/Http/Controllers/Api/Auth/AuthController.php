@@ -6,6 +6,9 @@ use App\Events\Security\UserLoggedIn;
 use App\Events\Security\UserLoggedOut;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Compliance\UserProfile;
+use App\Models\Compliance\ParentalConsent;
+use Illuminate\Auth\Events\Registered;
 use App\Services\AuditService;
 use App\Services\RiskAssessmentService;
 use Illuminate\Http\JsonResponse;
@@ -152,6 +155,72 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
             ],
+        ], 201);
+    }
+
+    public function registerWithConsent(Request $request): JsonResponse
+    {
+        $throttleKey = 'register_consent:'.$request->ip();
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            return response()->json(['message' => 'Too many attempts.'], 429);
+        }
+        RateLimiter::hit($throttleKey, 3600);
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'is_minor' => ['required', 'boolean'],
+            'parent_name' => ['required_if:is_minor,true', 'nullable', 'string', 'max:255'],
+            'parent_email' => ['required_if:is_minor,true', 'nullable', 'email'],
+            'signature' => ['required', 'string'],
+        ]);
+
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        UserProfile::create([
+            'user_id' => $user->id,
+            'parental_consent_required' => $validated['is_minor'],
+            'parental_consent_status' => $validated['is_minor'] ? 'granted' : null,
+            'onboarding_status' => 'completed',
+        ]);
+
+        if ($validated['is_minor']) {
+            ParentalConsent::create([
+                'user_id' => $user->id,
+                'parent_name' => $validated['parent_name'],
+                'parent_email' => $validated['parent_email'],
+                'consent_method' => 'digital_signature',
+                'consent_status' => 'granted',
+                'signature' => $validated['signature'],
+                'is_adult_self_consent' => false,
+                'ip_address' => $request->ip(),
+                'granted_at' => now(),
+            ]);
+        } else {
+            ParentalConsent::create([
+                'user_id' => $user->id,
+                'parent_name' => $validated['name'],
+                'parent_email' => $validated['email'],
+                'consent_method' => 'digital_signature',
+                'consent_status' => 'granted',
+                'signature' => $validated['signature'],
+                'is_adult_self_consent' => true,
+                'ip_address' => $request->ip(),
+                'granted_at' => now(),
+            ]);
+        }
+
+        event(new Registered($user));
+        $this->auditService->logRegistration($user);
+
+        return response()->json([
+            'message' => 'User registered successfully. Verification email sent.',
+            'user_id' => $user->id
         ], 201);
     }
 

@@ -17,14 +17,11 @@ import { UserManagementScreen } from './components/admin/UserManagementScreen';
 import { AppModerationScreen } from './components/admin/AppModerationScreen';
 import { ComplianceScreen } from './components/admin/ComplianceScreen';
 
-import { AuthProvider } from './contexts/AuthProvider';
-
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Main User Portal Routes */}
+    <BrowserRouter>
+      <Routes>
+        {/* Main User Portal Routes */}
         <Route path="/*" element={
           <AppLayout>
             <Routes>
@@ -68,9 +65,8 @@ function App() {
             </AdminLayout>
           </AppLayout>
         } />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+      </Routes>
+    </BrowserRouter>
   );
 }
 

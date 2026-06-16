@@ -4,9 +4,7 @@ import { ArrowLeft, Check, Copy, Plus, Trash2 } from 'lucide-react';
 import { MicrosoftLoadingDots } from '../MicrosoftLoadingDots';
 import axios from 'axios';
 
-import { useAuth } from '../../contexts/AuthProvider';
-
-// We won't use a global axios instance with default headers since we need the token from context
+// Create a custom axios instance pointing to the live backend
 const api = axios.create({
   baseURL: 'https://openrocketsauth.alwaysdata.net',
   headers: {
@@ -30,8 +28,6 @@ export const CreateAppScreen: React.FC = () => {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const { token } = useAuth();
 
   const handleUriChange = (index: number, value: string) => {
     const newUris = [...formData.redirect_uris];
@@ -79,11 +75,13 @@ export const CreateAppScreen: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate() || !token) return;
+    if (!validate()) return;
 
     setIsSubmitting(true);
     
     try {
+      // Send comma separated URIs or array depending on Laravel Passport requirement.
+      // Passport typically accepts comma-separated string for redirect
       const redirectUriString = formData.redirect_uris.filter(u => u.trim() !== '').join(',');
       
       const response = await api.post('/oauth/clients', {
@@ -91,8 +89,6 @@ export const CreateAppScreen: React.FC = () => {
         redirect: redirectUriString,
         description: formData.description,
         homepage_url: formData.homepage_url,
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
       });
 
       setSuccessData({

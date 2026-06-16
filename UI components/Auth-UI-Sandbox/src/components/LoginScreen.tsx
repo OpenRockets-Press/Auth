@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { MicrosoftLoadingDots } from './MicrosoftLoadingDots';
+import { useNavigate } from 'react-router-dom';
 import { AmbientBackground } from './AmbientBackground';
-import { Link, useSearchParams } from 'react-router-dom';
-
-// Import assets
 import logoPath from '../assets/openrocketsvc1.png';
 
 const api = axios.create({
@@ -16,134 +13,107 @@ const api = axios.create({
 });
 
 export const LoginScreen: React.FC = () => {
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
-  const [searchParams] = useSearchParams();
-
-  // Microsoft-style initial load stagger
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsInitialLoading(false);
-    }, 800);
-    return () => clearTimeout(timer);
-  }, []);
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('loading');
     setErrorMessage('');
-    
-    try {
-      const response = await api.post(`/api/auth/login`, { 
-        email,
-        password
-      });
-      
-      setStatus('success');
-      
-      // Store token safely (in production this could be secure HTTP-only cookie, but standard practice here is localStorage)
-      localStorage.setItem('openrockets_token', response.data.token);
-      
-      // Redirect back if origin is set
-      const redirectUri = searchParams.get('redirect_uri') || localStorage.getItem('redirect_uri');
-      
-      setTimeout(() => {
-        if (redirectUri) {
-          localStorage.removeItem('redirect_uri');
-          window.location.href = redirectUri;
-        } else {
-          // Fallback to OpenRockets main or DataHub
-          window.location.href = 'https://myaccount.openrockets.com';
-        }
-      }, 1500);
 
+    try {
+      const response = await api.post('/api/auth/login', { email, password });
+      setStatus('success');
+      // In a real flow, you'd store the token here, e.g., localStorage.setItem('token', response.data.access_token)
+      // Then redirect the user to the destination. For now, just simulating.
+      setTimeout(() => {
+        window.location.href = 'https://myaccount.openrockets.com';
+      }, 1000);
     } catch (error: any) {
-      console.error('Login API Error:', error);
+      console.error('Login Error:', error);
       setStatus('error');
-      setErrorMessage(error.response?.data?.message || 'Invalid email or password.');
-      setTimeout(() => setStatus('idle'), 3000);
+      setErrorMessage(error.response?.data?.message || 'Invalid credentials. Please try again.');
     }
   };
 
   return (
     <>
       <AmbientBackground />
-      <div className={`ms-card ${status === 'error' ? 'theme-error' : ''} ${isInitialLoading ? 'is-loading-initial' : ''}`} style={{ position: 'relative' }}>
-        {(status === 'loading' || isInitialLoading) && (
-          <div className="ms-loader-overlay">
-            <MicrosoftLoadingDots />
-          </div>
-        )}
-        
-        {status === 'success' && (
-          <div className="ms-loader-overlay" style={{ background: '#ffffff', bottom: 0, height: '100%', display: 'flex', zIndex: 20 }}>
-            <div className="ms-success-animation">
-              <svg viewBox="0 0 52 52" className="checkmark">
-                <circle className="checkmark-circle" fill="none" cx="26" cy="26" r="25" />
-                <path className="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
-              </svg>
-              <h2 className="ms-title" style={{ marginTop: '24px' }}>Welcome back!</h2>
-              <p className="ms-subtitle">Redirecting...</p>
-            </div>
-          </div>
-        )}
-
-        <div className="ms-card-content">
-          <div className="ms-header">
-            <img src={logoPath} alt="OpenRockets" className="ms-logo" />
-            <h1 className="ms-title">Sign in</h1>
-            <p className="ms-subtitle">to continue to OpenRockets</p>
-          </div>
-
-          <form onSubmit={handleLogin} className="ms-form" style={{ marginTop: '24px' }}>
-            <div className="ms-input-group">
-              <input 
-                type="email" 
-                className="ms-input" 
-                placeholder="Email, phone, or Skype" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={status === 'loading'}
-              />
-            </div>
-            
-            <div className="ms-input-group" style={{ marginTop: '12px' }}>
-              <input 
-                type="password" 
-                className="ms-input" 
-                placeholder="Password" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={status === 'loading'}
-              />
-            </div>
-
-            {errorMessage && (
-              <div className="ms-error-text" style={{ marginTop: '12px', color: '#e81123', fontSize: '14px' }}>
-                {errorMessage}
-              </div>
-            )}
-
-            <div className="ms-help-links" style={{ marginTop: '16px', fontSize: '13px' }}>
-              <p>No account? <Link to={`/register${searchParams.toString() ? '?' + searchParams.toString() : ''}`} className="ms-link">Create one!</Link></p>
-            </div>
-
-            <div className="ms-actions" style={{ marginTop: '32px' }}>
-              <button 
-                type="submit" 
-                className="ms-button primary"
-                disabled={status === 'loading'}
-              >
-                Next
-              </button>
-            </div>
-          </form>
+      <div className="ms-card" style={{ position: 'relative' }}>
+        <div className="ms-header">
+          <img src={logoPath} alt="OpenRockets Logo" className="ms-logo" />
+          <h2 className="ms-title">Sign in</h2>
+          <p className="ms-subtitle">to continue to OpenRockets</p>
         </div>
+
+        {status === 'error' && (
+          <div style={{ color: '#E81123', marginBottom: '16px', fontSize: '13px' }}>
+            {errorMessage}
+          </div>
+        )}
+
+        <form onSubmit={handleLogin} className="ms-content">
+          <div className="ms-info-box" style={{ background: 'transparent', padding: '0', border: 'none', marginBottom: '16px' }}>
+            <input
+              type="email"
+              className="ms-input"
+              placeholder="Email, phone, or Skype"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={status === 'loading' || status === 'success'}
+              style={{
+                width: '100%',
+                padding: '8px 0',
+                border: 'none',
+                borderBottom: '1px solid #8A8886',
+                outline: 'none',
+                fontSize: '15px',
+                marginBottom: '16px',
+                background: 'transparent'
+              }}
+            />
+            <input
+              type="password"
+              className="ms-input"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              disabled={status === 'loading' || status === 'success'}
+              style={{
+                width: '100%',
+                padding: '8px 0',
+                border: 'none',
+                borderBottom: '1px solid #8A8886',
+                outline: 'none',
+                fontSize: '15px',
+                marginBottom: '16px',
+                background: 'transparent'
+              }}
+            />
+          </div>
+
+          <div style={{ fontSize: '13px', marginBottom: '32px' }}>
+            No account?{' '}
+            <a href="#" onClick={(e) => { e.preventDefault(); navigate('/register'); }} className="ms-link">
+              Create one!
+            </a>
+          </div>
+
+          <div className="ms-actions" style={{ justifyContent: 'flex-end' }}>
+            <button 
+              type="submit" 
+              className="ms-button ms-button-primary"
+              disabled={status === 'loading' || status === 'success'}
+            >
+              {status === 'loading' ? 'Signing in...' : 'Sign in'}
+            </button>
+          </div>
+        </form>
       </div>
     </>
   );

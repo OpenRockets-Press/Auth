@@ -4,14 +4,24 @@ import { Network, Database, Shield, Search, ArrowRight, Terminal, Lock } from 'l
 import { MicrosoftLoadingDots } from './MicrosoftLoadingDots';
 import type {  User  } from '../models/types';
 
-import { useAuth } from '../contexts/AuthProvider';
-
 interface HomeDashboardProps {
   user?: User;
 }
 
-export const HomeDashboard: React.FC<HomeDashboardProps> = () => {
-  const { user } = useAuth();
+const mockUser: User = {
+  id: 1,
+  name: "OpenRockets Inc.",
+  email: "enterprise@openrockets.com",
+  status: "active",
+  last_login_at: new Date().toISOString(),
+  login_method: "password",
+  failed_login_attempts: 0,
+  locked_until: null,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString()
+};
+
+export const HomeDashboard: React.FC<HomeDashboardProps> = ({ user = mockUser }) => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -44,11 +54,11 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = () => {
             fontWeight: '400',
             fontSize: '36px'
           }}>
-            {user?.name?.charAt(0).toUpperCase()}
+            {user.name.charAt(0).toUpperCase()}
           </div>
         </div>
-        <h1 style={{ margin: '0 0 4px 0', fontSize: '24px', fontWeight: '400', color: '#ffffff' }}>{user?.name}</h1>
-        <div style={{ fontSize: '14px', color: '#ffffff' }}>{user?.email}</div>
+        <h1 style={{ margin: '0 0 4px 0', fontSize: '24px', fontWeight: '400', color: '#ffffff' }}>{user.name}</h1>
+        <div style={{ fontSize: '14px', color: '#ffffff' }}>{user.email}</div>
       </div>
 
       {/* Search Bar */}
