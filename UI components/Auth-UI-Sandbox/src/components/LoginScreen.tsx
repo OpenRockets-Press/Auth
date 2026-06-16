@@ -27,8 +27,6 @@ export const LoginScreen: React.FC = () => {
     try {
       await api.post('/api/auth/login', { email, password });
       setStatus('success');
-      // In a real flow, you'd store the token here, e.g., localStorage.setItem('token', response.data.access_token)
-      // Then redirect the user to the destination. For now, just simulating.
       setTimeout(() => {
         window.location.href = 'https://myaccount.openrockets.com';
       }, 1000);
@@ -43,23 +41,22 @@ export const LoginScreen: React.FC = () => {
     <>
       <AmbientBackground />
       <div className="ms-card" style={{ position: 'relative' }}>
-        <div className="ms-header">
-          <img src={logoPath} alt="OpenRockets Logo" className="ms-logo" />
-          <h2 className="ms-title">Sign in</h2>
-          <p className="ms-subtitle">to continue to OpenRockets</p>
+        <div className="ms-logo-container">
+          <img src={logoPath} alt="OpenRockets Logo" className="ms-logo-img" />
         </div>
+        <h1 className="ms-title" style={{ marginBottom: '8px' }}>Sign in</h1>
+        <p className="ms-description" style={{ marginBottom: '24px' }}>to continue to OpenRockets</p>
 
         {status === 'error' && (
-          <div style={{ color: '#E81123', marginBottom: '16px', fontSize: '13px' }}>
+          <div style={{ color: '#E81123', marginBottom: '16px', fontSize: '14px' }}>
             {errorMessage}
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="ms-content">
-          <div className="ms-info-box" style={{ background: 'transparent', padding: '0', border: 'none', marginBottom: '16px' }}>
+        <form onSubmit={handleLogin}>
+          <div style={{ marginBottom: '16px' }}>
             <input
               type="email"
-              className="ms-input"
               placeholder="Email, phone, or Skype"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -69,16 +66,16 @@ export const LoginScreen: React.FC = () => {
                 width: '100%',
                 padding: '8px 0',
                 border: 'none',
-                borderBottom: '1px solid #8A8886',
+                borderBottom: '1px solid var(--ms-border)',
                 outline: 'none',
                 fontSize: '15px',
                 marginBottom: '16px',
-                background: 'transparent'
+                background: 'transparent',
+                color: 'var(--ms-text)'
               }}
             />
             <input
               type="password"
-              className="ms-input"
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -88,23 +85,24 @@ export const LoginScreen: React.FC = () => {
                 width: '100%',
                 padding: '8px 0',
                 border: 'none',
-                borderBottom: '1px solid #8A8886',
+                borderBottom: '1px solid var(--ms-border)',
                 outline: 'none',
                 fontSize: '15px',
                 marginBottom: '16px',
-                background: 'transparent'
+                background: 'transparent',
+                color: 'var(--ms-text)'
               }}
             />
           </div>
 
           <div style={{ fontSize: '13px', marginBottom: '32px' }}>
             No account?{' '}
-            <a href="#" onClick={(e) => { e.preventDefault(); navigate('/register'); }} className="ms-link">
+            <a href="#" onClick={(e) => { e.preventDefault(); navigate('/register'); }} style={{ color: 'var(--theme-primary)', textDecoration: 'none' }}>
               Create one!
             </a>
           </div>
 
-          <div className="ms-actions" style={{ justifyContent: 'flex-end' }}>
+          <div className="ms-button-group">
             <button 
               type="submit" 
               className="ms-button ms-button-primary"

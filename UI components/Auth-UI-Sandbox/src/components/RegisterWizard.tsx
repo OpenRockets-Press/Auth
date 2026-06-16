@@ -116,16 +116,16 @@ export const RegisterWizard: React.FC = () => {
     <>
       <AmbientBackground />
       <div className="ms-card" style={{ position: 'relative', maxWidth: step === 'AGE_SELECTION' || step === 'PARENT_VERIFICATION' ? '500px' : '440px' }}>
-        <div className="ms-header">
-          <img src={logoPath} alt="OpenRockets Logo" className="ms-logo" />
-          <h2 className="ms-title">Create account</h2>
+        <div className="ms-logo-container">
+          <img src={logoPath} alt="OpenRockets Logo" className="ms-logo-img" />
         </div>
+        <h1 className="ms-title" style={{ marginBottom: '24px' }}>Create account</h1>
 
         {status === 'error' && (
-          <div style={{ color: '#E81123', marginBottom: '16px', fontSize: '13px' }}>{errorMessage}</div>
+          <div style={{ color: '#E81123', marginBottom: '16px', fontSize: '14px' }}>{errorMessage}</div>
         )}
 
-        <div className="ms-content">
+        <div>
           {step === 'AGE_SELECTION' && (
             <FaceAgeDetector 
               onComplete={handleAgeDetected} 
@@ -136,15 +136,15 @@ export const RegisterWizard: React.FC = () => {
 
           {step === 'USER_DETAILS' && (
             <form onSubmit={handleDetailsSubmit}>
-              <p className="ms-subtitle" style={{ marginBottom: '16px' }}>Enter your details</p>
+              <p className="ms-description" style={{ marginBottom: '16px', fontWeight: 600 }}>Enter your details</p>
               {renderInput('text', 'Full Name', name, setName)}
               {renderInput('email', 'Email Address', email, setEmail)}
               {renderInput('password', 'Create Password', password, setPassword)}
               
               {userType === 'minor' && (
                 <>
-                  <div style={{ marginTop: '16px', marginBottom: '8px', fontSize: '14px', fontWeight: 600 }}>Parent/Guardian Details</div>
-                  <p style={{ fontSize: '12px', color: '#605e5c', marginBottom: '16px' }}>
+                  <div style={{ marginTop: '16px', marginBottom: '8px', fontSize: '15px', fontWeight: 600 }}>Parent/Guardian Details</div>
+                  <p className="ms-description" style={{ fontSize: '13px', marginBottom: '16px' }}>
                     Because you are a minor, we need your parent's consent.
                   </p>
                   {renderInput('text', "Parent's Full Name", parentName, setParentName)}
@@ -152,25 +152,27 @@ export const RegisterWizard: React.FC = () => {
                 </>
               )}
 
-              <div className="ms-actions" style={{ justifyContent: 'space-between', marginTop: '24px' }}>
-                <button type="button" className="ms-button" onClick={() => setStep('AGE_SELECTION')}>Back</button>
+              <div className="ms-button-group" style={{ justifyContent: 'space-between', marginTop: '24px' }}>
+                <button type="button" className="ms-button ms-button-secondary" onClick={() => setStep('AGE_SELECTION')}>Back</button>
                 <button type="submit" className="ms-button ms-button-primary">Next</button>
               </div>
             </form>
           )}
 
           {step === 'GETTING_PARENT' && (
-            <div style={{ textAlign: 'center', padding: '32px 0' }}>
-              <h3 className="ms-title" style={{ fontSize: '18px', marginBottom: '16px' }}>Parental Consent Required</h3>
-              <p style={{ fontSize: '15px', marginBottom: '24px' }}>
+            <div style={{ textAlign: 'center', padding: '16px 0' }}>
+              <h3 className="ms-title" style={{ fontSize: '20px', marginBottom: '16px' }}>Parental Consent Required</h3>
+              <p className="ms-description" style={{ marginBottom: '24px' }}>
                 Please hand the device to your parent or guardian to verify their identity and provide consent.
               </p>
-              <button className="ms-button ms-button-primary" onClick={() => setStep('PARENT_VERIFICATION')} style={{ width: '100%' }}>
-                I am the Parent / Ready
-              </button>
-              <button className="ms-button" onClick={() => setStep('USER_DETAILS')} style={{ width: '100%', marginTop: '8px' }}>
-                Back
-              </button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <button className="ms-button ms-button-primary" onClick={() => setStep('PARENT_VERIFICATION')} style={{ width: '100%', padding: '12px' }}>
+                  I am the Parent / Ready
+                </button>
+                <button className="ms-button ms-button-secondary" onClick={() => setStep('USER_DETAILS')} style={{ width: '100%', padding: '12px' }}>
+                  Back
+                </button>
+              </div>
             </div>
           )}
 
@@ -184,8 +186,8 @@ export const RegisterWizard: React.FC = () => {
 
           {step === 'CONSENT' && (
             <div>
-              <p className="ms-subtitle" style={{ marginBottom: '16px' }}>Terms & Consent</p>
-              <div style={{ fontSize: '13px', lineHeight: '1.5', marginBottom: '16px', maxHeight: '150px', overflowY: 'auto', padding: '8px', background: '#f3f2f1' }}>
+              <p className="ms-description" style={{ marginBottom: '16px', fontWeight: 600 }}>Terms & Consent</p>
+              <div style={{ fontSize: '13px', lineHeight: '1.5', marginBottom: '16px', maxHeight: '150px', overflowY: 'auto', padding: '12px', background: 'rgba(0,0,0,0.03)', border: '1px solid var(--ms-border)' }}>
                 <strong>OpenRockets Terms of Service & Consent</strong><br/><br/>
                 {userType === 'minor' ? (
                   <>I, {parentName}, hereby grant permission for my child, {name}, to create an OpenRockets account and access the ecosystem. I understand the privacy policy and consent to the collection of necessary data.</>
@@ -194,22 +196,22 @@ export const RegisterWizard: React.FC = () => {
                 )}
               </div>
 
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ fontSize: '13px', display: 'block', marginBottom: '8px' }}>Please sign below:</label>
-                <div style={{ border: '1px solid #8A8886', background: '#fff' }}>
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{ fontSize: '14px', display: 'block', marginBottom: '8px', color: 'var(--ms-text)' }}>Please sign below:</label>
+                <div style={{ border: '1px solid var(--ms-border)', background: '#fff' }}>
                   <SignatureCanvas 
                     ref={sigPad} 
                     canvasProps={{ width: 400, height: 150, className: 'sigCanvas' }} 
                     penColor="black"
                   />
                 </div>
-                <button type="button" onClick={() => sigPad.current?.clear()} style={{ fontSize: '12px', background: 'none', border: 'none', color: '#0067b8', cursor: 'pointer', padding: '4px 0' }}>
+                <button type="button" onClick={() => sigPad.current?.clear()} style={{ fontSize: '13px', background: 'none', border: 'none', color: 'var(--theme-primary)', cursor: 'pointer', padding: '6px 0', marginTop: '4px' }}>
                   Clear Signature
                 </button>
               </div>
 
-              <div className="ms-actions" style={{ justifyContent: 'space-between' }}>
-                <button type="button" className="ms-button" onClick={() => setStep(userType === 'minor' ? 'GETTING_PARENT' : 'USER_DETAILS')} disabled={status === 'loading'}>Back</button>
+              <div className="ms-button-group" style={{ justifyContent: 'space-between' }}>
+                <button type="button" className="ms-button ms-button-secondary" onClick={() => setStep(userType === 'minor' ? 'GETTING_PARENT' : 'USER_DETAILS')} disabled={status === 'loading'}>Back</button>
                 <button type="button" className="ms-button ms-button-primary" onClick={submitRegistration} disabled={status === 'loading'}>
                   {status === 'loading' ? 'Creating...' : 'Accept & Create Account'}
                 </button>
@@ -220,14 +222,14 @@ export const RegisterWizard: React.FC = () => {
           {step === 'SUCCESS' && (
             <div style={{ textAlign: 'center', padding: '16px 0' }}>
               <div style={{ fontSize: '48px', color: '#107c10', marginBottom: '16px' }}>✓</div>
-              <h3 style={{ fontSize: '18px', marginBottom: '8px' }}>Account Created</h3>
-              <p style={{ fontSize: '14px', marginBottom: '24px' }}>
+              <h3 className="ms-title" style={{ fontSize: '20px', marginBottom: '8px' }}>Account Created</h3>
+              <p className="ms-description" style={{ marginBottom: '24px' }}>
                 We've sent a verification email to <strong>{email}</strong>. 
                 {userType === 'minor' && <span> We also sent a copy to your parent at <strong>{parentEmail}</strong>.</span>}
                 <br/><br/>
                 <strong>You must verify your email before you can log in.</strong>
               </p>
-              <button className="ms-button ms-button-primary" onClick={() => navigate('/login')} style={{ width: '100%' }}>
+              <button className="ms-button ms-button-primary" onClick={() => navigate('/login')} style={{ width: '100%', padding: '12px' }}>
                 Return to Sign In
               </button>
             </div>

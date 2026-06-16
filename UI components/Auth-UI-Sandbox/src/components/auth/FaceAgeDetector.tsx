@@ -113,9 +113,9 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
   if (cameraError) {
     return (
       <div style={{ textAlign: 'center', padding: '24px 0' }}>
-        <h3 className="ms-title">{title}</h3>
-        <p style={{ color: '#E81123', marginTop: '16px' }}>{cameraError}</p>
-        <button className="ms-button" onClick={startVideo} style={{ marginTop: '16px' }}>Retry Camera</button>
+        <h3 className="ms-title" style={{ marginBottom: '16px' }}>{title}</h3>
+        <p style={{ color: '#E81123', marginBottom: '24px' }}>{cameraError}</p>
+        <button className="ms-button ms-button-secondary" onClick={startVideo}>Retry Camera</button>
       </div>
     );
   }
@@ -123,22 +123,22 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
   if (!modelsLoaded) {
     return (
       <div style={{ textAlign: 'center', padding: '32px 0' }}>
-        <div className="ms-loader-overlay" style={{ position: 'relative', background: 'transparent' }}>
-          <div className="ms-loading-dots">
-            <div className="ms-dot"></div><div className="ms-dot"></div><div className="ms-dot"></div>
+        <div className="ms-loader-overlay" style={{ position: 'relative', background: 'transparent', height: '20px' }}>
+          <div className="ms-loader-container">
+            <div className="anim-dot dot1"></div><div className="anim-dot dot2"></div><div className="anim-dot dot3"></div><div className="anim-dot dot4"></div><div className="anim-dot dot5"></div>
           </div>
         </div>
-        <p style={{ marginTop: '16px', fontSize: '15px' }}>Loading AI Models...</p>
+        <p className="ms-description" style={{ marginTop: '16px' }}>Loading AI Models...</p>
       </div>
     );
   }
 
   return (
     <div style={{ textAlign: 'center' }}>
-      <h3 className="ms-title" style={{ fontSize: '18px', marginBottom: '8px' }}>{title}</h3>
-      <p className="ms-subtitle" style={{ marginBottom: '16px' }}>{subtitle}</p>
+      <h3 className="ms-title" style={{ fontSize: '20px', marginBottom: '8px' }}>{title}</h3>
+      <p className="ms-description" style={{ marginBottom: '16px' }}>{subtitle}</p>
 
-      <div style={{ position: 'relative', width: '100%', maxWidth: '400px', margin: '0 auto', background: '#000', borderRadius: '4px', overflow: 'hidden' }}>
+      <div style={{ position: 'relative', width: '100%', maxWidth: '400px', margin: '0 auto', background: '#000', borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--ms-border)' }}>
         <video 
           ref={videoRef} 
           autoPlay 
@@ -155,7 +155,7 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
       </div>
 
       <div style={{ marginTop: '24px' }}>
-        <p style={{ fontWeight: 'bold', marginBottom: '16px', fontSize: '16px' }}>
+        <p className="ms-description" style={{ fontWeight: 'bold', marginBottom: '16px' }}>
           Current Task: Capture {captures[currentCaptureIndex].label}
         </p>
 
@@ -164,13 +164,14 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
             <div key={idx} style={{ 
               flex: 1, 
               padding: '8px', 
-              background: cap.age ? '#dff6dd' : (idx === currentCaptureIndex ? '#deecf9' : '#f3f2f1'),
-              border: idx === currentCaptureIndex ? '2px solid #0078d4' : '1px solid transparent',
+              background: cap.age ? '#dff6dd' : (idx === currentCaptureIndex ? 'rgba(0, 103, 184, 0.1)' : 'rgba(0,0,0,0.02)'),
+              border: idx === currentCaptureIndex ? '2px solid var(--theme-primary)' : '1px solid var(--ms-border)',
               borderRadius: '4px',
-              fontSize: '12px'
+              fontSize: '13px',
+              color: 'var(--ms-text)'
             }}>
               <div>{cap.label}</div>
-              {cap.age && <div style={{ color: '#107c10', fontWeight: 'bold' }}>✓ Done</div>}
+              {cap.age && <div style={{ color: '#107c10', fontWeight: 'bold', marginTop: '4px' }}>✓ Done</div>}
             </div>
           ))}
         </div>
