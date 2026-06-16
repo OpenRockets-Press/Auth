@@ -40,8 +40,17 @@ export const RegisterWizard: React.FC = () => {
   const [parentOtp, setParentOtp] = useState('');
   const [parentEmailVerified, setParentEmailVerified] = useState(false);
 
+  const [minorOtpSent, setMinorOtpSent] = useState(false);
+  const [minorOtp, setMinorOtp] = useState('');
+  const [minorEmailVerified, setMinorEmailVerified] = useState(false);
+  
+  const [isUploading, setIsUploading] = useState(false);
+
   const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  const [uploadError, setUploadError] = useState('');
+  const [parentOtpError, setParentOtpError] = useState('');
+  const [minorOtpError, setMinorOtpError] = useState('');
   const [initialLoad, setInitialLoad] = useState(true);
   
   const sigPad = useRef<SignatureCanvas>(null);
@@ -108,17 +117,43 @@ export const RegisterWizard: React.FC = () => {
   };
 
   const handleVerifyParentOtp = async () => {
+    setParentOtpError('');
     if (!parentOtp || parentOtp.length < 6) {
-       setErrorMessage("Please enter a valid 6-digit OTP.");
+       setParentOtpError("Please enter a valid 6-digit OTP.");
        return;
     }
     setStatus('loading');
     await new Promise(r => setTimeout(r, 1000));
     if (parentOtp === '123456') {
        setParentEmailVerified(true);
-       setErrorMessage('');
+       setParentOtpError('');
     } else {
-       setErrorMessage("Invalid OTP. For demo purposes, use 123456.");
+       setParentOtpError("Invalid OTP. For demo purposes, use 123456.");
+    }
+    setStatus('idle');
+  };
+
+  const handleSendMinorOtp = async () => {
+    if (!email) return;
+    setStatus('loading');
+    await new Promise(r => setTimeout(r, 1000));
+    setMinorOtpSent(true);
+    setStatus('idle');
+  };
+
+  const handleVerifyMinorOtp = async () => {
+    setMinorOtpError('');
+    if (!minorOtp || minorOtp.length < 6) {
+       setMinorOtpError("Please enter a valid 6-digit OTP.");
+       return;
+    }
+    setStatus('loading');
+    await new Promise(r => setTimeout(r, 1000));
+    if (minorOtp === '123456') {
+       setMinorEmailVerified(true);
+       setMinorOtpError('');
+    } else {
+       setMinorOtpError("Invalid OTP. For demo purposes, use 123456.");
     }
     setStatus('idle');
   };
@@ -192,9 +227,19 @@ export const RegisterWizard: React.FC = () => {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setUploadError("Image too large. Please select an image under 5MB.");
+        return;
+      }
+      setIsUploading(true);
+      setUploadError('');
       const reader = new FileReader();
       reader.onloadend = () => {
-        setProfileImage(reader.result as string);
+        setTimeout(() => {
+          setProfileImage(reader.result as string);
+          setIsUploading(false);
+          setUploadError('');
+        }, 1500);
       };
       reader.readAsDataURL(file);
     }
@@ -331,19 +376,22 @@ export const RegisterWizard: React.FC = () => {
                       </div>
                       
                       {parentOtpSent && !parentEmailVerified && (
-                        <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
-                          <input 
-                            type="text" 
-                            placeholder="Enter 6-digit OTP (use 123456)" 
-                            value={parentOtp} 
-                            onChange={e => setParentOtp(e.target.value)} 
-                            maxLength={6}
-                            style={{ flex: 1, padding: '8px', border: '1px solid var(--ms-border)', outline: 'none' }}
-                          />
-                          <button type="button" className="ms-button ms-button-primary" onClick={handleVerifyParentOtp} style={{ height: '37px' }}>
-                            Verify
-                          </button>
-                        </div>
+                        <>
+                          <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
+                            <input 
+                              type="text" 
+                              placeholder="Enter 6-digit OTP (use 123456)" 
+                              value={parentOtp} 
+                              onChange={e => setParentOtp(e.target.value)} 
+                              maxLength={6}
+                              style={{ flex: 1, padding: '8px', border: '1px solid var(--ms-border)', outline: 'none' }}
+                            />
+                            <button type="button" className="ms-button ms-button-primary" onClick={handleVerifyParentOtp} style={{ height: '37px' }}>
+                              Verify
+                            </button>
+                          </div>
+                          {parentOtpError && <div style={{ color: '#E81123', marginTop: '8px', fontSize: '13px' }}>{parentOtpError}</div>}
+                        </>
                       )}
                       {parentEmailVerified && (
                         <div style={{ color: '#107c10', fontSize: '13px', fontWeight: 'bold', marginTop: '8px' }}>✓ Parent Email Verified</div>
@@ -424,17 +472,68 @@ export const RegisterWizard: React.FC = () => {
                     <div style={{ marginBottom: '16px' }}>
                       <label style={{ fontSize: '14px', display: 'block', marginBottom: '8px', color: 'var(--ms-text)' }}>Profile Picture</label>
                       <input type="file" accept="image/*" onChange={handleImageUpload} style={{ fontSize: '14px', color: 'var(--ms-text)' }} />
+                      {uploadError && <div style={{ color: '#E81123', marginTop: '8px', fontSize: '13px' }}>{uploadError}</div>}
                     </div>
 
                     {renderInput('text', 'Your Full Name', name, setName)}
-                    {renderInput('email', 'Your Email Address', email, setEmail)}
+                    
+                    <div style={{ marginBottom: '16px' }}>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <div style={{ flex: 1 }}>
+                          <input
+                            type="email"
+                            placeholder="Your Email Address"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required={true}
+                            disabled={status === 'loading' || minorEmailVerified}
+                            style={{
+                              width: '100%', padding: '8px 0', border: 'none', borderBottom: '1px solid var(--ms-border)',
+                              outline: 'none', fontSize: '15px', background: 'transparent', color: 'var(--ms-text)'
+                            }}
+                          />
+                        </div>
+                        {!minorEmailVerified && (
+                          <button type="button" className="ms-button ms-button-secondary" 
+                            onClick={handleSendMinorOtp}
+                            disabled={!email || minorOtpSent || status === 'loading'}
+                            style={{ height: '37px', whiteSpace: 'nowrap' }}
+                          >
+                            {minorOtpSent ? 'Code Sent' : 'Send Code'}
+                          </button>
+                        )}
+                      </div>
+                      
+                      {minorOtpSent && !minorEmailVerified && (
+                        <>
+                          <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
+                            <input 
+                              type="text" 
+                              placeholder="Enter 6-digit OTP (use 123456)" 
+                              value={minorOtp} 
+                              onChange={e => setMinorOtp(e.target.value)} 
+                              maxLength={6}
+                              style={{ flex: 1, padding: '8px', border: '1px solid var(--ms-border)', outline: 'none' }}
+                            />
+                            <button type="button" className="ms-button ms-button-primary" onClick={handleVerifyMinorOtp} style={{ height: '37px' }}>
+                              Verify
+                            </button>
+                          </div>
+                          {minorOtpError && <div style={{ color: '#E81123', marginTop: '8px', fontSize: '13px' }}>{minorOtpError}</div>}
+                        </>
+                      )}
+                      {minorEmailVerified && (
+                        <div style={{ color: '#107c10', fontSize: '13px', fontWeight: 'bold', marginTop: '8px' }}>✓ Email Verified</div>
+                      )}
+                    </div>
+
                     {renderInput('password', 'Create Password', password, setPassword)}
                     {renderInput('tel', 'Phone Number (Optional)', phone, setPhone, false)}
                     
                     {status === 'error' && <div style={{ color: '#E81123', marginBottom: '16px', fontSize: '14px' }}>{errorMessage}</div>}
 
                     <div className="ms-button-group" style={{ marginTop: '24px' }}>
-                      <button type="submit" className="ms-button ms-button-primary" disabled={status === 'loading'} style={{ width: '100%' }}>
+                      <button type="submit" className="ms-button ms-button-primary" disabled={status === 'loading' || !minorEmailVerified} style={{ width: '100%' }}>
                         {status === 'loading' ? 'Creating...' : 'Create Account'}
                       </button>
                     </div>
@@ -443,7 +542,7 @@ export const RegisterWizard: React.FC = () => {
                 
                 <div className="ms-split-preview">
                   <p className="ms-description" style={{ marginBottom: '24px', fontWeight: 600 }}>Live Preview</p>
-                  <img src={profileImage} alt="Profile Preview" className="profile-preview-avatar" />
+                  <img src={profileImage} alt="Profile Preview" className={`profile-preview-avatar ${isUploading ? 'ms-upload-anim' : ''}`} />
                   <div className="profile-preview-name">{name || 'Your Name'}</div>
                   <div className="profile-preview-email">{email || 'your.email@example.com'}</div>
                   {phone && <div style={{ fontSize: '13px', color: 'var(--ms-text-secondary)', marginTop: '8px' }}>{phone}</div>}
