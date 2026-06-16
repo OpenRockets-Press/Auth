@@ -30,9 +30,17 @@ export const RegisterWizard: React.FC = () => {
 
   const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  const [initialLoad, setInitialLoad] = useState(true);
   
   const sigPad = useRef<SignatureCanvas>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setInitialLoad(false);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleAgeDetected = (_averageAge: number, isAdult: boolean) => {
     setUserType(isAdult ? 'adult' : 'minor');
@@ -106,8 +114,8 @@ export const RegisterWizard: React.FC = () => {
       required={required}
       disabled={status === 'loading'}
       style={{
-        width: '100%', padding: '8px 0', border: 'none', borderBottom: '1px solid #8A8886',
-        outline: 'none', fontSize: '15px', marginBottom: '16px', background: 'transparent'
+        width: '100%', padding: '8px 0', border: 'none', borderBottom: '1px solid var(--ms-border)',
+        outline: 'none', fontSize: '15px', marginBottom: '16px', background: 'transparent', color: 'var(--ms-text)'
       }}
     />
   );
@@ -115,9 +123,9 @@ export const RegisterWizard: React.FC = () => {
   return (
     <>
       <AmbientBackground />
-      <div className="ms-card" style={{ position: 'relative', maxWidth: step === 'AGE_SELECTION' || step === 'PARENT_VERIFICATION' ? '500px' : '440px' }}>
+      <div className={`ms-card ${initialLoad ? 'is-loading-initial' : ''}`} style={{ position: 'relative', maxWidth: step === 'AGE_SELECTION' || step === 'PARENT_VERIFICATION' ? '500px' : '440px' }}>
         
-        {status === 'loading' && (
+        {(status === 'loading' || initialLoad) && (
           <div className="ms-loader-overlay">
             <div className="ms-loader-container">
               <div className="anim-dot dot1"></div><div className="anim-dot dot2"></div><div className="anim-dot dot3"></div><div className="anim-dot dot4"></div><div className="anim-dot dot5"></div>
@@ -128,22 +136,24 @@ export const RegisterWizard: React.FC = () => {
         <div className="ms-logo-container">
           <img src={logoPath} alt="OpenRockets Logo" className="ms-logo-img" />
         </div>
-        <h1 className="ms-title" style={{ marginBottom: '24px' }}>Create account</h1>
+        
+        <div className="ms-card-content" style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+          <h1 className="ms-title" style={{ marginBottom: '24px' }}>Create account</h1>
 
-        {status === 'error' && (
-          <div style={{ color: '#E81123', marginBottom: '16px', fontSize: '14px' }}>{errorMessage}</div>
-        )}
-
-        <div className="ms-card-scrollable">
-          {step === 'AGE_SELECTION' && (
-            <FaceAgeDetector 
-              onComplete={handleAgeDetected} 
-              title="Identity Verification"
-              subtitle="To comply with safety regulations, we need to determine if you are an adult or a minor. Your image is processed entirely on your device and is not saved."
-            />
+          {status === 'error' && (
+            <div style={{ color: '#E81123', marginBottom: '16px', fontSize: '14px' }}>{errorMessage}</div>
           )}
 
-          {step === 'USER_DETAILS' && (
+          <div className="ms-card-scrollable">
+            {step === 'AGE_SELECTION' && (
+              <FaceAgeDetector 
+                onComplete={handleAgeDetected} 
+                title="Identity Verification"
+                subtitle="To comply with safety regulations, we need to determine if you are an adult or a minor. Your image is processed entirely on your device and is not saved."
+              />
+            )}
+
+            {step === 'USER_DETAILS' && (
             <form onSubmit={handleDetailsSubmit}>
               <p className="ms-description" style={{ marginBottom: '16px', fontWeight: 600 }}>Enter your details</p>
               {renderInput('text', 'Full Name', name, setName)}
@@ -243,6 +253,7 @@ export const RegisterWizard: React.FC = () => {
               </button>
             </div>
           )}
+          </div>
         </div>
       </div>
     </>

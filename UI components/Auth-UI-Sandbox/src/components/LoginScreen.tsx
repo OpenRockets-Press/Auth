@@ -17,7 +17,15 @@ export const LoginScreen: React.FC = () => {
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  const [initialLoad, setInitialLoad] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setInitialLoad(false);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,9 +48,9 @@ export const LoginScreen: React.FC = () => {
   return (
     <>
       <AmbientBackground />
-      <div className="ms-card" style={{ position: 'relative' }}>
+      <div className={`ms-card ${initialLoad ? 'is-loading-initial' : ''}`} style={{ position: 'relative' }}>
         
-        {status === 'loading' && (
+        {(status === 'loading' || initialLoad) && (
           <div className="ms-loader-overlay">
             <div className="ms-loader-container">
               <div className="anim-dot dot1"></div><div className="anim-dot dot2"></div><div className="anim-dot dot3"></div><div className="anim-dot dot4"></div><div className="anim-dot dot5"></div>
@@ -53,14 +61,16 @@ export const LoginScreen: React.FC = () => {
         <div className="ms-logo-container">
           <img src={logoPath} alt="OpenRockets Logo" className="ms-logo-img" />
         </div>
-        <h1 className="ms-title" style={{ marginBottom: '8px' }}>Sign in</h1>
-        <p className="ms-description" style={{ marginBottom: '24px' }}>to continue to OpenRockets</p>
+        
+        <div className="ms-card-content" style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+          <h1 className="ms-title" style={{ marginBottom: '8px' }}>Sign in</h1>
+          <p className="ms-description" style={{ marginBottom: '24px' }}>to continue to OpenRockets</p>
 
-        {status === 'error' && (
-          <div style={{ color: '#E81123', marginBottom: '16px', fontSize: '14px' }}>
-            {errorMessage}
-          </div>
-        )}
+          {status === 'error' && (
+            <div style={{ color: '#E81123', marginBottom: '16px', fontSize: '14px' }}>
+              {errorMessage}
+            </div>
+          )}
 
         <form onSubmit={handleLogin} className="ms-card-scrollable">
           <div style={{ marginBottom: '16px' }}>
@@ -121,6 +131,7 @@ export const LoginScreen: React.FC = () => {
             </button>
           </div>
         </form>
+        </div>
       </div>
     </>
   );
