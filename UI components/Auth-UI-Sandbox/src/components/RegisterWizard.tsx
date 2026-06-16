@@ -13,8 +13,7 @@ const api = axios.create({
   }
 });
 
-type Step = 'AGE_SELECTION' | 'USER_DETAILS' | 'GETTING_PARENT' | 'PARENT_STATEMENT' | 'PARENT_VERIFICATION' | 'PARENT_DETAILS' | 'CONSENT' | 'MINOR_VERIFICATION' | 'MINOR_PROFILE_SETUP' | 'SUCCESS';
-type UserType = 'adult' | 'minor' | null;
+type Step = 'PARENT_STATEMENT' | 'PARENT_VERIFICATION' | 'PARENT_DETAILS' | 'CONSENT' | 'MINOR_VERIFICATION' | 'MINOR_PROFILE_SETUP' | 'SUCCESS';
 
 const PLACEHOLDER_AVATARS = [
   'https://raw.githubusercontent.com/roma-lukashik/animal-avatar-generator/e9b435bb28c8ae2dda224678bdda8faad6035373/preview.svg',
@@ -23,8 +22,7 @@ const PLACEHOLDER_AVATARS = [
 ];
 
 export const RegisterWizard: React.FC = () => {
-  const [step, setStep] = useState<Step>('AGE_SELECTION');
-  const [userType, setUserType] = useState<UserType>(null);
+  const [step, setStep] = useState<Step>('PARENT_STATEMENT');
   
   // Form state
   const [name, setName] = useState('');
@@ -64,19 +62,11 @@ export const RegisterWizard: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleAgeDetected = (_averageAge: number, isAdult: boolean) => {
-    setUserType(isAdult ? 'adult' : 'minor');
-    if (isAdult) {
-      setStep('USER_DETAILS');
-    } else {
-      setStep('GETTING_PARENT');
-    }
-  };
 
   const handleParentAgeDetected = (_averageAge: number, isAdult: boolean) => {
     if (!isAdult) {
       setErrorMessage("Parent verification failed. The person detected appears to be a minor.");
-      setStep('GETTING_PARENT');
+      setStep('PARENT_STATEMENT');
     } else {
       setErrorMessage('');
       setStep('PARENT_DETAILS');
@@ -90,11 +80,6 @@ export const RegisterWizard: React.FC = () => {
       setErrorMessage('');
       setStep('MINOR_PROFILE_SETUP');
     }
-  };
-
-  const handleAdultDetailsSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setStep('CONSENT');
   };
 
   const handleParentConsentSubmit = (e: React.FormEvent) => {
@@ -160,7 +145,7 @@ export const RegisterWizard: React.FC = () => {
   const submitRegistration = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     
-    if (userType === 'adult' && (!sigPad.current || sigPad.current.isEmpty())) {
+    if (!sigPad.current || sigPad.current.isEmpty()) {
       setErrorMessage("Please provide a signature to continue.");
       return;
     }
@@ -178,9 +163,9 @@ export const RegisterWizard: React.FC = () => {
         password_confirmation: password,
         phone,
         profile_image: profileImage,
-        is_minor: userType === 'minor',
-        parent_name: userType === 'minor' ? parentName : null,
-        parent_email: userType === 'minor' ? parentEmail : null,
+        is_minor: true,
+        parent_name: parentName,
+        parent_email: parentEmail,
         signature: signatureBase64
       });
       
@@ -279,57 +264,15 @@ export const RegisterWizard: React.FC = () => {
               <h1 className="ms-title" style={{ margin: 0 }}>Create account</h1>
               <span style={{ fontSize: '13px', color: 'var(--ms-text-secondary)', paddingBottom: '4px' }}>
                 Step <strong style={{ fontSize: '24px', color: '#000', fontWeight: 'bold' }}>{
-                  userType === 'minor' 
-                    ? (step === 'GETTING_PARENT' ? 2 : step === 'PARENT_STATEMENT' ? 3 : step === 'PARENT_VERIFICATION' ? 4 : step === 'PARENT_DETAILS' ? 5 : step === 'CONSENT' ? 6 : step === 'MINOR_VERIFICATION' ? 7 : step === 'MINOR_PROFILE_SETUP' ? 8 : 1)
-                    : (step === 'USER_DETAILS' ? 2 : step === 'CONSENT' ? 3 : 1)
-                }</strong> of {userType === 'minor' ? 8 : 3}
+                  step === 'PARENT_STATEMENT' ? 1 : step === 'PARENT_VERIFICATION' ? 2 : step === 'PARENT_DETAILS' ? 3 : step === 'CONSENT' ? 4 : step === 'MINOR_VERIFICATION' ? 5 : step === 'MINOR_PROFILE_SETUP' ? 6 : 1
+                }</strong> of 6
               </span>
             </div>
           )}
 
           <div className="ms-card-scrollable">
             
-            {step === 'AGE_SELECTION' && (
-              <FaceAgeDetector 
-                onComplete={handleAgeDetected} 
-                title="Identity Verification"
-                onLoadingChange={setAiLoading}
-              />
-            )}
 
-            {step === 'USER_DETAILS' && (
-              <form onSubmit={handleAdultDetailsSubmit}>
-                <p className="ms-description" style={{ marginBottom: '16px', fontWeight: 600 }}>Enter your details</p>
-                {renderInput('text', 'Full Name', name, setName)}
-                {renderInput('email', 'Email Address', email, setEmail)}
-                {renderInput('password', 'Create Password', password, setPassword)}
-                
-                {status === 'error' && <div style={{ color: '#E81123', marginBottom: '16px', fontSize: '14px' }}>{errorMessage}</div>}
-
-                <div className="ms-button-group" style={{ justifyContent: 'space-between', marginTop: '24px' }}>
-                  <button type="button" className="ms-button ms-button-secondary" onClick={() => setStep('AGE_SELECTION')}>Back</button>
-                  <button type="submit" className="ms-button ms-button-primary">Next</button>
-                </div>
-              </form>
-            )}
-
-            {step === 'GETTING_PARENT' && (
-              <div style={{ textAlign: 'center', padding: '16px 0' }}>
-                <h3 className="ms-title" style={{ fontSize: '20px', marginBottom: '16px' }}>Parental Consent Required</h3>
-                <p className="ms-description" style={{ marginBottom: '24px' }}>
-                  Please hand the device to your parent or guardian to verify their identity and provide consent.
-                </p>
-                {status === 'error' && <div style={{ color: '#E81123', marginBottom: '16px', fontSize: '14px' }}>{errorMessage}</div>}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <button className="ms-button ms-button-primary" onClick={() => setStep('PARENT_STATEMENT')} style={{ width: '100%', padding: '12px' }}>
-                    I am the Parent / Ready
-                  </button>
-                  <button className="ms-button ms-button-secondary" onClick={() => setStep('AGE_SELECTION')} style={{ width: '100%', padding: '12px' }}>
-                    Back
-                  </button>
-                </div>
-              </div>
-            )}
 
             {step === 'PARENT_STATEMENT' && (
               <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -352,8 +295,7 @@ export const RegisterWizard: React.FC = () => {
                   <p>2. <strong>No Data Retention:</strong> The images captured during the identity verification stage are immediately discarded once the verification algorithm completes. They are never saved, stored, or transmitted.</p>
                   <p>3. <strong>Purpose:</strong> We collect parent details and verify identity strictly to comply with safety regulations regarding minor accounts. Your information is protected and encrypted.</p>
                 </div>
-                <div className="ms-button-group" style={{ justifyContent: 'space-between' }}>
-                  <button className="ms-button ms-button-secondary" onClick={() => setStep('GETTING_PARENT')}>Back</button>
+                <div className="ms-button-group" style={{ justifyContent: 'flex-end' }}>
                   <button className="ms-button ms-button-primary" onClick={() => setStep('PARENT_VERIFICATION')}>Next</button>
                 </div>
               </div>
@@ -442,16 +384,12 @@ export const RegisterWizard: React.FC = () => {
             )}
 
             {step === 'CONSENT' && (
-              <form onSubmit={userType === 'minor' ? handleParentConsentSubmit : submitRegistration}>
+              <form onSubmit={handleParentConsentSubmit}>
                 <p className="ms-description" style={{ marginBottom: '16px', fontWeight: 600 }}>Terms & Consent</p>
 
                 <div style={{ fontSize: '13px', lineHeight: '1.5', marginBottom: '16px', maxHeight: '150px', overflowY: 'auto', padding: '12px', background: 'rgba(0,0,0,0.03)', border: '1px solid var(--ms-border)' }}>
                   <strong>OpenRockets Terms of Service & Consent</strong><br/><br/>
-                  {userType === 'minor' ? (
-                    <>I, {parentName || '[Parent Name]'}, hereby grant permission for my child to create an OpenRockets account. I understand the privacy policy and consent to the collection of necessary data.</>
-                  ) : (
-                    <>I, {name}, hereby agree to the OpenRockets Terms of Service and Privacy Policy. I certify that I am 18 years of age or older.</>
-                  )}
+                  <>I, {parentName || '[Parent Name]'}, hereby grant permission for my child to create an OpenRockets account. I understand the privacy policy and consent to the collection of necessary data.</>
                 </div>
 
                 <div style={{ marginBottom: '24px' }}>
@@ -471,9 +409,9 @@ export const RegisterWizard: React.FC = () => {
                 {status === 'error' && <div style={{ color: '#E81123', marginBottom: '16px', fontSize: '14px' }}>{errorMessage}</div>}
 
                 <div className="ms-button-group" style={{ justifyContent: 'space-between' }}>
-                  <button type="button" className="ms-button ms-button-secondary" onClick={() => setStep(userType === 'minor' ? 'PARENT_DETAILS' : 'USER_DETAILS')} disabled={status === 'loading'}>Back</button>
+                  <button type="button" className="ms-button ms-button-secondary" onClick={() => setStep('PARENT_DETAILS')} disabled={status === 'loading'}>Back</button>
                   <button type="submit" className="ms-button ms-button-primary" disabled={status === 'loading'}>
-                    {status === 'loading' ? 'Processing...' : (userType === 'minor' ? 'Grant Consent' : 'Accept & Create Account')}
+                    {status === 'loading' ? 'Processing...' : 'Grant Consent'}
                   </button>
                 </div>
               </form>
