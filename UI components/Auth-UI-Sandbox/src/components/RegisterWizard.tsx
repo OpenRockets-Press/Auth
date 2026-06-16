@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import SignatureCanvas from 'react-signature-canvas';
 import { AmbientBackground } from './AmbientBackground';
 import { FaceAgeDetector } from './auth/FaceAgeDetector';
@@ -54,7 +53,6 @@ export const RegisterWizard: React.FC = () => {
   const [initialLoad, setInitialLoad] = useState(true);
   
   const sigPad = useRef<SignatureCanvas>(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const timer = setTimeout(() => {

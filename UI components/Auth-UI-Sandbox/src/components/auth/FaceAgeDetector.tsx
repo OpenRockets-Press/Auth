@@ -177,6 +177,20 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
     );
   }
 
+  const getNaturalInstruction = (index: number, label: string) => {
+    if (!label) return '';
+    const lowerLabel = label.toLowerCase();
+    if (index === 0) return `Okay, first turn the ${lowerLabel}`;
+    if (index === 1) return `Then, let's get the ${lowerLabel}`;
+    return `Finally, let's get the ${lowerLabel}`;
+  };
+
+  const getNaturalButtonText = (label: string) => {
+    if (!label) return 'Take Photo';
+    const lowerLabel = label.toLowerCase();
+    return `Take ${lowerLabel} photo`;
+  };
+
   return (
     <div style={{ textAlign: 'left', animation: 'fadeIn 0.8s ease' }}>
       
@@ -207,7 +221,7 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
           fontWeight: 'bold', zIndex: 4, boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
           whiteSpace: 'nowrap', textShadow: '0 1px 2px rgba(0,0,0,0.8)', fontSize: '14px'
         }}>
-          Please turn: {captures[currentCaptureIndex]?.label}
+          {getNaturalInstruction(currentCaptureIndex, captures[currentCaptureIndex]?.label)}
         </div>
 
         {/* GIF Overlay */}
@@ -262,9 +276,11 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
             <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
             <circle cx="12" cy="13" r="4"></circle>
           </svg>
-          {isProcessing ? 'Analyzing...' : `Take ${captures[currentCaptureIndex]?.label} Photo`}
+          {isProcessing ? 'Analyzing...' : getNaturalButtonText(captures[currentCaptureIndex]?.label)}
         </button>
       </div>
     </div>
   );
 };
+
+export default FaceAgeDetector;
