@@ -195,7 +195,18 @@ export const RegisterWizard: React.FC = () => {
         </div>
         
         <div className="ms-card-content" style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-          {step !== 'SUCCESS' && <h1 className="ms-title" style={{ marginBottom: '24px' }}>Create account</h1>}
+          {step !== 'SUCCESS' && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '24px' }}>
+              <h1 className="ms-title" style={{ margin: 0 }}>Create account</h1>
+              <span style={{ fontSize: '13px', color: 'var(--ms-text-secondary)', paddingBottom: '4px' }}>
+                Step {
+                  userType === 'minor' 
+                    ? (step === 'GETTING_PARENT' ? 2 : step === 'PARENT_VERIFICATION' ? 3 : step === 'CONSENT' ? 4 : step === 'MINOR_VERIFICATION' ? 5 : step === 'MINOR_PROFILE_SETUP' ? 6 : 1)
+                    : (step === 'USER_DETAILS' ? 2 : step === 'CONSENT' ? 3 : 1)
+                } of {userType === 'minor' ? 6 : 3}
+              </span>
+            </div>
+          )}
 
           <div className="ms-card-scrollable">
             
@@ -243,8 +254,16 @@ export const RegisterWizard: React.FC = () => {
             {step === 'PARENT_VERIFICATION' && (
               <FaceAgeDetector 
                 onComplete={handleParentAgeDetected} 
-                title="Parent Verification"
-                subtitle="Please position your face to verify you are an adult."
+                title="Parent or Guardian Verification"
+                subtitle={
+                  <>
+                    To comply with safety regulations, we need to determine you are an adult who is either a legal parent or guardian. Your face data is never sent to any other place, and they are processed internally inside your device.
+                    <br/><br/>
+                    <a href="https://openrockets.com/legal/ID-verification" target="_blank" rel="noreferrer" style={{ color: 'var(--theme-primary)', textDecoration: 'none' }}>
+                      Learn more how you can trust us
+                    </a>
+                  </>
+                }
               />
             )}
 

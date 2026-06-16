@@ -5,12 +5,12 @@ import faceInstructionGif from '../../assets/face-instruction.gif';
 interface FaceAgeDetectorProps {
   onComplete: (averageAge: number, isAdult: boolean) => void;
   title?: string;
-  subtitle?: string;
+  subtitle?: React.ReactNode;
 }
 
 export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({ 
   onComplete, 
-  title = "Age Verification",
+  title = "Identity Verification",
   subtitle = "Please position your face as shown in the animation"
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -140,7 +140,7 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
   }
 
   return (
-    <div style={{ textAlign: 'center' }}>
+    <div style={{ textAlign: 'left' }}>
       
       {isProcessing && (
         <div className="ms-loader-overlay">
