@@ -195,7 +195,20 @@ export const RegisterWizard: React.FC = () => {
         </div>
         
         <div className="ms-card-content" style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-          {step !== 'SUCCESS' && <h1 className="ms-title" style={{ marginBottom: '24px' }}>Create account</h1>}
+          {step !== 'SUCCESS' && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <h1 className="ms-title" style={{ marginBottom: 0 }}>Create account</h1>
+              <span style={{ fontSize: '13px', color: 'var(--ms-text-secondary)', fontWeight: 500 }}>
+                {userType === 'adult' ? (
+                  `Step ${step === 'AGE_SELECTION' ? 1 : step === 'USER_DETAILS' ? 2 : 3} of 3`
+                ) : userType === 'minor' ? (
+                  `Step ${step === 'AGE_SELECTION' ? 1 : step === 'GETTING_PARENT' ? 2 : step === 'PARENT_VERIFICATION' ? 3 : step === 'CONSENT' ? 4 : step === 'MINOR_VERIFICATION' ? 5 : 6} of 6`
+                ) : (
+                  'Step 1'
+                )}
+              </span>
+            </div>
+          )}
 
           <div className="ms-card-scrollable">
             
@@ -243,8 +256,15 @@ export const RegisterWizard: React.FC = () => {
             {step === 'PARENT_VERIFICATION' && (
               <FaceAgeDetector 
                 onComplete={handleParentAgeDetected} 
-                title="Parent Verification"
-                subtitle="Please position your face to verify you are an adult."
+                title="Parent or Guardian Verification"
+                subtitle={
+                  <>
+                    To comply with safety regulations, we need to determine you are an adult who is either a legal parent or guardian. Your face data or anything is never sent to any other place, and they are processed inside your device as well.{' '}
+                    <a href="https://openrockets.com/legal/ID-verification" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--theme-primary)', textDecoration: 'none' }}>
+                      Learn more how you can trust us.
+                    </a>
+                  </>
+                }
               />
             )}
 
