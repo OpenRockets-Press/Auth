@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as faceapi from 'face-api.js';
+import faceInstructionGif from '../../assets/face-instruction.gif';
 
 interface FaceAgeDetectorProps {
   onComplete: (averageAge: number, isAdult: boolean) => void;
@@ -10,7 +11,7 @@ interface FaceAgeDetectorProps {
 export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({ 
   onComplete, 
   title = "Age Verification",
-  subtitle = "Please follow the instructions on screen"
+  subtitle = "Please position your face as shown in the animation"
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [modelsLoaded, setModelsLoaded] = useState(false);
@@ -50,6 +51,7 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
   }, [modelsLoaded]);
 
   const startVideo = () => {
+    setCameraError('');
     navigator.mediaDevices.getUserMedia({ video: true })
       .then(stream => {
         if (videoRef.current) {
@@ -115,7 +117,7 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
       <div style={{ textAlign: 'center', padding: '24px 0' }}>
         <h3 className="ms-title" style={{ marginBottom: '16px' }}>{title}</h3>
         <p style={{ color: '#E81123', marginBottom: '24px' }}>{cameraError}</p>
-        <button className="ms-button ms-button-secondary" onClick={startVideo}>Retry Camera</button>
+        <button className="ms-button ms-button-secondary" onClick={startVideo}>Clear and retry this step</button>
       </div>
     );
   }
@@ -147,7 +149,7 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
       <h3 className="ms-title" style={{ fontSize: '20px', marginBottom: '8px' }}>{title}</h3>
       <p className="ms-description" style={{ marginBottom: '16px' }}>{subtitle}</p>
 
-      <div style={{ position: 'relative', width: '100%', maxWidth: '400px', margin: '0 auto', background: '#000', borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--ms-border)' }}>
+      <div style={{ position: 'relative', width: '100%', maxWidth: '400px', margin: '0 auto', background: '#000', borderRadius: '0.5rem', overflow: 'hidden', border: '1px solid var(--ms-border)' }}>
         <video 
           ref={videoRef} 
           autoPlay 
@@ -156,8 +158,25 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
           style={{ width: '100%', display: 'block', transform: 'scaleX(-1)' }} 
         />
         
+        {/* GIF Overlay */}
+        <div style={{ 
+          position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, 
+          display: 'flex', alignItems: 'center', justifyContent: 'center', 
+          pointerEvents: 'none', zIndex: 2 
+        }}>
+          <img 
+            src={faceInstructionGif} 
+            alt="Face alignment instruction" 
+            style={{ 
+              height: '80%', opacity: 0.5, 
+              transform: currentCaptureIndex === 0 ? 'scale(1.2)' : currentCaptureIndex === 1 ? 'scale(1.0)' : 'scale(1.0) rotateY(180deg)',
+              transition: 'transform 0.5s ease'
+            }} 
+          />
+        </div>
+        
         {isProcessing && (
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3 }}>
             <span style={{ color: 'white', fontWeight: 'bold' }}>Processing...</span>
           </div>
         )}
