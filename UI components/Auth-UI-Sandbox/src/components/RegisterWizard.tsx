@@ -246,7 +246,7 @@ export const RegisterWizard: React.FC = () => {
   return (
     <>
       <AmbientBackground />
-      <div className={`ms-card ${initialLoad ? 'is-loading-initial' : ''} ${step === 'MINOR_PROFILE_SETUP' ? 'expanded' : ''}`} style={{ position: 'relative', maxWidth: step === 'MINOR_PROFILE_SETUP' ? '800px' : (step === 'AGE_SELECTION' || step === 'PARENT_VERIFICATION' || step === 'MINOR_VERIFICATION' ? '500px' : '440px') }}>
+      <div className={`ms-card ${initialLoad ? 'is-loading-initial' : ''} ${step === 'MINOR_PROFILE_SETUP' ? 'expanded' : ''}`} style={{ position: 'relative', maxWidth: step === 'MINOR_PROFILE_SETUP' ? '800px' : '440px', transition: 'max-width 0.5s ease' }}>
         
         {(status === 'loading' || initialLoad) && (
           <div className="ms-loader-overlay">

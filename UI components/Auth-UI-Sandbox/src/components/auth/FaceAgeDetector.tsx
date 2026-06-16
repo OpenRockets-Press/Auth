@@ -140,22 +140,22 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
 
   if (!modelsLoaded) {
     return (
-      <div style={{ textAlign: 'left', minHeight: '350px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+      <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '16px 0 24px 0' }}>
         <style>{`
           .local-ai-loader {
             position: absolute;
-            top: -68px;
-            left: -44px;
-            right: -44px;
+            top: 0;
+            left: 0;
+            right: 0;
             height: 4px;
             background-color: transparent;
             z-index: 10;
           }
           @media (max-width: 480px) {
             .local-ai-loader {
-              top: -32px;
-              left: -24px;
-              right: -24px;
+              top: 0;
+              left: 0;
+              right: 0;
             }
           }
         `}</style>
