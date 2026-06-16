@@ -25,7 +25,7 @@ export const LoginScreen: React.FC = () => {
     setErrorMessage('');
 
     try {
-      const response = await api.post('/api/auth/login', { email, password });
+      await api.post('/api/auth/login', { email, password });
       setStatus('success');
       // In a real flow, you'd store the token here, e.g., localStorage.setItem('token', response.data.access_token)
       // Then redirect the user to the destination. For now, just simulating.

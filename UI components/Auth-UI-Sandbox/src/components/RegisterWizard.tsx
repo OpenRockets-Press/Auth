@@ -34,12 +34,12 @@ export const RegisterWizard: React.FC = () => {
   const sigPad = useRef<SignatureCanvas>(null);
   const navigate = useNavigate();
 
-  const handleAgeDetected = (averageAge: number, isAdult: boolean) => {
+  const handleAgeDetected = (_averageAge: number, isAdult: boolean) => {
     setUserType(isAdult ? 'adult' : 'minor');
     setStep('USER_DETAILS');
   };
 
-  const handleParentAgeDetected = (averageAge: number, isAdult: boolean) => {
+  const handleParentAgeDetected = (_averageAge: number, isAdult: boolean) => {
     if (!isAdult) {
       setErrorMessage("Parent verification failed. The person detected appears to be a minor.");
       // Go back to getting parent
