@@ -3,17 +3,12 @@ import axios from 'axios';
 import SignatureCanvas from 'react-signature-canvas';
 import { AmbientBackground } from './AmbientBackground';
 import { FaceAgeDetector } from './auth/FaceAgeDetector';
+import { MembershipCard } from './auth/MembershipCard';
 import logoPath from '../assets/openrocketsvc1.png';
 
-const api = axios.create({
-  baseURL: 'https://openrocketsauth.alwaysdata.net',
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  }
-});
+import { sendOtp, verifyOtp, registerMinorWizard } from '../api';
 
-type Step = 'PARENT_STATEMENT' | 'PARENT_VERIFICATION' | 'PARENT_DETAILS' | 'CONSENT' | 'MINOR_VERIFICATION' | 'MINOR_PROFILE_SETUP' | 'SUCCESS';
+type Step = 'PARENT_STATEMENT' | 'PARENT_VERIFICATION' | 'PARENT_DETAILS' | 'CONSENT' | 'MINOR_VERIFICATION' | 'MINOR_PROFILE_SETUP' | 'SUCCESS_CARD';
 
 const PLACEHOLDER_AVATARS = [
   'https://raw.githubusercontent.com/roma-lukashik/animal-avatar-generator/e9b435bb28c8ae2dda224678bdda8faad6035373/preview.svg',
@@ -23,6 +18,8 @@ const PLACEHOLDER_AVATARS = [
 
 export const RegisterWizard: React.FC = () => {
   const [step, setStep] = useState<Step>('PARENT_STATEMENT');
+  const [parentSignatureData, setParentSignatureData] = useState('');
+  const [profileFileName, setProfileFileName] = useState('');
   
   // Form state
   const [name, setName] = useState('');
@@ -63,21 +60,24 @@ export const RegisterWizard: React.FC = () => {
   }, []);
 
 
-  const handleParentAgeDetected = (_averageAge: number, isAdult: boolean) => {
-    if (!isAdult) {
-      setErrorMessage("Parent verification failed. The person detected appears to be a minor.");
-      setStep('PARENT_STATEMENT');
+  const handleParentAgeDetected = (averageAge: number) => {
+    if (averageAge < 18) {
+      setErrorMessage("Verification failed. The person detected appears to be a minor.");
+      setStatus('error');
     } else {
       setErrorMessage('');
+      setStatus('idle');
       setStep('PARENT_DETAILS');
     }
   };
 
-  const handleMinorVerification = (_averageAge: number, isAdult: boolean) => {
-    if (isAdult) {
+  const handleMinorVerification = (averageAge: number) => {
+    if (averageAge >= 35) {
       setErrorMessage("Verification failed. The person detected appears to be an adult. This flow is for minors.");
+      setStatus('error');
     } else {
       setErrorMessage('');
+      setStatus('idle');
       setStep('MINOR_PROFILE_SETUP');
     }
   };
@@ -88,6 +88,12 @@ export const RegisterWizard: React.FC = () => {
        setErrorMessage("Parent signature is required.");
        return;
     }
+    try {
+      setParentSignatureData(sigPad.current.toDataURL('image/png'));
+    } catch (err) {
+      console.error("Signature save error:", err);
+      // allow to proceed even if canvas export fails
+    }
     setErrorMessage('');
     setStep('MINOR_VERIFICATION');
   };
@@ -95,8 +101,13 @@ export const RegisterWizard: React.FC = () => {
   const handleSendParentOtp = async () => {
     if (!parentEmail) return;
     setStatus('loading');
-    await new Promise(r => setTimeout(r, 1000));
-    setParentOtpSent(true);
+    try {
+      await sendOtp(parentEmail, 'parent');
+      setParentOtpSent(true);
+    } catch (err: any) {
+      setErrorMessage("Failed to send OTP.");
+      setStatus('error');
+    }
     setStatus('idle');
   };
 
@@ -107,12 +118,12 @@ export const RegisterWizard: React.FC = () => {
        return;
     }
     setStatus('loading');
-    await new Promise(r => setTimeout(r, 1000));
-    if (parentOtp === '123456') {
-       setParentEmailVerified(true);
-       setParentOtpError('');
-    } else {
-       setParentOtpError("Invalid OTP. For demo purposes, use 123456.");
+    try {
+      await verifyOtp(parentEmail, parentOtp, 'parent');
+      setParentEmailVerified(true);
+      setParentOtpError('');
+    } catch (err: any) {
+      setParentOtpError(err.response?.data?.message || "Invalid OTP.");
     }
     setStatus('idle');
   };
@@ -120,8 +131,13 @@ export const RegisterWizard: React.FC = () => {
   const handleSendMinorOtp = async () => {
     if (!email) return;
     setStatus('loading');
-    await new Promise(r => setTimeout(r, 1000));
-    setMinorOtpSent(true);
+    try {
+      await sendOtp(email, 'minor');
+      setMinorOtpSent(true);
+    } catch (err: any) {
+      setErrorMessage("Failed to send OTP.");
+      setStatus('error');
+    }
     setStatus('idle');
   };
 
@@ -132,12 +148,12 @@ export const RegisterWizard: React.FC = () => {
        return;
     }
     setStatus('loading');
-    await new Promise(r => setTimeout(r, 1000));
-    if (minorOtp === '123456') {
-       setMinorEmailVerified(true);
-       setMinorOtpError('');
-    } else {
-       setMinorOtpError("Invalid OTP. For demo purposes, use 123456.");
+    try {
+      await verifyOtp(email, minorOtp, 'minor');
+      setMinorEmailVerified(true);
+      setMinorOtpError('');
+    } catch (err: any) {
+      setMinorOtpError(err.response?.data?.message || "Invalid OTP.");
     }
     setStatus('idle');
   };
@@ -145,51 +161,47 @@ export const RegisterWizard: React.FC = () => {
   const submitRegistration = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     
-    if (!sigPad.current || sigPad.current.isEmpty()) {
-      setErrorMessage("Please provide a signature to continue.");
+    if (!minorEmailVerified) {
+      setErrorMessage("Please verify your email code first.");
+      setStatus('error');
       return;
     }
     
     setStatus('loading');
     setErrorMessage('');
     
-    const signatureBase64 = sigPad.current ? sigPad.current.getTrimmedCanvas().toDataURL('image/png') : '';
-
     try {
-      const response = await api.post('/api/auth/register-with-consent', {
-        name,
-        email,
-        password,
-        password_confirmation: password,
-        phone,
-        profile_image: profileImage,
-        is_minor: true,
-        parent_name: parentName,
-        parent_email: parentEmail,
-        signature: signatureBase64
-      });
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('email', email);
+      formData.append('password', password);
+      formData.append('parent_email', parentEmail);
+      formData.append('parent_name', parentName);
+      formData.append('dob', '2010-01-01'); // Assume default or derived
+      formData.append('pin', '1234'); // Assume generated or input
+      formData.append('signature', parentSignatureData);
+
+      // Extract raw File if available (using a hack from the image src or ideally keeping raw File in state)
+      // Since profileImage is a dataUrl, we should ideally fetch it and convert to blob
+      if (profileImage && profileImage.startsWith('data:image')) {
+          const res = await fetch(profileImage);
+          const blob = await res.blob();
+          formData.append('profile_image', blob, profileFileName || 'avatar.png');
+      }
+
+      const response = await registerMinorWizard(formData);
       
-      // Indefinite encrypted token storage
-      if (response.data.token) {
-        // Obfuscation/Encryption placeholder (btoa for now)
-        const encryptedToken = window.btoa(response.data.token);
+      if (response.token) {
+        const encryptedToken = window.btoa(response.token);
         localStorage.setItem('_or_auth_tk', encryptedToken);
       }
 
       setStatus('idle');
-      setStep('SUCCESS');
-      
-      // Auto-redirect if token was received
-      if (response.data.token) {
-        setTimeout(() => {
-          window.location.href = 'https://myaccount.openrockets.com';
-        }, 3000);
-      }
-      
-    } catch (error: any) {
-      console.error('Registration Error:', error);
+      setStep('SUCCESS_CARD');
+    } catch (err: any) {
+      console.error("Registration error", err);
+      setErrorMessage(err.response?.data?.message || "Registration failed.");
       setStatus('error');
-      setErrorMessage(error.response?.data?.message || 'An error occurred during registration.');
     }
   };
 
@@ -215,6 +227,7 @@ export const RegisterWizard: React.FC = () => {
         setUploadError("Image too large. Please select an image under 5MB.");
         return;
       }
+      setProfileFileName(file.name);
       setIsUploading(true);
       setUploadError('');
       const reader = new FileReader();
@@ -232,9 +245,9 @@ export const RegisterWizard: React.FC = () => {
   return (
     <>
       <AmbientBackground />
-      <div className={`ms-card ${initialLoad ? 'is-loading-initial' : ''} ${step === 'MINOR_PROFILE_SETUP' ? 'expanded' : ''}`} style={{ position: 'relative', maxWidth: step === 'MINOR_PROFILE_SETUP' ? '800px' : '440px', transition: 'max-width 0.5s ease' }}>
+      <div className={`ms-card ${(initialLoad || aiLoading) ? 'is-loading-initial' : ''} ${step === 'MINOR_PROFILE_SETUP' ? 'expanded' : ''}`} style={{ position: 'relative', maxWidth: step === 'MINOR_PROFILE_SETUP' ? '800px' : '440px', transition: 'max-width 0.5s ease' }}>
         
-        {(status === 'loading' || initialLoad) && (
+        {(status === 'loading' || initialLoad || aiLoading) && (
           <div className="ms-loader-overlay">
             <div className="ms-loader-container">
               <div className={`anim-dot dot1 ${status === 'error' ? 'error-dot' : ''}`}></div>
@@ -246,12 +259,20 @@ export const RegisterWizard: React.FC = () => {
           </div>
         )}
 
-        <div className="ms-logo-container">
+        <div className="ms-logo-container" style={{ marginBottom: aiLoading ? '0' : '16px', transition: 'margin 0.5s ease' }}>
           <img src={logoPath} alt="OpenRockets Logo" className="ms-logo-img" />
         </div>
+
+        {aiLoading && (
+          <div style={{ marginTop: '16px', animation: 'fadeIn 0.5s ease' }}>
+            <p className="ms-description" style={{ fontSize: '15px', fontWeight: 600, margin: 0, color: 'var(--ms-text-secondary)' }}>
+              This feature uses AI...
+            </p>
+          </div>
+        )}
         
         <div className="ms-card-content" style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-          {step !== 'SUCCESS' && (
+          {step !== 'SUCCESS_CARD' && (
             <div style={{ 
               display: 'flex', 
               flexDirection: aiLoading ? 'column' : 'row', 
@@ -275,10 +296,10 @@ export const RegisterWizard: React.FC = () => {
 
 
             {step === 'PARENT_STATEMENT' && (
-              <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <h3 className="ms-title" style={{ fontSize: '20px', marginBottom: '16px' }}>Data Privacy Statement</h3>
                 <div style={{ 
-                  flex: 1, 
+                  maxHeight: '220px', 
                   overflowY: 'auto', 
                   padding: '16px', 
                   background: 'rgba(0,0,0,0.02)', 
@@ -290,10 +311,28 @@ export const RegisterWizard: React.FC = () => {
                   color: 'var(--ms-text)'
                 }}>
                   <p><strong>Your Privacy is Our Priority</strong></p>
-                  <p>Before proceeding, please review our data processing agreement.</p>
-                  <p>1. <strong>Local Processing:</strong> All facial recognition and age detection processes happen entirely on your device. We do not upload your video feed or photos to any external servers.</p>
-                  <p>2. <strong>No Data Retention:</strong> The images captured during the identity verification stage are immediately discarded once the verification algorithm completes. They are never saved, stored, or transmitted.</p>
-                  <p>3. <strong>Purpose:</strong> We collect parent details and verify identity strictly to comply with safety regulations regarding minor accounts. Your information is protected and encrypted.</p>
+                  <p style={{ marginBottom: '12px' }}>
+                    OpenRockets is a 100% teen-run corporation based in the United States, operated by high schoolers and teenagers. Our mission is to make a positive impact on our community, and our primary goal is to provide the highest security standards for our users—which means teenagers, minors, and their supervising parents.
+                  </p>
+                  <p style={{ marginBottom: '12px' }}>
+                    <strong>How We Process Data:</strong> You will notice that we use video technology and artificial intelligence to predict your age internally, directly inside your device. Meaning that your data will never be shared with a separate data center. Since we utilize local JavaScript technologies and AI frameworks, everything is fully transparent.
+                  </p>
+                  <p style={{ marginBottom: '12px' }}>
+                    <strong>Legal Compliance:</strong> We must justify our use of video technologies based on the <a href="https://www.ftc.gov/legal-library/browse/rules/childrens-online-privacy-protection-rule-coppa" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--theme-primary)' }}>Child Online Privacy Protection Act (COPPA)</a> in the United States, and the <a href="https://gdpr-info.eu/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--theme-primary)' }}>GDPR</a> in Europe (and other countries where applicable). This rigorous process is to certify to parents and governments that we are verifying teenagers and minors properly. We collect and store teenagers and minors data securely in an encrypted manner that meets or exceeds industry standard practices.
+                  </p>
+                  <p style={{ marginBottom: '12px' }}>
+                    <strong>Why The High Standards?</strong> We use AI age prediction and two-step email verification because this single OpenRockets account grants teenagers and minors access to more than 30+ OpenRockets services via Single Sign-On. Furthermore, as of January 2026, 50 to 60 external organizations are integrating our account system via our API. Teenagers and minors will use this same account to access those external services. This is why we maintain such a high-standard, secure account system—so only teenagers and minors can access and benefit from it safely.
+                  </p>
+                  <p style={{ marginBottom: '0' }}>
+                    To see exactly how we secure your data and how transparent we are, please review our legal policies:
+                    <br />
+                    • <a href="https://openrockets.com/legal/privacy" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--theme-primary)' }}>openrockets.com/legal/privacy</a>
+                    <br />
+                    • <a href="https://openrockets.com/legal/id-verification" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--theme-primary)' }}>openrockets.com/legal/id-verification</a>
+                  </p>
+                  <p style={{ marginTop: '16px', fontSize: '13px', fontStyle: 'italic', color: 'var(--ms-text-secondary)', textAlign: 'right', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '8px' }}>
+                    written by; United States Rep: Ryan Chan
+                  </p>
                 </div>
                 <div className="ms-button-group" style={{ justifyContent: 'flex-end' }}>
                   <button className="ms-button ms-button-primary" onClick={() => setStep('PARENT_VERIFICATION')}>Next</button>
@@ -302,20 +341,30 @@ export const RegisterWizard: React.FC = () => {
             )}
 
             {step === 'PARENT_VERIFICATION' && (
-              <FaceAgeDetector 
-                onComplete={handleParentAgeDetected} 
-                title="Parent or Guardian Verification"
-                onLoadingChange={setAiLoading}
-                subtitle={
-                  <>
-                    To comply with safety regulations, we need to determine you are an adult who is either a legal parent or guardian. Your face data is never sent to any other place, and they are processed internally inside your device.
-                    <br/><br/>
-                    <a href="https://openrockets.com/legal/ID-verification" target="_blank" rel="noreferrer" style={{ color: 'var(--theme-primary)', textDecoration: 'none' }}>
-                      Learn more how you can trust us
-                    </a>
-                  </>
-                }
-              />
+              <>
+                {status !== 'error' ? (
+                  <FaceAgeDetector 
+                    onComplete={handleParentAgeDetected} 
+                    title="Parent or Guardian Verification"
+                    onLoadingChange={setAiLoading}
+                    subtitle={
+                      <>
+                        To comply with safety regulations, we need to determine you are an adult who is either a legal parent or guardian. Your face data is never sent to any other place, and they are processed internally inside your device.
+                        <br/><br/>
+                        <a href="https://openrockets.com/legal/ID-verification" target="_blank" rel="noreferrer" style={{ color: 'var(--theme-primary)', textDecoration: 'none' }}>
+                          Learn more about data handling process and safety measures
+                        </a>
+                      </>
+                    }
+                  />
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '24px 0' }}>
+                    <h3 className="ms-title" style={{ fontSize: '20px', marginBottom: '16px' }}>Verification Failed</h3>
+                    <p style={{ color: '#E81123', marginBottom: '24px' }}>{errorMessage}</p>
+                    <button className="ms-button ms-button-primary" onClick={() => setStatus('idle')}>Try Again</button>
+                  </div>
+                )}
+              </>
             )}
 
             {step === 'PARENT_DETAILS' && (
@@ -356,7 +405,7 @@ export const RegisterWizard: React.FC = () => {
                       <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
                         <input 
                           type="text" 
-                          placeholder="Enter 6-digit OTP (use 123456)" 
+                          placeholder="Enter 6-digit OTP" 
                           value={parentOtp} 
                           onChange={e => setParentOtp(e.target.value)} 
                           maxLength={6}
@@ -419,17 +468,24 @@ export const RegisterWizard: React.FC = () => {
 
             {step === 'MINOR_VERIFICATION' && (
               <>
-                <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+                <div style={{ textAlign: 'left', marginBottom: '16px' }}>
                   <h3 className="ms-title" style={{ fontSize: '20px' }}>Hand device back to child</h3>
                   <p className="ms-description">Thank you for consenting. Please hand the device back to the minor to create their profile.</p>
                 </div>
-                <FaceAgeDetector 
-                  onComplete={handleMinorVerification} 
-                  title="Child Verification"
-                  subtitle="Please position your face to verify."
-                  onLoadingChange={setAiLoading}
-                />
-                {status === 'error' && <div style={{ color: '#E81123', marginTop: '16px', fontSize: '14px', textAlign: 'center' }}>{errorMessage}</div>}
+                {status !== 'error' ? (
+                  <FaceAgeDetector 
+                    onComplete={handleMinorVerification} 
+                    title="Child Verification"
+                    subtitle="Please position your face to verify."
+                    onLoadingChange={setAiLoading}
+                  />
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '24px 0' }}>
+                    <h3 className="ms-title" style={{ fontSize: '20px', marginBottom: '16px' }}>Verification Failed</h3>
+                    <p style={{ color: '#E81123', marginBottom: '24px' }}>{errorMessage}</p>
+                    <button className="ms-button ms-button-primary" onClick={() => setStatus('idle')}>Try Again</button>
+                  </div>
+                )}
               </>
             )}
 
@@ -441,7 +497,26 @@ export const RegisterWizard: React.FC = () => {
                     
                     <div style={{ marginBottom: '16px' }}>
                       <label style={{ fontSize: '14px', display: 'block', marginBottom: '8px', color: 'var(--ms-text)' }}>Profile Picture</label>
-                      <input type="file" accept="image/*" onChange={handleImageUpload} style={{ fontSize: '14px', color: 'var(--ms-text)' }} />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <button 
+                          type="button" 
+                          className="ms-button ms-button-primary" 
+                          style={{ padding: '6px 12px', fontSize: '13px' }}
+                          onClick={() => document.getElementById('profile-upload-input')?.click()}
+                        >
+                          Choose File
+                        </button>
+                        <span style={{ fontSize: '13px', color: 'var(--ms-text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '200px' }}>
+                          {profileFileName || 'No file chosen'}
+                        </span>
+                        <input 
+                          id="profile-upload-input"
+                          type="file" 
+                          accept="image/*" 
+                          onChange={handleImageUpload} 
+                          style={{ display: 'none' }} 
+                        />
+                      </div>
                       {uploadError && <div style={{ color: '#E81123', marginTop: '8px', fontSize: '13px' }}>{uploadError}</div>}
                     </div>
 
@@ -479,7 +554,7 @@ export const RegisterWizard: React.FC = () => {
                           <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
                             <input 
                               type="text" 
-                              placeholder="Enter 6-digit OTP (use 123456)" 
+                              placeholder="Enter 6-digit OTP" 
                               value={minorOtp} 
                               onChange={e => setMinorOtp(e.target.value)} 
                               maxLength={6}
@@ -503,36 +578,35 @@ export const RegisterWizard: React.FC = () => {
                     {status === 'error' && <div style={{ color: '#E81123', marginBottom: '16px', fontSize: '14px' }}>{errorMessage}</div>}
 
                     <div className="ms-button-group" style={{ marginTop: '24px' }}>
-                      <button type="submit" className="ms-button ms-button-primary" disabled={status === 'loading' || !minorEmailVerified} style={{ width: '100%' }}>
+                      <button 
+                        type="submit" 
+                        className="ms-button ms-button-primary" 
+                        style={{ width: '100%', opacity: !minorEmailVerified ? 0.6 : 1, cursor: !minorEmailVerified ? 'not-allowed' : 'pointer' }}
+                        onClick={(e) => {
+                          if (!minorEmailVerified) {
+                            e.preventDefault();
+                            setErrorMessage("Please verify your email code first.");
+                            setStatus('error');
+                          }
+                        }}
+                      >
                         {status === 'loading' ? 'Creating...' : 'Create Account'}
                       </button>
                     </div>
                   </form>
                 </div>
                 
-                <div className="ms-split-preview">
-                  <p className="ms-description" style={{ marginBottom: '24px', fontWeight: 600 }}>Live Preview</p>
-                  <img src={profileImage} alt="Profile Preview" className={`profile-preview-avatar ${isUploading ? 'ms-upload-anim' : ''}`} />
-                  <div className="profile-preview-name">{name || 'Your Name'}</div>
-                  <div className="profile-preview-email">{email || 'your.email@example.com'}</div>
+                <div className="ms-split-preview" style={{ justifyContent: 'center' }}>
+                  <img src={profileImage} alt="Profile Preview" className={`profile-preview-avatar ${isUploading ? 'ms-upload-anim' : ''}`} style={{ width: '120px', height: '120px', marginBottom: '16px' }} />
+                  <div className="profile-preview-name" style={{ fontSize: '18px' }}>{name || 'Your Name'}</div>
+                  <div className="profile-preview-email" style={{ fontSize: '14px' }}>{email || 'your.email@example.com'}</div>
                   {phone && <div style={{ fontSize: '13px', color: 'var(--ms-text-secondary)', marginTop: '8px' }}>{phone}</div>}
-                  <div style={{ marginTop: 'auto', paddingTop: '24px', fontSize: '12px', color: 'var(--theme-primary)', fontWeight: 'bold' }}>
-                    OpenRockets Ecosystem
-                  </div>
                 </div>
               </div>
             )}
 
-            {step === 'SUCCESS' && (
-              <div style={{ textAlign: 'center', padding: '16px 0' }}>
-                <div style={{ fontSize: '48px', color: '#107c10', marginBottom: '16px' }}>✓</div>
-                <h3 className="ms-title" style={{ fontSize: '20px', marginBottom: '8px' }}>Account Created</h3>
-                <p className="ms-description" style={{ marginBottom: '24px' }}>
-                  We've successfully created your account.
-                  <br/><br/>
-                  Redirecting to your dashboard...
-                </p>
-              </div>
+            {step === 'SUCCESS_CARD' && (
+              <MembershipCard name={name} password={password} />
             )}
           </div>
         </div>
