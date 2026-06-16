@@ -123,7 +123,7 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
   if (!modelsLoaded) {
     return (
       <div style={{ textAlign: 'center', padding: '32px 0' }}>
-        <div className="ms-loader-overlay" style={{ position: 'relative', background: 'transparent', height: '20px' }}>
+        <div className="ms-loader-overlay">
           <div className="ms-loader-container">
             <div className="anim-dot dot1"></div><div className="anim-dot dot2"></div><div className="anim-dot dot3"></div><div className="anim-dot dot4"></div><div className="anim-dot dot5"></div>
           </div>
@@ -135,6 +135,15 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
 
   return (
     <div style={{ textAlign: 'center' }}>
+      
+      {isProcessing && (
+        <div className="ms-loader-overlay">
+          <div className="ms-loader-container">
+            <div className="anim-dot dot1"></div><div className="anim-dot dot2"></div><div className="anim-dot dot3"></div><div className="anim-dot dot4"></div><div className="anim-dot dot5"></div>
+          </div>
+        </div>
+      )}
+
       <h3 className="ms-title" style={{ fontSize: '20px', marginBottom: '8px' }}>{title}</h3>
       <p className="ms-description" style={{ marginBottom: '16px' }}>{subtitle}</p>
 

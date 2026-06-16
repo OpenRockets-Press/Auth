@@ -41,6 +41,15 @@ export const LoginScreen: React.FC = () => {
     <>
       <AmbientBackground />
       <div className="ms-card" style={{ position: 'relative' }}>
+        
+        {status === 'loading' && (
+          <div className="ms-loader-overlay">
+            <div className="ms-loader-container">
+              <div className="anim-dot dot1"></div><div className="anim-dot dot2"></div><div className="anim-dot dot3"></div><div className="anim-dot dot4"></div><div className="anim-dot dot5"></div>
+            </div>
+          </div>
+        )}
+
         <div className="ms-logo-container">
           <img src={logoPath} alt="OpenRockets Logo" className="ms-logo-img" />
         </div>
@@ -53,7 +62,7 @@ export const LoginScreen: React.FC = () => {
           </div>
         )}
 
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleLogin} className="ms-card-scrollable">
           <div style={{ marginBottom: '16px' }}>
             <input
               type="email"

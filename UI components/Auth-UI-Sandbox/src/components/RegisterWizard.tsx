@@ -116,6 +116,15 @@ export const RegisterWizard: React.FC = () => {
     <>
       <AmbientBackground />
       <div className="ms-card" style={{ position: 'relative', maxWidth: step === 'AGE_SELECTION' || step === 'PARENT_VERIFICATION' ? '500px' : '440px' }}>
+        
+        {status === 'loading' && (
+          <div className="ms-loader-overlay">
+            <div className="ms-loader-container">
+              <div className="anim-dot dot1"></div><div className="anim-dot dot2"></div><div className="anim-dot dot3"></div><div className="anim-dot dot4"></div><div className="anim-dot dot5"></div>
+            </div>
+          </div>
+        )}
+
         <div className="ms-logo-container">
           <img src={logoPath} alt="OpenRockets Logo" className="ms-logo-img" />
         </div>
@@ -125,7 +134,7 @@ export const RegisterWizard: React.FC = () => {
           <div style={{ color: '#E81123', marginBottom: '16px', fontSize: '14px' }}>{errorMessage}</div>
         )}
 
-        <div>
+        <div className="ms-card-scrollable">
           {step === 'AGE_SELECTION' && (
             <FaceAgeDetector 
               onComplete={handleAgeDetected} 
