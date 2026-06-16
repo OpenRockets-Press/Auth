@@ -188,8 +188,8 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
     if (!label) return '';
     const lowerLabel = label.toLowerCase();
     if (index === 0) return `Okay, first turn the ${lowerLabel}`;
-    if (index === 1) return `Then, let's get the ${lowerLabel}`;
-    return `Finally, let's get the ${lowerLabel}`;
+    if (index === 1) return `Okay, next turn the ${lowerLabel}`;
+    return `Finally, turn your ${lowerLabel}`;
   };
 
   const getNaturalButtonText = (label: string) => {

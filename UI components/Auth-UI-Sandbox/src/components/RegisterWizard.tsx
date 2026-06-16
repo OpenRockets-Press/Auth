@@ -13,7 +13,7 @@ const api = axios.create({
   }
 });
 
-type Step = 'AGE_SELECTION' | 'USER_DETAILS' | 'GETTING_PARENT' | 'PARENT_VERIFICATION' | 'CONSENT' | 'MINOR_VERIFICATION' | 'MINOR_PROFILE_SETUP' | 'SUCCESS';
+type Step = 'AGE_SELECTION' | 'USER_DETAILS' | 'GETTING_PARENT' | 'PARENT_STATEMENT' | 'PARENT_VERIFICATION' | 'PARENT_DETAILS' | 'CONSENT' | 'MINOR_VERIFICATION' | 'MINOR_PROFILE_SETUP' | 'SUCCESS';
 type UserType = 'adult' | 'minor' | null;
 
 const PLACEHOLDER_AVATARS = [
@@ -79,7 +79,7 @@ export const RegisterWizard: React.FC = () => {
       setStep('GETTING_PARENT');
     } else {
       setErrorMessage('');
-      setStep('CONSENT');
+      setStep('PARENT_DETAILS');
     }
   };
 
@@ -280,9 +280,9 @@ export const RegisterWizard: React.FC = () => {
               <span style={{ fontSize: '13px', color: 'var(--ms-text-secondary)', paddingBottom: '4px' }}>
                 Step <strong style={{ fontSize: '24px', color: '#000', fontWeight: 'bold' }}>{
                   userType === 'minor' 
-                    ? (step === 'GETTING_PARENT' ? 2 : step === 'PARENT_VERIFICATION' ? 3 : step === 'CONSENT' ? 4 : step === 'MINOR_VERIFICATION' ? 5 : step === 'MINOR_PROFILE_SETUP' ? 6 : 1)
+                    ? (step === 'GETTING_PARENT' ? 2 : step === 'PARENT_STATEMENT' ? 3 : step === 'PARENT_VERIFICATION' ? 4 : step === 'PARENT_DETAILS' ? 5 : step === 'CONSENT' ? 6 : step === 'MINOR_VERIFICATION' ? 7 : step === 'MINOR_PROFILE_SETUP' ? 8 : 1)
                     : (step === 'USER_DETAILS' ? 2 : step === 'CONSENT' ? 3 : 1)
-                }</strong> of {userType === 'minor' ? 6 : 3}
+                }</strong> of {userType === 'minor' ? 8 : 3}
               </span>
             </div>
           )}
@@ -321,12 +321,40 @@ export const RegisterWizard: React.FC = () => {
                 </p>
                 {status === 'error' && <div style={{ color: '#E81123', marginBottom: '16px', fontSize: '14px' }}>{errorMessage}</div>}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <button className="ms-button ms-button-primary" onClick={() => setStep('PARENT_VERIFICATION')} style={{ width: '100%', padding: '12px' }}>
+                  <button className="ms-button ms-button-primary" onClick={() => setStep('PARENT_STATEMENT')} style={{ width: '100%', padding: '12px' }}>
                     I am the Parent / Ready
                   </button>
                   <button className="ms-button ms-button-secondary" onClick={() => setStep('AGE_SELECTION')} style={{ width: '100%', padding: '12px' }}>
                     Back
                   </button>
+                </div>
+              </div>
+            )}
+
+            {step === 'PARENT_STATEMENT' && (
+              <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                <h3 className="ms-title" style={{ fontSize: '20px', marginBottom: '16px' }}>Data Privacy Statement</h3>
+                <div style={{ 
+                  flex: 1, 
+                  overflowY: 'auto', 
+                  padding: '16px', 
+                  background: 'rgba(0,0,0,0.02)', 
+                  border: '1px solid var(--ms-border)', 
+                  borderRadius: '4px',
+                  marginBottom: '24px',
+                  fontSize: '14px',
+                  lineHeight: '1.6',
+                  color: 'var(--ms-text)'
+                }}>
+                  <p><strong>Your Privacy is Our Priority</strong></p>
+                  <p>Before proceeding, please review our data processing agreement.</p>
+                  <p>1. <strong>Local Processing:</strong> All facial recognition and age detection processes happen entirely on your device. We do not upload your video feed or photos to any external servers.</p>
+                  <p>2. <strong>No Data Retention:</strong> The images captured during the identity verification stage are immediately discarded once the verification algorithm completes. They are never saved, stored, or transmitted.</p>
+                  <p>3. <strong>Purpose:</strong> We collect parent details and verify identity strictly to comply with safety regulations regarding minor accounts. Your information is protected and encrypted.</p>
+                </div>
+                <div className="ms-button-group" style={{ justifyContent: 'space-between' }}>
+                  <button className="ms-button ms-button-secondary" onClick={() => setStep('GETTING_PARENT')}>Back</button>
+                  <button className="ms-button ms-button-primary" onClick={() => setStep('PARENT_VERIFICATION')}>Next</button>
                 </div>
               </div>
             )}
@@ -348,112 +376,106 @@ export const RegisterWizard: React.FC = () => {
               />
             )}
 
+            {step === 'PARENT_DETAILS' && (
+              <form onSubmit={(e) => { e.preventDefault(); setStep('CONSENT'); }}>
+                <p className="ms-description" style={{ marginBottom: '16px', fontWeight: 600 }}>Parent Details</p>
+                <p className="ms-description" style={{ fontSize: '14px', marginBottom: '16px' }}>Please provide your details as the consenting parent/guardian.</p>
+                {renderInput('text', "Parent's Full Name", parentName, setParentName)}
+                
+                <div style={{ marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <div style={{ flex: 1 }}>
+                      <input
+                        type="email"
+                        placeholder="Parent's Email Address"
+                        value={parentEmail}
+                        onChange={(e) => setParentEmail(e.target.value)}
+                        required={true}
+                        disabled={status === 'loading' || parentEmailVerified}
+                        style={{
+                          width: '100%', padding: '8px 0', border: 'none', borderBottom: '1px solid var(--ms-border)',
+                          outline: 'none', fontSize: '15px', background: 'transparent', color: 'var(--ms-text)'
+                        }}
+                      />
+                    </div>
+                    {!parentEmailVerified && (
+                      <button type="button" className="ms-button ms-button-secondary" 
+                        onClick={handleSendParentOtp}
+                        disabled={!parentEmail || parentOtpSent || status === 'loading'}
+                        style={{ height: '37px', whiteSpace: 'nowrap' }}
+                      >
+                        {parentOtpSent ? 'Code Sent' : 'Send Code'}
+                      </button>
+                    )}
+                  </div>
+                  
+                  {parentOtpSent && !parentEmailVerified && (
+                    <>
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
+                        <input 
+                          type="text" 
+                          placeholder="Enter 6-digit OTP (use 123456)" 
+                          value={parentOtp} 
+                          onChange={e => setParentOtp(e.target.value)} 
+                          maxLength={6}
+                          style={{ flex: 1, padding: '8px', border: '1px solid var(--ms-border)', outline: 'none' }}
+                        />
+                        <button type="button" className="ms-button ms-button-primary" onClick={handleVerifyParentOtp} style={{ height: '37px' }}>
+                          Verify
+                        </button>
+                      </div>
+                      {parentOtpError && <div style={{ color: '#E81123', marginTop: '8px', fontSize: '13px' }}>{parentOtpError}</div>}
+                    </>
+                  )}
+                  {parentEmailVerified && (
+                    <div style={{ color: '#107c10', fontSize: '13px', fontWeight: 'bold', marginTop: '8px' }}>✓ Parent Email Verified</div>
+                  )}
+                </div>
+
+                {status === 'error' && <div style={{ color: '#E81123', marginBottom: '16px', fontSize: '14px' }}>{errorMessage}</div>}
+
+                <div className="ms-button-group" style={{ justifyContent: 'space-between', marginTop: '24px' }}>
+                  <button type="button" className="ms-button ms-button-secondary" onClick={() => setStep('PARENT_VERIFICATION')}>Back</button>
+                  <button type="submit" className="ms-button ms-button-primary" disabled={!parentEmailVerified}>Next</button>
+                </div>
+              </form>
+            )}
+
             {step === 'CONSENT' && (
               <form onSubmit={userType === 'minor' ? handleParentConsentSubmit : submitRegistration}>
                 <p className="ms-description" style={{ marginBottom: '16px', fontWeight: 600 }}>Terms & Consent</p>
-                
-                {userType === 'minor' && (
-                  <>
-                    <p className="ms-description" style={{ fontSize: '14px', marginBottom: '16px' }}>Please provide your details as the consenting parent/guardian.</p>
-                    {renderInput('text', "Parent's Full Name", parentName, setParentName)}
-                    
-                    <div style={{ marginBottom: '16px' }}>
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <div style={{ flex: 1 }}>
-                          <input
-                            type="email"
-                            placeholder="Parent's Email Address"
-                            value={parentEmail}
-                            onChange={(e) => setParentEmail(e.target.value)}
-                            required={true}
-                            disabled={status === 'loading' || parentEmailVerified}
-                            style={{
-                              width: '100%', padding: '8px 0', border: 'none', borderBottom: '1px solid var(--ms-border)',
-                              outline: 'none', fontSize: '15px', background: 'transparent', color: 'var(--ms-text)'
-                            }}
-                          />
-                        </div>
-                        {!parentEmailVerified && (
-                          <button type="button" className="ms-button ms-button-secondary" 
-                            onClick={handleSendParentOtp}
-                            disabled={!parentEmail || parentOtpSent || status === 'loading'}
-                            style={{ height: '37px', whiteSpace: 'nowrap' }}
-                          >
-                            {parentOtpSent ? 'Code Sent' : 'Send Code'}
-                          </button>
-                        )}
-                      </div>
-                      
-                      {parentOtpSent && !parentEmailVerified && (
-                        <>
-                          <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
-                            <input 
-                              type="text" 
-                              placeholder="Enter 6-digit OTP (use 123456)" 
-                              value={parentOtp} 
-                              onChange={e => setParentOtp(e.target.value)} 
-                              maxLength={6}
-                              style={{ flex: 1, padding: '8px', border: '1px solid var(--ms-border)', outline: 'none' }}
-                            />
-                            <button type="button" className="ms-button ms-button-primary" onClick={handleVerifyParentOtp} style={{ height: '37px' }}>
-                              Verify
-                            </button>
-                          </div>
-                          {parentOtpError && <div style={{ color: '#E81123', marginTop: '8px', fontSize: '13px' }}>{parentOtpError}</div>}
-                        </>
-                      )}
-                      {parentEmailVerified && (
-                        <div style={{ color: '#107c10', fontSize: '13px', fontWeight: 'bold', marginTop: '8px' }}>✓ Parent Email Verified</div>
-                      )}
-                    </div>
-                  </>
-                )}
 
-                {(userType === 'adult' || parentEmailVerified) ? (
-                  <>
-                    <div style={{ fontSize: '13px', lineHeight: '1.5', marginBottom: '16px', maxHeight: '150px', overflowY: 'auto', padding: '12px', background: 'rgba(0,0,0,0.03)', border: '1px solid var(--ms-border)' }}>
-                      <strong>OpenRockets Terms of Service & Consent</strong><br/><br/>
-                      {userType === 'minor' ? (
-                        <>I, {parentName || '[Parent Name]'}, hereby grant permission for my child to create an OpenRockets account. I understand the privacy policy and consent to the collection of necessary data.</>
-                      ) : (
-                        <>I, {name}, hereby agree to the OpenRockets Terms of Service and Privacy Policy. I certify that I am 18 years of age or older.</>
-                      )}
-                    </div>
+                <div style={{ fontSize: '13px', lineHeight: '1.5', marginBottom: '16px', maxHeight: '150px', overflowY: 'auto', padding: '12px', background: 'rgba(0,0,0,0.03)', border: '1px solid var(--ms-border)' }}>
+                  <strong>OpenRockets Terms of Service & Consent</strong><br/><br/>
+                  {userType === 'minor' ? (
+                    <>I, {parentName || '[Parent Name]'}, hereby grant permission for my child to create an OpenRockets account. I understand the privacy policy and consent to the collection of necessary data.</>
+                  ) : (
+                    <>I, {name}, hereby agree to the OpenRockets Terms of Service and Privacy Policy. I certify that I am 18 years of age or older.</>
+                  )}
+                </div>
 
-                    <div style={{ marginBottom: '24px' }}>
-                      <label style={{ fontSize: '14px', display: 'block', marginBottom: '8px', color: 'var(--ms-text)' }}>Please sign below:</label>
-                      <div style={{ border: '1px solid var(--ms-border)', background: '#fff' }}>
-                        <SignatureCanvas 
-                          ref={sigPad} 
-                          canvasProps={{ width: 400, height: 150, className: 'sigCanvas' }} 
-                          penColor="black"
-                        />
-                      </div>
-                      <button type="button" onClick={() => sigPad.current?.clear()} style={{ fontSize: '13px', background: 'none', border: 'none', color: 'var(--theme-primary)', cursor: 'pointer', padding: '6px 0', marginTop: '4px' }}>
-                        Clear Signature
-                      </button>
-                    </div>
+                <div style={{ marginBottom: '24px' }}>
+                  <label style={{ fontSize: '14px', display: 'block', marginBottom: '8px', color: 'var(--ms-text)' }}>Please sign below:</label>
+                  <div style={{ border: '1px solid var(--ms-border)', background: '#fff' }}>
+                    <SignatureCanvas 
+                      ref={sigPad} 
+                      canvasProps={{ width: 400, height: 150, className: 'sigCanvas' }} 
+                      penColor="black"
+                    />
+                  </div>
+                  <button type="button" onClick={() => sigPad.current?.clear()} style={{ fontSize: '13px', background: 'none', border: 'none', color: 'var(--theme-primary)', cursor: 'pointer', padding: '6px 0', marginTop: '4px' }}>
+                    Clear Signature
+                  </button>
+                </div>
 
-                    {status === 'error' && <div style={{ color: '#E81123', marginBottom: '16px', fontSize: '14px' }}>{errorMessage}</div>}
+                {status === 'error' && <div style={{ color: '#E81123', marginBottom: '16px', fontSize: '14px' }}>{errorMessage}</div>}
 
-                    <div className="ms-button-group" style={{ justifyContent: 'space-between' }}>
-                      <button type="button" className="ms-button ms-button-secondary" onClick={() => setStep(userType === 'minor' ? 'PARENT_VERIFICATION' : 'USER_DETAILS')} disabled={status === 'loading'}>Back</button>
-                      <button type="submit" className="ms-button ms-button-primary" disabled={status === 'loading'}>
-                        {status === 'loading' ? 'Processing...' : (userType === 'minor' ? 'Grant Consent' : 'Accept & Create Account')}
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    {status === 'error' && <div style={{ color: '#E81123', marginBottom: '16px', fontSize: '14px' }}>{errorMessage}</div>}
-                    <div className="ms-button-group" style={{ justifyContent: 'space-between', marginTop: '24px' }}>
-                      <button type="button" className="ms-button ms-button-secondary" onClick={() => setStep('PARENT_VERIFICATION')} disabled={status === 'loading'}>Back</button>
-                      <button type="button" className="ms-button ms-button-primary" disabled={true}>
-                        Grant Consent
-                      </button>
-                    </div>
-                  </>
-                )}
+                <div className="ms-button-group" style={{ justifyContent: 'space-between' }}>
+                  <button type="button" className="ms-button ms-button-secondary" onClick={() => setStep(userType === 'minor' ? 'PARENT_DETAILS' : 'USER_DETAILS')} disabled={status === 'loading'}>Back</button>
+                  <button type="submit" className="ms-button ms-button-primary" disabled={status === 'loading'}>
+                    {status === 'loading' ? 'Processing...' : (userType === 'minor' ? 'Grant Consent' : 'Accept & Create Account')}
+                  </button>
+                </div>
               </form>
             )}
 

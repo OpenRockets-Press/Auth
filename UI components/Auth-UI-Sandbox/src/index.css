@@ -185,7 +185,7 @@ body {
 
 /* Ensure the content inside the card can scroll while keeping header/footer static if needed, or just let everything scroll */
 .ms-card-scrollable {
-  overflow-y: auto;
+  overflow-y: visible;
   padding-right: 8px; /* For scrollbar breathing room */
   margin-right: -8px; /* Offset padding */
   flex: 1;
