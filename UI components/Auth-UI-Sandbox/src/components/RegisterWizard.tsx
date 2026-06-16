@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
+
 import SignatureCanvas from 'react-signature-canvas';
 import { AmbientBackground } from './AmbientBackground';
 import { FaceAgeDetector } from './auth/FaceAgeDetector';
