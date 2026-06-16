@@ -51,6 +51,7 @@ export const RegisterWizard: React.FC = () => {
   const [parentOtpError, setParentOtpError] = useState('');
   const [minorOtpError, setMinorOtpError] = useState('');
   const [initialLoad, setInitialLoad] = useState(true);
+  const [aiLoading, setAiLoading] = useState(false);
   
   const sigPad = useRef<SignatureCanvas>(null);
 
@@ -266,14 +267,22 @@ export const RegisterWizard: React.FC = () => {
         
         <div className="ms-card-content" style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
           {step !== 'SUCCESS' && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '24px' }}>
+            <div style={{ 
+              display: 'flex', 
+              flexDirection: aiLoading ? 'column' : 'row', 
+              justifyContent: aiLoading ? 'flex-start' : 'space-between', 
+              alignItems: aiLoading ? 'flex-start' : 'flex-end', 
+              marginBottom: '24px',
+              gap: aiLoading ? '8px' : '0',
+              transition: 'all 0.3s ease'
+            }}>
               <h1 className="ms-title" style={{ margin: 0 }}>Create account</h1>
               <span style={{ fontSize: '13px', color: 'var(--ms-text-secondary)', paddingBottom: '4px' }}>
-                Step {
+                Step <strong style={{ fontSize: '24px', color: '#000', fontWeight: 'bold' }}>{
                   userType === 'minor' 
                     ? (step === 'GETTING_PARENT' ? 2 : step === 'PARENT_VERIFICATION' ? 3 : step === 'CONSENT' ? 4 : step === 'MINOR_VERIFICATION' ? 5 : step === 'MINOR_PROFILE_SETUP' ? 6 : 1)
                     : (step === 'USER_DETAILS' ? 2 : step === 'CONSENT' ? 3 : 1)
-                } of {userType === 'minor' ? 6 : 3}
+                }</strong> of {userType === 'minor' ? 6 : 3}
               </span>
             </div>
           )}
@@ -284,6 +293,7 @@ export const RegisterWizard: React.FC = () => {
               <FaceAgeDetector 
                 onComplete={handleAgeDetected} 
                 title="Identity Verification"
+                onLoadingChange={setAiLoading}
               />
             )}
 
@@ -325,6 +335,7 @@ export const RegisterWizard: React.FC = () => {
               <FaceAgeDetector 
                 onComplete={handleParentAgeDetected} 
                 title="Parent or Guardian Verification"
+                onLoadingChange={setAiLoading}
                 subtitle={
                   <>
                     To comply with safety regulations, we need to determine you are an adult who is either a legal parent or guardian. Your face data is never sent to any other place, and they are processed internally inside your device.
@@ -456,6 +467,7 @@ export const RegisterWizard: React.FC = () => {
                   onComplete={handleMinorVerification} 
                   title="Child Verification"
                   subtitle="Please position your face to verify."
+                  onLoadingChange={setAiLoading}
                 />
                 {status === 'error' && <div style={{ color: '#E81123', marginTop: '16px', fontSize: '14px', textAlign: 'center' }}>{errorMessage}</div>}
               </>

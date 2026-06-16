@@ -6,12 +6,14 @@ interface FaceAgeDetectorProps {
   onComplete: (averageAge: number, isAdult: boolean) => void;
   title?: string;
   subtitle?: React.ReactNode;
+  onLoadingChange?: (isLoading: boolean) => void;
 }
 
 export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({ 
   onComplete, 
   title = "Identity Verification",
-  subtitle = "Please position your face as shown in the animation"
+  subtitle = "Please position your face as shown in the animation",
+  onLoadingChange
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [modelsLoaded, setModelsLoaded] = useState(false);
@@ -46,13 +48,18 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
     if (modelsLoaded) {
       startVideo();
     }
+    
+    if (onLoadingChange) {
+      onLoadingChange(!modelsLoaded);
+    }
+
     return () => {
       if (videoRef.current && videoRef.current.srcObject) {
         const stream = videoRef.current.srcObject as MediaStream;
         stream.getTracks().forEach(track => track.stop());
       }
     };
-  }, [modelsLoaded]);
+  }, [modelsLoaded, onLoadingChange]);
 
   const startVideo = () => {
     setCameraError('');
@@ -217,9 +224,9 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
         {/* Instruction Overlay on Video */}
         <div style={{
           position: 'absolute', top: '16px', left: '50%', transform: 'translateX(-50%)',
-          background: 'rgba(0,0,0,0.6)', color: '#fff', padding: '8px 16px', borderRadius: '24px',
+          background: 'rgba(0,0,0,0.6)', color: '#fff', borderRadius: '24px',
           fontWeight: 'bold', zIndex: 4, boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-          whiteSpace: 'nowrap', textShadow: '0 1px 2px rgba(0,0,0,0.8)', fontSize: '14px'
+          whiteSpace: 'nowrap', textShadow: '0 1px 2px rgba(0,0,0,0.8)', fontSize: '18px', padding: '10px 20px'
         }}>
           {getNaturalInstruction(currentCaptureIndex, captures[currentCaptureIndex]?.label)}
         </div>
@@ -249,23 +256,6 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
       </div>
 
       <div style={{ marginTop: '24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px', gap: '8px' }}>
-          {captures.map((cap, idx) => (
-            <div key={idx} style={{ 
-              flex: 1, 
-              padding: '8px', 
-              background: cap.age ? '#dff6dd' : (idx === currentCaptureIndex ? 'rgba(0, 103, 184, 0.1)' : 'rgba(0,0,0,0.02)'),
-              border: idx === currentCaptureIndex ? '2px solid var(--theme-primary)' : '1px solid var(--ms-border)',
-              borderRadius: '4px',
-              fontSize: '13px',
-              color: 'var(--ms-text)'
-            }}>
-              <div>{cap.label}</div>
-              {cap.age && <div style={{ color: '#107c10', fontWeight: 'bold', marginTop: '4px' }}>✓ Done</div>}
-            </div>
-          ))}
-        </div>
-
         <button 
           className="ms-button ms-button-primary" 
           onClick={captureAndDetect}
