@@ -1,11 +1,11 @@
-import React, { useEffect, useRef, useState, ReactNode } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as faceapi from 'face-api.js';
 import faceInstructionGif from '../../assets/face-instruction.gif';
 
 interface FaceAgeDetectorProps {
   onComplete: (averageAge: number, isAdult: boolean) => void;
   title?: string;
-  subtitle?: ReactNode;
+  subtitle?: string;
 }
 
 export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({ 
@@ -16,18 +16,17 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [modelsLoaded, setModelsLoaded] = useState(false);
   const [cameraError, setCameraError] = useState('');
-  
-  const [captures, setCaptures] = useState<{ id: string; label: string; age: number | null }[]>(() => {
-    const defaultCaptures = [
-      { id: 'front', label: 'Front Face', age: null },
-      { id: 'left', label: 'Left Side', age: null },
-      { id: 'right', label: 'Right Side', age: null }
-    ];
-    return defaultCaptures.sort(() => Math.random() - 0.5);
-  });
-  
+  const [captures, setCaptures] = useState<{ label: string; age: number | null }[]>([
+    { label: 'Front Face', age: null },
+    { label: 'Left Side', age: null },
+    { label: 'Right Side', age: null }
+  ]);
   const [currentCaptureIndex, setCurrentCaptureIndex] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  useEffect(() => {
+    setCaptures(prev => [...prev].sort(() => Math.random() - 0.5));
+  }, []);
 
   useEffect(() => {
     const loadModels = async () => {
@@ -119,7 +118,7 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
 
   if (cameraError) {
     return (
-      <div style={{ textAlign: 'left', padding: '24px 0' }}>
+      <div style={{ textAlign: 'center', padding: '24px 0' }}>
         <h3 className="ms-title" style={{ marginBottom: '16px' }}>{title}</h3>
         <p style={{ color: '#E81123', marginBottom: '24px' }}>{cameraError}</p>
         <button className="ms-button ms-button-secondary" onClick={startVideo}>Clear and retry this step</button>
@@ -140,10 +139,8 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
     );
   }
 
-  const currentTask = captures[currentCaptureIndex];
-
   return (
-    <div style={{ textAlign: 'left' }}>
+    <div style={{ textAlign: 'center' }}>
       
       {isProcessing && (
         <div className="ms-loader-overlay">
@@ -154,7 +151,7 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
       )}
 
       <h3 className="ms-title" style={{ fontSize: '20px', marginBottom: '8px' }}>{title}</h3>
-      <div className="ms-description" style={{ marginBottom: '16px' }}>{subtitle}</div>
+      <p className="ms-description" style={{ marginBottom: '16px' }}>{subtitle}</p>
 
       <div style={{ position: 'relative', width: '100%', maxWidth: '400px', margin: '0 auto', background: '#000', borderRadius: '0.5rem', overflow: 'hidden', border: '1px solid var(--ms-border)' }}>
         <video 
@@ -165,18 +162,14 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
           style={{ width: '100%', display: 'block', transform: 'scaleX(-1)' }} 
         />
         
-        {/* Instruction Text Overlay */}
+        {/* Instruction Overlay on Video */}
         <div style={{
-          position: 'absolute', top: '16px', left: 0, right: 0,
-          textAlign: 'center', zIndex: 3, pointerEvents: 'none'
+          position: 'absolute', top: '16px', left: '50%', transform: 'translateX(-50%)',
+          background: 'rgba(0,0,0,0.6)', color: '#fff', padding: '8px 16px', borderRadius: '24px',
+          fontWeight: 'bold', zIndex: 4, boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+          whiteSpace: 'nowrap', textShadow: '0 1px 2px rgba(0,0,0,0.8)', fontSize: '14px'
         }}>
-          <span style={{
-            background: 'rgba(0,0,0,0.6)', color: 'white', padding: '6px 16px',
-            borderRadius: '20px', fontWeight: 'bold', fontSize: '14px',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.2)', textShadow: '0 1px 2px rgba(0,0,0,0.8)'
-          }}>
-            Please show your {currentTask.label}
-          </span>
+          Please turn: {captures[currentCaptureIndex]?.label}
         </div>
 
         {/* GIF Overlay */}
@@ -190,7 +183,7 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
             alt="Face alignment instruction" 
             style={{ 
               height: '50%', opacity: 0.5, 
-              transform: currentTask.id === 'front' ? 'scale(1.2)' : currentTask.id === 'left' ? 'scale(1.0)' : 'scale(1.0) rotateY(180deg)',
+              transform: captures[currentCaptureIndex]?.label === 'Front Face' ? 'scale(1.2)' : captures[currentCaptureIndex]?.label === 'Left Side' ? 'scale(1.0)' : 'scale(1.0) rotateY(180deg)',
               transition: 'transform 0.5s ease'
             }} 
           />
@@ -213,8 +206,7 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
               border: idx === currentCaptureIndex ? '2px solid var(--theme-primary)' : '1px solid var(--ms-border)',
               borderRadius: '4px',
               fontSize: '13px',
-              color: 'var(--ms-text)',
-              textAlign: 'center'
+              color: 'var(--ms-text)'
             }}>
               <div>{cap.label}</div>
               {cap.age && <div style={{ color: '#107c10', fontWeight: 'bold', marginTop: '4px' }}>✓ Done</div>}
@@ -232,7 +224,7 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
             <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
             <circle cx="12" cy="13" r="4"></circle>
           </svg>
-          {isProcessing ? 'Analyzing...' : `Take ${currentTask.label} Photo`}
+          {isProcessing ? 'Analyzing...' : `Take ${captures[currentCaptureIndex]?.label} Photo`}
         </button>
       </div>
     </div>
