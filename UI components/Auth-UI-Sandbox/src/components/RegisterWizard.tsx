@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import SignatureCanvas from 'react-signature-canvas';
 import { AmbientBackground } from './AmbientBackground';
+import { FaceAgeDetector } from './auth/FaceAgeDetector';
 import logoPath from '../assets/openrocketsvc1.png';
 
 const api = axios.create({
@@ -13,7 +14,7 @@ const api = axios.create({
   }
 });
 
-type Step = 'AGE_SELECTION' | 'USER_DETAILS' | 'GETTING_PARENT' | 'CONSENT' | 'SUCCESS';
+type Step = 'AGE_SELECTION' | 'USER_DETAILS' | 'GETTING_PARENT' | 'PARENT_VERIFICATION' | 'CONSENT' | 'SUCCESS';
 type UserType = 'adult' | 'minor' | null;
 
 export const RegisterWizard: React.FC = () => {
@@ -33,33 +34,46 @@ export const RegisterWizard: React.FC = () => {
   const sigPad = useRef<SignatureCanvas>(null);
   const navigate = useNavigate();
 
-  const handleSelectType = (type: UserType) => {
-    setUserType(type);
+  const handleAgeDetected = (averageAge: number, isAdult: boolean) => {
+    setUserType(isAdult ? 'adult' : 'minor');
     setStep('USER_DETAILS');
+  };
+
+  const handleParentAgeDetected = (averageAge: number, isAdult: boolean) => {
+    if (!isAdult) {
+      setErrorMessage("Parent verification failed. The person detected appears to be a minor.");
+      // Go back to getting parent
+      setStep('GETTING_PARENT');
+    } else {
+      setErrorMessage('');
+      setStep('CONSENT');
+    }
   };
 
   const handleDetailsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (userType === 'minor') {
       setStep('GETTING_PARENT');
-      setTimeout(() => {
-        setStep('CONSENT');
-      }, 2000); // Simulate getting parent
     } else {
       setStep('CONSENT');
     }
   };
 
   const submitRegistration = async () => {
-    if (!sigPad.current || sigPad.current.isEmpty()) {
+    if (userType === 'adult' && (!sigPad.current || sigPad.current.isEmpty())) {
       setErrorMessage("Please provide a signature to continue.");
       return;
+    }
+    
+    if (userType === 'minor' && (!sigPad.current || sigPad.current.isEmpty())) {
+       setErrorMessage("Parent signature is required.");
+       return;
     }
     
     setStatus('loading');
     setErrorMessage('');
     
-    const signatureBase64 = sigPad.current.getTrimmedCanvas().toDataURL('image/png');
+    const signatureBase64 = sigPad.current ? sigPad.current.getTrimmedCanvas().toDataURL('image/png') : '';
 
     try {
       await api.post('/api/auth/register-with-consent', {
@@ -101,15 +115,10 @@ export const RegisterWizard: React.FC = () => {
   return (
     <>
       <AmbientBackground />
-      <div className="ms-card" style={{ position: 'relative' }}>
+      <div className="ms-card" style={{ position: 'relative', maxWidth: step === 'AGE_SELECTION' || step === 'PARENT_VERIFICATION' ? '500px' : '440px' }}>
         <div className="ms-header">
           <img src={logoPath} alt="OpenRockets Logo" className="ms-logo" />
           <h2 className="ms-title">Create account</h2>
-          {step === 'AGE_SELECTION' && <p className="ms-subtitle">Select your age group to continue</p>}
-          {step === 'USER_DETAILS' && <p className="ms-subtitle">Enter your details</p>}
-          {step === 'GETTING_PARENT' && <p className="ms-subtitle">Please hand the device to your parent/guardian...</p>}
-          {step === 'CONSENT' && <p className="ms-subtitle">Parental Consent & Signature</p>}
-          {step === 'SUCCESS' && <p className="ms-subtitle">Account created successfully</p>}
         </div>
 
         {status === 'error' && (
@@ -118,21 +127,16 @@ export const RegisterWizard: React.FC = () => {
 
         <div className="ms-content">
           {step === 'AGE_SELECTION' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '16px' }}>
-              <button className="ms-button" onClick={() => handleSelectType('adult')} style={{ padding: '12px' }}>
-                I am an Adult (18+)
-              </button>
-              <button className="ms-button" onClick={() => handleSelectType('minor')} style={{ padding: '12px' }}>
-                I am a Minor (Under 18)
-              </button>
-              <div style={{ fontSize: '13px', marginTop: '16px' }}>
-                Already have an account? <a href="#" onClick={(e) => { e.preventDefault(); navigate('/login'); }} className="ms-link">Sign in</a>
-              </div>
-            </div>
+            <FaceAgeDetector 
+              onComplete={handleAgeDetected} 
+              title="Identity Verification"
+              subtitle="To comply with safety regulations, we need to determine if you are an adult or a minor. Your image is processed entirely on your device and is not saved."
+            />
           )}
 
           {step === 'USER_DETAILS' && (
             <form onSubmit={handleDetailsSubmit}>
+              <p className="ms-subtitle" style={{ marginBottom: '16px' }}>Enter your details</p>
               {renderInput('text', 'Full Name', name, setName)}
               {renderInput('email', 'Email Address', email, setEmail)}
               {renderInput('password', 'Create Password', password, setPassword)}
@@ -140,6 +144,9 @@ export const RegisterWizard: React.FC = () => {
               {userType === 'minor' && (
                 <>
                   <div style={{ marginTop: '16px', marginBottom: '8px', fontSize: '14px', fontWeight: 600 }}>Parent/Guardian Details</div>
+                  <p style={{ fontSize: '12px', color: '#605e5c', marginBottom: '16px' }}>
+                    Because you are a minor, we need your parent's consent.
+                  </p>
                   {renderInput('text', "Parent's Full Name", parentName, setParentName)}
                   {renderInput('email', "Parent's Email Address", parentEmail, setParentEmail)}
                 </>
@@ -154,19 +161,32 @@ export const RegisterWizard: React.FC = () => {
 
           {step === 'GETTING_PARENT' && (
             <div style={{ textAlign: 'center', padding: '32px 0' }}>
-              <div className="ms-loader-overlay" style={{ position: 'relative', background: 'transparent' }}>
-                <div className="ms-loading-dots">
-                  <div className="ms-dot"></div><div className="ms-dot"></div><div className="ms-dot"></div>
-                </div>
-              </div>
-              <p style={{ marginTop: '16px', fontSize: '15px' }}>Waiting for parent...</p>
+              <h3 className="ms-title" style={{ fontSize: '18px', marginBottom: '16px' }}>Parental Consent Required</h3>
+              <p style={{ fontSize: '15px', marginBottom: '24px' }}>
+                Please hand the device to your parent or guardian to verify their identity and provide consent.
+              </p>
+              <button className="ms-button ms-button-primary" onClick={() => setStep('PARENT_VERIFICATION')} style={{ width: '100%' }}>
+                I am the Parent / Ready
+              </button>
+              <button className="ms-button" onClick={() => setStep('USER_DETAILS')} style={{ width: '100%', marginTop: '8px' }}>
+                Back
+              </button>
             </div>
+          )}
+
+          {step === 'PARENT_VERIFICATION' && (
+            <FaceAgeDetector 
+              onComplete={handleParentAgeDetected} 
+              title="Parent Verification"
+              subtitle="Please take three photos to verify that you are an adult. This is processed securely on your device."
+            />
           )}
 
           {step === 'CONSENT' && (
             <div>
+              <p className="ms-subtitle" style={{ marginBottom: '16px' }}>Terms & Consent</p>
               <div style={{ fontSize: '13px', lineHeight: '1.5', marginBottom: '16px', maxHeight: '150px', overflowY: 'auto', padding: '8px', background: '#f3f2f1' }}>
-                <strong>OpenRockets Terms of Service & Consent</strong><br/>
+                <strong>OpenRockets Terms of Service & Consent</strong><br/><br/>
                 {userType === 'minor' ? (
                   <>I, {parentName}, hereby grant permission for my child, {name}, to create an OpenRockets account and access the ecosystem. I understand the privacy policy and consent to the collection of necessary data.</>
                 ) : (
@@ -189,7 +209,7 @@ export const RegisterWizard: React.FC = () => {
               </div>
 
               <div className="ms-actions" style={{ justifyContent: 'space-between' }}>
-                <button type="button" className="ms-button" onClick={() => setStep('USER_DETAILS')} disabled={status === 'loading'}>Back</button>
+                <button type="button" className="ms-button" onClick={() => setStep(userType === 'minor' ? 'GETTING_PARENT' : 'USER_DETAILS')} disabled={status === 'loading'}>Back</button>
                 <button type="button" className="ms-button ms-button-primary" onClick={submitRegistration} disabled={status === 'loading'}>
                   {status === 'loading' ? 'Creating...' : 'Accept & Create Account'}
                 </button>
