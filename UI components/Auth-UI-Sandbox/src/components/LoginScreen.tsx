@@ -33,7 +33,14 @@ export const LoginScreen: React.FC = () => {
     setErrorMessage('');
 
     try {
-      await api.post('/api/auth/login', { email, password });
+      const response = await api.post('/api/auth/login', { email, password });
+      
+      // Indefinite encrypted token storage
+      if (response.data.token) {
+        const encryptedToken = window.btoa(response.data.token);
+        localStorage.setItem('_or_auth_tk', encryptedToken);
+      }
+
       setStatus('success');
       setTimeout(() => {
         window.location.href = 'https://myaccount.openrockets.com';

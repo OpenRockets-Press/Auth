@@ -400,3 +400,71 @@ body {
   background-color: transparent;
   z-index: 10;
 }
+
+/* Red error dots */
+.anim-dot.error-dot {
+  background-color: #E81123;
+}
+
+/* Split UI layout for Minor Profile Setup */
+.ms-split-container {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+@media (min-width: 768px) {
+  .ms-split-container {
+    flex-direction: row;
+    align-items: stretch;
+  }
+}
+
+.ms-split-form {
+  flex: 1;
+  min-width: 0; /* allows flex children to shrink */
+}
+
+.ms-split-preview {
+  flex: 1;
+  min-width: 0;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid #e1dfdd;
+}
+
+.profile-preview-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 16px;
+  background-color: var(--theme-primary);
+  border: 4px solid white;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.profile-preview-name {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ms-text);
+  margin-bottom: 4px;
+  text-align: center;
+  word-break: break-word;
+}
+
+.profile-preview-email {
+  font-size: 14px;
+  color: var(--ms-text-secondary);
+  text-align: center;
+  word-break: break-all;
+}
+
+/* Ensure the card can expand horizontally for split layout */
+.ms-card.expanded {
+  max-width: 800px;
+}
