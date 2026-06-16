@@ -26,6 +26,8 @@ export const RegisterWizard: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
+  const [dob, setDob] = useState('');
+  const [pin, setPin] = useState('');
   const [profileImage, setProfileImage] = useState<string>('');
   
   const [parentName, setParentName] = useState('');
@@ -177,8 +179,8 @@ export const RegisterWizard: React.FC = () => {
       formData.append('password', password);
       formData.append('parent_email', parentEmail);
       formData.append('parent_name', parentName);
-      formData.append('dob', '2010-01-01'); // Assume default or derived
-      formData.append('pin', '1234'); // Assume generated or input
+      formData.append('dob', dob);
+      formData.append('pin', pin);
       formData.append('signature', parentSignatureData);
 
       // Extract raw File if available (using a hack from the image src or ideally keeping raw File in state)
@@ -573,6 +575,24 @@ export const RegisterWizard: React.FC = () => {
                     </div>
 
                     {renderInput('password', 'Create Password', password, setPassword)}
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <div style={{ flex: 1 }}>{renderInput('date', 'Date of Birth', dob, setDob)}</div>
+                      <div style={{ flex: 1 }}>
+                        <input
+                          type="password"
+                          placeholder="4-Digit PIN"
+                          value={pin}
+                          onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                          required={true}
+                          disabled={status === 'loading'}
+                          maxLength={4}
+                          style={{
+                            width: '100%', padding: '8px 0', border: 'none', borderBottom: '1px solid var(--ms-border)',
+                            outline: 'none', fontSize: '15px', marginBottom: '16px', background: 'transparent', color: 'var(--ms-text)'
+                          }}
+                        />
+                      </div>
+                    </div>
                     {renderInput('tel', 'Phone Number (Optional)', phone, setPhone, false)}
                     
                     {status === 'error' && <div style={{ color: '#E81123', marginBottom: '16px', fontSize: '14px' }}>{errorMessage}</div>}

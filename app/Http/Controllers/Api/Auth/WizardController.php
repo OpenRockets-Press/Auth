@@ -32,15 +32,13 @@ class WizardController extends Controller
         $email = $request->email;
         $parentEmail = $request->parent_email;
 
-        // Check OTP verifications (allow skipping if '123456' was used for testing, but ideally check cache)
         $minorVerified = Cache::get("otp_verified_minor_{$email}");
         $parentVerified = Cache::get("otp_verified_parent_{$parentEmail}");
 
-        // For local development bypass if not cached
-        // In production, uncomment the check
-        // if (!$minorVerified || !$parentVerified) {
-        //     return response()->json(['message' => 'Email verification required.'], 403);
-        // }
+        // Security check: Ensure both the minor and parent have verified their emails via OTP
+        if (!$minorVerified || !$parentVerified) {
+            return response()->json(['message' => 'Both minor and parent email verification is strictly required.'], 403);
+        }
 
         try {
             DB::beginTransaction();

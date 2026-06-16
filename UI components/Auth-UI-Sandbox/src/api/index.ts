@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create a configured axios instance
 export const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api', // Defaults to localhost for dev if not set
+    baseURL: import.meta.env.VITE_API_URL || 'https://openrocketsauth.alwaysdata.net/api', // Pointing directly to production backend
     headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',

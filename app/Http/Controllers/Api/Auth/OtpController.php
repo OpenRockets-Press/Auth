@@ -52,12 +52,9 @@ class OtpController extends Controller
         $cachedOtp = Cache::get($cacheKey);
 
         if (!$cachedOtp || $cachedOtp !== $otp) {
-            // For testing sandbox easily, allow "123456"
-            if ($otp !== '123456') {
-                return response()->json([
-                    'message' => 'Invalid or expired OTP.'
-                ], 400);
-            }
+            return response()->json([
+                'message' => 'Invalid or expired OTP.'
+            ], 400);
         }
 
         // Drop the used OTP
