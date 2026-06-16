@@ -36,6 +36,9 @@ export const RegisterWizard: React.FC = () => {
   
   const [parentName, setParentName] = useState('');
   const [parentEmail, setParentEmail] = useState('');
+  const [parentOtpSent, setParentOtpSent] = useState(false);
+  const [parentOtp, setParentOtp] = useState('');
+  const [parentEmailVerified, setParentEmailVerified] = useState(false);
 
   const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
@@ -94,6 +97,30 @@ export const RegisterWizard: React.FC = () => {
     }
     setErrorMessage('');
     setStep('MINOR_VERIFICATION');
+  };
+
+  const handleSendParentOtp = async () => {
+    if (!parentEmail) return;
+    setStatus('loading');
+    await new Promise(r => setTimeout(r, 1000));
+    setParentOtpSent(true);
+    setStatus('idle');
+  };
+
+  const handleVerifyParentOtp = async () => {
+    if (!parentOtp || parentOtp.length < 6) {
+       setErrorMessage("Please enter a valid 6-digit OTP.");
+       return;
+    }
+    setStatus('loading');
+    await new Promise(r => setTimeout(r, 1000));
+    if (parentOtp === '123456') {
+       setParentEmailVerified(true);
+       setErrorMessage('');
+    } else {
+       setErrorMessage("Invalid OTP. For demo purposes, use 123456.");
+    }
+    setStatus('idle');
   };
 
   const submitRegistration = async (e?: React.FormEvent) => {
@@ -275,41 +302,101 @@ export const RegisterWizard: React.FC = () => {
                   <>
                     <p className="ms-description" style={{ fontSize: '14px', marginBottom: '16px' }}>Please provide your details as the consenting parent/guardian.</p>
                     {renderInput('text', "Parent's Full Name", parentName, setParentName)}
-                    {renderInput('email', "Parent's Email Address", parentEmail, setParentEmail)}
+                    
+                    <div style={{ marginBottom: '16px' }}>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <div style={{ flex: 1 }}>
+                          <input
+                            type="email"
+                            placeholder="Parent's Email Address"
+                            value={parentEmail}
+                            onChange={(e) => setParentEmail(e.target.value)}
+                            required={true}
+                            disabled={status === 'loading' || parentEmailVerified}
+                            style={{
+                              width: '100%', padding: '8px 0', border: 'none', borderBottom: '1px solid var(--ms-border)',
+                              outline: 'none', fontSize: '15px', background: 'transparent', color: 'var(--ms-text)'
+                            }}
+                          />
+                        </div>
+                        {!parentEmailVerified && (
+                          <button type="button" className="ms-button ms-button-secondary" 
+                            onClick={handleSendParentOtp}
+                            disabled={!parentEmail || parentOtpSent || status === 'loading'}
+                            style={{ height: '37px', whiteSpace: 'nowrap' }}
+                          >
+                            {parentOtpSent ? 'Code Sent' : 'Send Code'}
+                          </button>
+                        )}
+                      </div>
+                      
+                      {parentOtpSent && !parentEmailVerified && (
+                        <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
+                          <input 
+                            type="text" 
+                            placeholder="Enter 6-digit OTP (use 123456)" 
+                            value={parentOtp} 
+                            onChange={e => setParentOtp(e.target.value)} 
+                            maxLength={6}
+                            style={{ flex: 1, padding: '8px', border: '1px solid var(--ms-border)', outline: 'none' }}
+                          />
+                          <button type="button" className="ms-button ms-button-primary" onClick={handleVerifyParentOtp} style={{ height: '37px' }}>
+                            Verify
+                          </button>
+                        </div>
+                      )}
+                      {parentEmailVerified && (
+                        <div style={{ color: '#107c10', fontSize: '13px', fontWeight: 'bold', marginTop: '8px' }}>✓ Parent Email Verified</div>
+                      )}
+                    </div>
                   </>
                 )}
 
-                <div style={{ fontSize: '13px', lineHeight: '1.5', marginBottom: '16px', maxHeight: '150px', overflowY: 'auto', padding: '12px', background: 'rgba(0,0,0,0.03)', border: '1px solid var(--ms-border)' }}>
-                  <strong>OpenRockets Terms of Service & Consent</strong><br/><br/>
-                  {userType === 'minor' ? (
-                    <>I, {parentName || '[Parent Name]'}, hereby grant permission for my child to create an OpenRockets account. I understand the privacy policy and consent to the collection of necessary data.</>
-                  ) : (
-                    <>I, {name}, hereby agree to the OpenRockets Terms of Service and Privacy Policy. I certify that I am 18 years of age or older.</>
-                  )}
-                </div>
+                {(userType === 'adult' || parentEmailVerified) ? (
+                  <>
+                    <div style={{ fontSize: '13px', lineHeight: '1.5', marginBottom: '16px', maxHeight: '150px', overflowY: 'auto', padding: '12px', background: 'rgba(0,0,0,0.03)', border: '1px solid var(--ms-border)' }}>
+                      <strong>OpenRockets Terms of Service & Consent</strong><br/><br/>
+                      {userType === 'minor' ? (
+                        <>I, {parentName || '[Parent Name]'}, hereby grant permission for my child to create an OpenRockets account. I understand the privacy policy and consent to the collection of necessary data.</>
+                      ) : (
+                        <>I, {name}, hereby agree to the OpenRockets Terms of Service and Privacy Policy. I certify that I am 18 years of age or older.</>
+                      )}
+                    </div>
 
-                <div style={{ marginBottom: '24px' }}>
-                  <label style={{ fontSize: '14px', display: 'block', marginBottom: '8px', color: 'var(--ms-text)' }}>Please sign below:</label>
-                  <div style={{ border: '1px solid var(--ms-border)', background: '#fff' }}>
-                    <SignatureCanvas 
-                      ref={sigPad} 
-                      canvasProps={{ width: 400, height: 150, className: 'sigCanvas' }} 
-                      penColor="black"
-                    />
-                  </div>
-                  <button type="button" onClick={() => sigPad.current?.clear()} style={{ fontSize: '13px', background: 'none', border: 'none', color: 'var(--theme-primary)', cursor: 'pointer', padding: '6px 0', marginTop: '4px' }}>
-                    Clear Signature
-                  </button>
-                </div>
+                    <div style={{ marginBottom: '24px' }}>
+                      <label style={{ fontSize: '14px', display: 'block', marginBottom: '8px', color: 'var(--ms-text)' }}>Please sign below:</label>
+                      <div style={{ border: '1px solid var(--ms-border)', background: '#fff' }}>
+                        <SignatureCanvas 
+                          ref={sigPad} 
+                          canvasProps={{ width: 400, height: 150, className: 'sigCanvas' }} 
+                          penColor="black"
+                        />
+                      </div>
+                      <button type="button" onClick={() => sigPad.current?.clear()} style={{ fontSize: '13px', background: 'none', border: 'none', color: 'var(--theme-primary)', cursor: 'pointer', padding: '6px 0', marginTop: '4px' }}>
+                        Clear Signature
+                      </button>
+                    </div>
 
-                {status === 'error' && <div style={{ color: '#E81123', marginBottom: '16px', fontSize: '14px' }}>{errorMessage}</div>}
+                    {status === 'error' && <div style={{ color: '#E81123', marginBottom: '16px', fontSize: '14px' }}>{errorMessage}</div>}
 
-                <div className="ms-button-group" style={{ justifyContent: 'space-between' }}>
-                  <button type="button" className="ms-button ms-button-secondary" onClick={() => setStep(userType === 'minor' ? 'GETTING_PARENT' : 'USER_DETAILS')} disabled={status === 'loading'}>Back</button>
-                  <button type="submit" className="ms-button ms-button-primary" disabled={status === 'loading'}>
-                    {status === 'loading' ? 'Processing...' : (userType === 'minor' ? 'Grant Consent' : 'Accept & Create Account')}
-                  </button>
-                </div>
+                    <div className="ms-button-group" style={{ justifyContent: 'space-between' }}>
+                      <button type="button" className="ms-button ms-button-secondary" onClick={() => setStep(userType === 'minor' ? 'PARENT_VERIFICATION' : 'USER_DETAILS')} disabled={status === 'loading'}>Back</button>
+                      <button type="submit" className="ms-button ms-button-primary" disabled={status === 'loading'}>
+                        {status === 'loading' ? 'Processing...' : (userType === 'minor' ? 'Grant Consent' : 'Accept & Create Account')}
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {status === 'error' && <div style={{ color: '#E81123', marginBottom: '16px', fontSize: '14px' }}>{errorMessage}</div>}
+                    <div className="ms-button-group" style={{ justifyContent: 'space-between', marginTop: '24px' }}>
+                      <button type="button" className="ms-button ms-button-secondary" onClick={() => setStep('PARENT_VERIFICATION')} disabled={status === 'loading'}>Back</button>
+                      <button type="button" className="ms-button ms-button-primary" disabled={true}>
+                        Grant Consent
+                      </button>
+                    </div>
+                  </>
+                )}
               </form>
             )}
 

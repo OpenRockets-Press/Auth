@@ -116,9 +116,21 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
     setIsProcessing(false);
   };
 
+  const [loadingText, setLoadingText] = useState('This feature uses AI...');
+  
+  useEffect(() => {
+    if (modelsLoaded) return;
+    const timer = setInterval(() => {
+      setLoadingText(prev => 
+        prev === 'This feature uses AI...' ? 'Processing, please wait...' : 'This feature uses AI...'
+      );
+    }, 2000);
+    return () => clearInterval(timer);
+  }, [modelsLoaded]);
+
   if (cameraError) {
     return (
-      <div style={{ textAlign: 'center', padding: '24px 0' }}>
+      <div style={{ textAlign: 'left', padding: '24px 0' }}>
         <h3 className="ms-title" style={{ marginBottom: '16px' }}>{title}</h3>
         <p style={{ color: '#E81123', marginBottom: '24px' }}>{cameraError}</p>
         <button className="ms-button ms-button-secondary" onClick={startVideo}>Clear and retry this step</button>
@@ -128,19 +140,45 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
 
   if (!modelsLoaded) {
     return (
-      <div style={{ textAlign: 'center', padding: '32px 0' }}>
-        <div className="ms-loader-overlay">
+      <div style={{ textAlign: 'left', minHeight: '350px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <style>{`
+          .local-ai-loader {
+            position: absolute;
+            top: -68px;
+            left: -44px;
+            right: -44px;
+            height: 4px;
+            background-color: transparent;
+            z-index: 10;
+          }
+          @media (max-width: 480px) {
+            .local-ai-loader {
+              top: -32px;
+              left: -24px;
+              right: -24px;
+            }
+          }
+        `}</style>
+        <div className="local-ai-loader">
           <div className="ms-loader-container">
             <div className="anim-dot dot1"></div><div className="anim-dot dot2"></div><div className="anim-dot dot3"></div><div className="anim-dot dot4"></div><div className="anim-dot dot5"></div>
           </div>
         </div>
-        <p className="ms-description" style={{ marginTop: '16px' }}>Loading AI Models...</p>
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', animation: 'fadeIn 0.5s ease' }}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--theme-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path>
+          </svg>
+          <p className="ms-description" style={{ fontSize: '16px', fontWeight: 600, margin: 0, transition: 'opacity 0.3s ease' }}>
+            {loadingText}
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{ textAlign: 'left' }}>
+    <div style={{ textAlign: 'left', animation: 'fadeIn 0.8s ease' }}>
       
       {isProcessing && (
         <div className="ms-loader-overlay">
