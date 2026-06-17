@@ -14,6 +14,8 @@ const AuthWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     if (urlParams.get('error') === 'invalid_token') {
         localStorage.removeItem('_or_auth_tk');
         window.history.replaceState({}, document.title, window.location.pathname);
+        setIsChecking(false);
+        return;
     }
 
     const token = localStorage.getItem('_or_auth_tk');
