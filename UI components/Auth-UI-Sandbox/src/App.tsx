@@ -9,6 +9,13 @@ const AuthWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
+    // Check if we were redirected back with an error
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('error') === 'invalid_token') {
+        localStorage.removeItem('_or_auth_tk');
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
     const token = localStorage.getItem('_or_auth_tk');
     if (token) {
       // Simulate validation delay and redirect
