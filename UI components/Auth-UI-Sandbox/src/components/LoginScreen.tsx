@@ -43,7 +43,7 @@ export const LoginScreen: React.FC = () => {
 
       setStatus('success');
       setTimeout(() => {
-        window.location.href = 'https://myaccount.openrockets.com';
+        window.location.href = 'https://myaccount.openrockets.com/auth/sso?token=' + response.data.token;
       }, 1000);
     } catch (error: any) {
       console.error('Login Error:', error);

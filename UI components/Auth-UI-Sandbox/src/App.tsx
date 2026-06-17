@@ -13,7 +13,7 @@ const AuthWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     if (token) {
       // Simulate validation delay and redirect
       setTimeout(() => {
-        window.location.href = 'https://myaccount.openrockets.com';
+        window.location.href = 'https://myaccount.openrockets.com/auth/sso?token=' + token;
       }, 1000);
     } else {
       setIsChecking(false);
