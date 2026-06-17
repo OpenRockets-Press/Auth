@@ -2,7 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::inertia('/', 'welcome')->name('home');
+Route::get('/', function () {
+    return redirect()->route('dashboard');
+})->name('home');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('onboarding', [\App\Http\Controllers\OnboardingController::class, 'index'])->name('onboarding');
