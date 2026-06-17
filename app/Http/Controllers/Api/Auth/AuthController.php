@@ -103,6 +103,7 @@ class AuthController extends Controller
 
         return response()->json([
             'access_token' => $token->accessToken,
+            'token' => $token->accessToken,
             'token_type' => 'Bearer',
             'expires_in' => config('auth-system.session_lifetime_minutes', 480) * 60,
             'user' => [
@@ -149,6 +150,7 @@ class AuthController extends Controller
 
         return response()->json([
             'access_token' => $token->accessToken,
+            'token' => $token->accessToken,
             'token_type' => 'Bearer',
             'user' => [
                 'id' => $user->id,

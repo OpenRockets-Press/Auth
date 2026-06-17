@@ -25,16 +25,7 @@ class SsoController extends Controller
             ->get('https://openrocketsauth.alwaysdata.net/api/auth/me');
 
         if ($response->failed()) {
-            // TEMPORARY DEBUG: Show exactly what went wrong instead of redirecting
-            return response()->json([
-                'debug' => 'SSO_BRIDGE_FAILURE',
-                'token_length' => strlen($token),
-                'token_first_30' => substr($token, 0, 30),
-                'token_last_10' => substr($token, -10),
-                'looks_like_jwt' => str_starts_with($token, 'eyJ'),
-                'api_http_status' => $response->status(),
-                'api_response_body' => $response->body(),
-            ]);
+            return redirect()->away('https://accounts.openrockets.com/login?error=invalid_token');
         }
 
         $userData = $response->json();
