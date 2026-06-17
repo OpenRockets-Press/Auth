@@ -22,6 +22,11 @@ const mainNavItems: NavItem[] = [
         href: dashboard(),
         icon: LayoutGrid,
     },
+    {
+        title: 'Developer Hub',
+        href: '/developer/apps',
+        icon: LayoutGrid, // Can be changed to Terminal or Code later
+    },
 ];
 
 const footerNavItems: NavItem[] = [

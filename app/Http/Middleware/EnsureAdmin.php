@@ -12,11 +12,17 @@ class EnsureAdmin
     public function handle(Request $request, Closure $next): Response
     {
         if (! Auth::check()) {
-            return response()->json(['message' => 'Unauthenticated.'], 401);
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json(['message' => 'Unauthenticated.'], 401);
+            }
+            return redirect()->route('login');
         }
 
         if (! Auth::user()->isAdmin()) {
-            return response()->json(['message' => 'Admin access required.'], 403);
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json(['message' => 'Admin access required.'], 403);
+            }
+            return redirect()->route('dashboard')->with('error', 'You do not have permission to access the admin console.');
         }
 
         return $next($request);

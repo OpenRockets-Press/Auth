@@ -17,6 +17,8 @@ class EnsureOnboardingComplete
         'api/settings',
         'api/consent/verify',
         '.well-known',
+        'onboarding',
+        'logout',
     ];
 
     public function handle(Request $request, Closure $next): Response
@@ -43,11 +45,15 @@ class EnsureOnboardingComplete
             }
         }
 
-        return response()->json([
-            'message' => 'Please complete your profile setup before proceeding.',
-            'onboarding_status' => 'incomplete',
-            'required_fields' => ['country_code', 'state', 'date_of_birth'],
-            'onboarding_endpoint' => '/api/onboarding',
-        ], 403);
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'message' => 'Please complete your profile setup before proceeding.',
+                'onboarding_status' => 'incomplete',
+                'required_fields' => ['country_code', 'state', 'date_of_birth'],
+                'onboarding_endpoint' => '/api/onboarding',
+            ], 403);
+        }
+
+        return redirect()->route('onboarding');
     }
 }
