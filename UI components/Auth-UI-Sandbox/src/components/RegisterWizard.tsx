@@ -394,7 +394,11 @@ export const RegisterWizard: React.FC = () => {
                         type="email"
                         placeholder="Parent's Email Address"
                         value={parentEmail}
-                        onChange={(e) => setParentEmail(e.target.value)}
+                        onChange={(e) => {
+                          setParentEmail(e.target.value);
+                          setParentOtpSent(false);
+                          setParentOtp('');
+                        }}
                         required={true}
                         disabled={status === 'loading' || parentEmailVerified}
                         style={{
@@ -406,10 +410,10 @@ export const RegisterWizard: React.FC = () => {
                     {!parentEmailVerified && (
                       <button type="button" className="ms-button ms-button-secondary" 
                         onClick={handleSendParentOtp}
-                        disabled={!parentEmail || parentOtpSent || status === 'loading'}
+                        disabled={!parentEmail || status === 'loading'}
                         style={{ height: '37px', whiteSpace: 'nowrap' }}
                       >
-                        {parentOtpSent ? 'Code Sent' : 'Send Code'}
+                        {parentOtpSent ? 'Resend Code' : 'Send Code'}
                       </button>
                     )}
                   </div>
@@ -545,7 +549,11 @@ export const RegisterWizard: React.FC = () => {
                             type="email"
                             placeholder="Your Email Address"
                             value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            onChange={(e) => {
+                              setEmail(e.target.value);
+                              setMinorOtpSent(false);
+                              setMinorOtp('');
+                            }}
                             required={true}
                             disabled={status === 'loading' || minorEmailVerified}
                             style={{
@@ -557,10 +565,10 @@ export const RegisterWizard: React.FC = () => {
                         {!minorEmailVerified && (
                           <button type="button" className="ms-button ms-button-secondary" 
                             onClick={handleSendMinorOtp}
-                            disabled={!email || minorOtpSent || status === 'loading'}
+                            disabled={!email || status === 'loading'}
                             style={{ height: '37px', whiteSpace: 'nowrap' }}
                           >
-                            {minorOtpSent ? 'Code Sent' : 'Send Code'}
+                            {minorOtpSent ? 'Resend Code' : 'Send Code'}
                           </button>
                         )}
                       </div>
