@@ -12,26 +12,42 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
-        // Get basic stats for the user
-        $activeConsents = DB::table('consent_records')
-            ->where('user_id', $user->id)
-            ->where('status', 'active')
-            ->count();
+        // Get basic stats for the user — wrapped in try/catch since myaccount DB may not have all tables
+        try {
+            $activeConsents = DB::table('consent_records')
+                ->where('user_id', $user->id)
+                ->whereNull('revoked_at')
+                ->count();
+        } catch (\Exception $e) {
+            $activeConsents = 0;
+        }
 
-        $connectedAccounts = DB::table('social_accounts')
-            ->where('user_id', $user->id)
-            ->count();
-            
-        $activeSessions = DB::table('sessions')
-            ->where('user_id', $user->id)
-            ->count();
+        try {
+            $connectedAccounts = DB::table('social_accounts')
+                ->where('user_id', $user->id)
+                ->count();
+        } catch (\Exception $e) {
+            $connectedAccounts = 0;
+        }
+
+        try {
+            $activeSessions = DB::table('sessions')
+                ->where('user_id', $user->id)
+                ->count();
+        } catch (\Exception $e) {
+            $activeSessions = 0;
+        }
+
+        $hasTwoFactor = method_exists($user, 'hasEnabledTwoFactorAuthentication') 
+            ? $user->hasEnabledTwoFactorAuthentication() 
+            : false;
 
         return Inertia::render('dashboard', [
             'stats' => [
                 'active_consents' => $activeConsents,
                 'connected_accounts' => $connectedAccounts,
                 'active_sessions' => $activeSessions,
-                'security_status' => $user->hasEnabledTwoFactorAuthentication() ? 'Strong' : 'Needs Attention',
+                'security_status' => $hasTwoFactor ? 'Strong' : 'Needs Attention',
             ]
         ]);
     }
