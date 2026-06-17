@@ -1,9 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 
 import SignatureCanvas from 'react-signature-canvas';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import { AmbientBackground } from './AmbientBackground';
-import { FaceAgeDetector } from './auth/FaceAgeDetector';
-import { MembershipCard } from './auth/MembershipCard';
+
+const VerifiedIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+  </svg>
+);
 import logoPath from '../assets/openrocketsvc1.png';
 
 import { sendOtp, verifyOtp, registerMinorWizard } from '../api';
@@ -26,8 +32,7 @@ export const RegisterWizard: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
-  const [dob, setDob] = useState('');
-  const [pin, setPin] = useState('');
+  const [dobDate, setDobDate] = useState<Date | null>(null);
   const [profileImage, setProfileImage] = useState<string>('');
   
   const [parentName, setParentName] = useState('');
@@ -179,8 +184,15 @@ export const RegisterWizard: React.FC = () => {
       formData.append('password', password);
       formData.append('parent_email', parentEmail);
       formData.append('parent_name', parentName);
-      formData.append('dob', dob);
-      formData.append('pin', pin);
+      
+      const dobStr = dobDate 
+        ? `${dobDate.getFullYear()}-${String(dobDate.getMonth() + 1).padStart(2, '0')}-${String(dobDate.getDate()).padStart(2, '0')}`
+        : '';
+      formData.append('dob', dobStr);
+      
+      const derivedPin = dobDate ? dobDate.getFullYear().toString() : '0000';
+      formData.append('pin', derivedPin);
+      
       formData.append('signature', parentSignatureData);
 
       // Extract raw File if available (using a hack from the image src or ideally keeping raw File in state)
@@ -421,7 +433,9 @@ export const RegisterWizard: React.FC = () => {
                     </>
                   )}
                   {parentEmailVerified && (
-                    <div style={{ color: '#107c10', fontSize: '13px', fontWeight: 'bold', marginTop: '8px' }}>✓ Parent Email Verified</div>
+                    <div style={{ color: 'var(--theme-primary)', fontSize: '13px', fontWeight: 'bold', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <VerifiedIcon /> Parent Email Verified
+                    </div>
                   )}
                 </div>
 
@@ -570,26 +584,35 @@ export const RegisterWizard: React.FC = () => {
                         </>
                       )}
                       {minorEmailVerified && (
-                        <div style={{ color: '#107c10', fontSize: '13px', fontWeight: 'bold', marginTop: '8px' }}>✓ Email Verified</div>
+                        <div style={{ color: 'var(--theme-primary)', fontSize: '13px', fontWeight: 'bold', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <VerifiedIcon /> Email Verified
+                        </div>
                       )}
                     </div>
 
                     {renderInput('password', 'Create Password', password, setPassword)}
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <div style={{ flex: 1 }}>{renderInput('date', 'Date of Birth', dob, setDob)}</div>
-                      <div style={{ flex: 1 }}>
-                        <input
-                          type="password"
-                          placeholder="4-Digit PIN"
-                          value={pin}
-                          onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                          required={true}
+                    
+                    <div style={{ marginBottom: '16px' }}>
+                      <label style={{ fontSize: '14px', display: 'block', marginBottom: '4px', color: 'var(--ms-text)' }}>Date of Birth</label>
+                      <div style={{ position: 'relative' }}>
+                        <DatePicker
+                          selected={dobDate}
+                          onChange={(date: Date | null) => setDobDate(date)}
+                          showYearDropdown
+                          scrollableYearDropdown
+                          yearDropdownItemNumber={60}
+                          maxDate={new Date()}
+                          placeholderText="Select your birthday"
                           disabled={status === 'loading'}
-                          maxLength={4}
-                          style={{
-                            width: '100%', padding: '8px 0', border: 'none', borderBottom: '1px solid var(--ms-border)',
-                            outline: 'none', fontSize: '15px', marginBottom: '16px', background: 'transparent', color: 'var(--ms-text)'
-                          }}
+                          required
+                          customInput={
+                            <input 
+                              style={{
+                                width: '100%', padding: '8px 0', border: 'none', borderBottom: '1px solid var(--ms-border)',
+                                outline: 'none', fontSize: '15px', background: 'transparent', color: 'var(--ms-text)'
+                              }}
+                            />
+                          }
                         />
                       </div>
                     </div>
