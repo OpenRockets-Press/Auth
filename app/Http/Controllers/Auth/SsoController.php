@@ -26,7 +26,12 @@ class SsoController extends Controller
 
         if ($response->failed() || !isset($response['id'])) {
             // Token is invalid or expired
-            return redirect('https://accounts.openrockets.com/login')->withErrors(['sso' => 'Invalid or expired authentication session.']);
+            return response()->json([
+                'error' => 'API request failed',
+                'status' => $response->status(),
+                'body' => $response->body(),
+                'token_sent' => substr($token, 0, 10) . '...'
+            ], 400);
         }
 
         $userData = $response->json();
