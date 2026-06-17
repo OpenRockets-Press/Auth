@@ -38,14 +38,13 @@ class SsoController extends Controller
             $user = User::create([
                 'name' => $userData['name'],
                 'email' => $userData['email'],
+                'email_verified_at' => now(), // SSO users are inherently verified — they authenticated through the auth server
                 'password' => bcrypt(Str::random(24)), // Random password, authentication is handled by the SSO token
             ]);
-            
-            // Mark email as verified if it is in the auth database
-            if (isset($userData['email_verified_at'])) {
-                $user->email_verified_at = $userData['email_verified_at'];
-                $user->save();
-            }
+        } elseif (!$user->email_verified_at) {
+            // Existing user who hasn't been verified yet — mark as verified since they came through SSO
+            $user->email_verified_at = now();
+            $user->save();
         }
 
         // Establish local session
