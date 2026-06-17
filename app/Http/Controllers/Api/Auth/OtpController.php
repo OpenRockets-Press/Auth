@@ -29,7 +29,13 @@ class OtpController extends Controller
         Cache::put($cacheKey, $otp, now()->addMinutes(15));
 
         // Send OTP email
-        Mail::to($email)->send(new OtpMail($otp, $type));
+        try {
+            Mail::to($email)->send(new OtpMail($otp, $type));
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Email failed to send: ' . $e->getMessage()
+            ], 500);
+        }
 
         return response()->json([
             'message' => 'OTP sent successfully.'
