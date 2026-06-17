@@ -24,14 +24,8 @@ class SsoController extends Controller
             ->withHeaders(['Accept' => 'application/json'])
             ->get('https://openrocketsauth.alwaysdata.net/api/auth/me');
 
-        if ($response->failed() || !isset($response['id'])) {
-            // Token is invalid or expired
-            return response()->json([
-                'error' => 'API request failed',
-                'status' => $response->status(),
-                'body' => $response->body(),
-                'token_sent' => substr($token, 0, 10) . '...'
-            ], 400);
+        if ($response->failed()) {
+            return redirect()->away('https://accounts.openrockets.com/login?error=invalid_token');
         }
 
         $userData = $response->json();
