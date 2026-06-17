@@ -47,6 +47,10 @@ class AppServiceProvider extends ServiceProvider
 
     protected function configureSwagger(): void
     {
+        if (!class_exists(\Dedoc\Scramble\Scramble::class)) {
+            return;
+        }
+
         Scramble::ignoreDefaultRoutes();
 
         Route::get('/swagger', function () {
