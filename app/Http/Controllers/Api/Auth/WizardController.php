@@ -97,8 +97,7 @@ class WizardController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
-                'message' => 'Registration failed.',
-                'error' => $e->getMessage()
+                'message' => 'DB/Passport Crash: ' . $e->getMessage()
             ], 500);
         }
     }
