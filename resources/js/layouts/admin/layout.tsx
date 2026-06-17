@@ -3,7 +3,7 @@ import type { PropsWithChildren } from 'react';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn } from '@/lib/utils';
 import { LayoutDashboard, Users, LayoutGrid, Webhook, Settings, ShieldAlert } from 'lucide-react';
-import AppLayout from '@/layouts/app/app-layout';
+import AppLayout from '@/layouts/app-layout';
 
 const sidebarNavItems = [
     {

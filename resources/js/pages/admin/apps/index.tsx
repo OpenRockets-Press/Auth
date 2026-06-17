@@ -1,6 +1,5 @@
 import { Head } from '@inertiajs/react';
 import AdminLayout from '@/layouts/admin/layout';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MoreHorizontal, CheckCircle2, XCircle, AlertTriangle, ExternalLink } from 'lucide-react';
@@ -61,46 +60,46 @@ export default function AdminApps({ apps }: Props) {
                     </p>
                 </div>
 
-                <div className="rounded-md border bg-card">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>App Name</TableHead>
-                                <TableHead>Developer</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Registered</TableHead>
-                                <TableHead className="w-[80px]"></TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
+                <div className="rounded-md border bg-card overflow-hidden">
+                    <table className="w-full caption-bottom text-sm">
+                        <thead className="[&_tr]:border-b">
+                            <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">App Name</th>
+                                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Developer</th>
+                                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
+                                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Registered</th>
+                                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground w-[80px]"></th>
+                            </tr>
+                        </thead>
+                        <tbody className="[&_tr:last-child]:border-0">
                             {apps.data.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={5} className="h-24 text-center">
+                                <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                                    <td colSpan={5} className="p-4 align-middle h-24 text-center">
                                         No OAuth applications registered.
-                                    </TableCell>
-                                </TableRow>
+                                    </td>
+                                </tr>
                             ) : (
                                 apps.data.map((app) => (
-                                    <TableRow key={app.id}>
-                                        <TableCell>
+                                    <tr key={app.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                                        <td className="p-4 align-middle">
                                             <div className="font-medium">{app.name}</div>
                                             {app.homepage_url && (
                                                 <a href={app.homepage_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1 mt-1">
                                                     Website <ExternalLink className="h-3 w-3" />
                                                 </a>
                                             )}
-                                        </TableCell>
-                                        <TableCell>
+                                        </td>
+                                        <td className="p-4 align-middle">
                                             <div className="font-medium text-sm">{app.owner_name}</div>
                                             <div className="text-xs text-muted-foreground">{app.owner_email}</div>
-                                        </TableCell>
-                                        <TableCell>
+                                        </td>
+                                        <td className="p-4 align-middle">
                                             {getStatusBadge(app.status)}
-                                        </TableCell>
-                                        <TableCell className="text-muted-foreground">
+                                        </td>
+                                        <td className="p-4 align-middle text-muted-foreground">
                                             {new Date(app.created_at).toLocaleDateString()}
-                                        </TableCell>
-                                        <TableCell>
+                                        </td>
+                                        <td className="p-4 align-middle">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
                                                     <Button variant="ghost" className="h-8 w-8 p-0">
@@ -139,12 +138,12 @@ export default function AdminApps({ apps }: Props) {
                                                     </DropdownMenuItem>
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
-                                        </TableCell>
-                                    </TableRow>
+                                        </td>
+                                    </tr>
                                 ))
                             )}
-                        </TableBody>
-                    </Table>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </AdminLayout>
