@@ -33,17 +33,19 @@ export const LoginScreen: React.FC = () => {
     setErrorMessage('');
 
     try {
-      const response = await api.post('/api/auth/login', { email, password });
+      const response = await api.post('/auth/login', { email, password });
       
+      const token = response.data.access_token || response.data.token;
+
       // Indefinite encrypted token storage
-      if (response.data.token) {
-        const encryptedToken = window.btoa(response.data.token);
+      if (token) {
+        const encryptedToken = window.btoa(token);
         localStorage.setItem('_or_auth_tk', encryptedToken);
       }
 
       setStatus('success');
       setTimeout(() => {
-        window.location.href = 'https://myaccount.openrockets.com/auth/sso?token=' + response.data.token;
+        window.location.href = 'https://myaccount.openrockets.com/auth/sso?token=' + token;
       }, 1000);
     } catch (error: any) {
       console.error('Login Error:', error);
