@@ -12,6 +12,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('onboarding/parental-consent', [\App\Http\Controllers\OnboardingController::class, 'parentalConsent'])->name('onboarding.parental-consent');
 });
 
+Route::get('/login', function () {
+    return redirect('https://accounts.openrockets.com/login');
+})->name('login');
+
+Route::get('/auth/sso', [\App\Http\Controllers\Auth\SsoController::class, 'handle'])->name('sso.handle');
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
     

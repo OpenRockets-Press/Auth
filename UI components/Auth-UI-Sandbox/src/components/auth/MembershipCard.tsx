@@ -26,7 +26,7 @@ export const MembershipCard: React.FC<MembershipCardProps> = ({ name, password }
   };
 
   const handleFinish = () => {
-    window.location.href = 'https://myaccount.openrockets.com';
+    window.location.href = 'https://myaccount.openrockets.com/auth/sso?token=' + localStorage.getItem('_or_auth_tk');
   };
 
   return (
