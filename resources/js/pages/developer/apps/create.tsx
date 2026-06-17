@@ -1,10 +1,9 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import AppLayout from '@/layouts/app/app-layout';
+import AppLayout from '@/layouts/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import InputError from '@/components/input-error';
 import { ArrowLeft } from 'lucide-react';
 
@@ -66,12 +65,13 @@ export default function CreateApp() {
 
                             <div className="grid gap-2">
                                 <Label htmlFor="description">Description</Label>
-                                <Textarea
+                                <textarea
                                     id="description"
                                     value={data.description}
                                     onChange={(e) => setData('description', e.target.value)}
                                     placeholder="What does your app do?"
                                     rows={3}
+                                    className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                 />
                                 <InputError message={errors.description} />
                             </div>
@@ -104,13 +104,14 @@ export default function CreateApp() {
 
                             <div className="grid gap-2">
                                 <Label htmlFor="redirect_uris">Authorized Redirect URIs *</Label>
-                                <Textarea
+                                <textarea
                                     id="redirect_uris"
                                     value={data.redirect_uris}
                                     onChange={(e) => setData('redirect_uris', e.target.value)}
                                     placeholder="https://mycoolapp.com/callback, https://mycoolapp.com/api/auth/callback"
                                     rows={3}
                                     required
+                                    className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                 />
                                 <p className="text-xs text-muted-foreground">
                                     Separate multiple URIs with commas. These are the endpoints OpenRockets will redirect users to after successful authentication.

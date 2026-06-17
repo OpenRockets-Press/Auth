@@ -1,19 +1,18 @@
 import { Head, useForm } from '@inertiajs/react';
-import AppLayout from '@/layouts/app/app-layout';
+import AppLayout from '@/layouts/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { KeyRound, ExternalLink, AlertTriangle } from 'lucide-react';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+} from '@/components/ui/dialog';
 
 interface Consent {
     id: string;
@@ -91,35 +90,37 @@ export default function ConsentsIndex({ consents }: Props) {
                                             </div>
                                         </div>
                                         
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
+                                        <Dialog>
+                                            <DialogTrigger asChild>
                                                 <Button variant="destructive" size="sm">
                                                     Revoke Access
                                                 </Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle className="flex items-center gap-2">
+                                            </DialogTrigger>
+                                            <DialogContent>
+                                                <DialogHeader>
+                                                    <DialogTitle className="flex items-center gap-2">
                                                         <AlertTriangle className="h-5 w-5 text-destructive" />
                                                         Revoke access for {consent.app_name}?
-                                                    </AlertDialogTitle>
-                                                    <AlertDialogDescription>
+                                                    </DialogTitle>
+                                                    <DialogDescription>
                                                         This application will no longer be able to access your profile data or log you in automatically.
                                                         However, they may still retain data they have already collected in accordance with their privacy policy.
-                                                    </AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                    <AlertDialogAction 
-                                                        onClick={() => revokeConsent(consent.id)}
+                                                    </DialogDescription>
+                                                </DialogHeader>
+                                                <DialogFooter>
+                                                    <DialogClose asChild>
+                                                        <Button variant="outline">Cancel</Button>
+                                                    </DialogClose>
+                                                    <Button 
+                                                        onClick={() => { revokeConsent(consent.id); }}
                                                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                                         disabled={processing}
                                                     >
                                                         {processing ? 'Revoking...' : 'Yes, Revoke Access'}
-                                                    </AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
+                                                    </Button>
+                                                </DialogFooter>
+                                            </DialogContent>
+                                        </Dialog>
                                     </div>
                                 </CardContent>
                             </Card>

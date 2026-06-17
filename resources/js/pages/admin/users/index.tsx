@@ -1,6 +1,5 @@
 import { Head, router } from '@inertiajs/react';
 import AdminLayout from '@/layouts/admin/layout';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -74,30 +73,30 @@ export default function AdminUsers({ users, filters }: Props) {
                     </form>
                 </div>
 
-                <div className="rounded-md border bg-card">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Name</TableHead>
-                                <TableHead>Email</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Joined</TableHead>
-                                <TableHead className="w-[80px]"></TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
+                <div className="rounded-md border bg-card overflow-hidden">
+                    <table className="w-full caption-bottom text-sm">
+                        <thead className="[&_tr]:border-b">
+                            <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Name</th>
+                                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Email</th>
+                                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
+                                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Joined</th>
+                                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground w-[80px]"></th>
+                            </tr>
+                        </thead>
+                        <tbody className="[&_tr:last-child]:border-0">
                             {users.data.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={5} className="h-24 text-center">
+                                <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                                    <td colSpan={5} className="p-4 align-middle h-24 text-center">
                                         No users found.
-                                    </TableCell>
-                                </TableRow>
+                                    </td>
+                                </tr>
                             ) : (
                                 users.data.map((user) => (
-                                    <TableRow key={user.id}>
-                                        <TableCell className="font-medium">{user.name}</TableCell>
-                                        <TableCell>{user.email}</TableCell>
-                                        <TableCell>
+                                    <tr key={user.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                                        <td className="p-4 align-middle font-medium">{user.name}</td>
+                                        <td className="p-4 align-middle">{user.email}</td>
+                                        <td className="p-4 align-middle">
                                             <div className="flex gap-2">
                                                 {user.email_verified_at ? (
                                                     <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">Verified</Badge>
@@ -109,11 +108,11 @@ export default function AdminUsers({ users, filters }: Props) {
                                                     <Badge variant="secondary">Onboarded</Badge>
                                                 )}
                                             </div>
-                                        </TableCell>
-                                        <TableCell className="text-muted-foreground">
+                                        </td>
+                                        <td className="p-4 align-middle text-muted-foreground">
                                             {new Date(user.created_at).toLocaleDateString()}
-                                        </TableCell>
-                                        <TableCell>
+                                        </td>
+                                        <td className="p-4 align-middle">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
                                                     <Button variant="ghost" className="h-8 w-8 p-0">
@@ -139,12 +138,12 @@ export default function AdminUsers({ users, filters }: Props) {
                                                     </DropdownMenuItem>
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
-                                        </TableCell>
-                                    </TableRow>
+                                        </td>
+                                    </tr>
                                 ))
                             )}
-                        </TableBody>
-                    </Table>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </AdminLayout>

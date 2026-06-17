@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import AppLayout from '@/layouts/app/app-layout';
+import AppLayout from '@/layouts/app-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { KeyRound, ShieldCheck, Link2, MonitorSmartphone, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';

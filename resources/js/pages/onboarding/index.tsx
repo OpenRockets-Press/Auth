@@ -1,5 +1,5 @@
 import { Head, useForm } from '@inertiajs/react';
-import AuthLayout from '@/layouts/auth/auth-layout';
+import AuthLayout from '@/layouts/auth-layout';
 import InputError from '@/components/input-error';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';

@@ -1,7 +1,7 @@
 import { Head } from '@inertiajs/react';
 import Heading from '@/components/heading';
 import SettingsLayout from '@/layouts/settings/layout';
-import AppLayout from '@/layouts/app/app-layout';
+import AppLayout from '@/layouts/app-layout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Github, Mail, Apple } from 'lucide-react'; // Simulating Google icon with Mail or custom SVG
