@@ -68,7 +68,7 @@ class WizardController extends Controller
             ]);
 
             // Create Parental Consent
-            $user->parentalConsent()->create([
+            $user->parentalConsents()->create([
                 'parent_email' => $request->parent_email,
                 'parent_name' => $request->parent_name,
                 'signature' => $request->signature, // Store base64 or you can decode and store as file
@@ -90,7 +90,7 @@ class WizardController extends Controller
             $token = $user->createToken('auth_token')->accessToken;
 
             return response()->json([
-                'user' => $user->load('profile', 'parentalConsent'),
+                'user' => $user->load('profile', 'parentalConsents'),
                 'token' => $token
             ], 201);
 
