@@ -18,12 +18,28 @@ export const LoginScreen: React.FC = () => {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [initialLoad, setInitialLoad] = useState(true);
+  const [targetAppName, setTargetAppName] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setInitialLoad(false);
     }, 800);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectUri = urlParams.get('redirect_uri') || localStorage.getItem('_or_redirect_uri');
+    if (redirectUri) {
+      try {
+        const url = new URL(redirectUri);
+        const host = url.hostname.toLowerCase();
+        if (host.startsWith('mag.')) setTargetAppName('Mag');
+        else if (host.startsWith('ads.')) setTargetAppName('Ads');
+        else if (host.startsWith('myaccount.')) setTargetAppName('MyAccount');
+      } catch (e) {
+        // invalid url, ignore
+      }
+    }
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -73,7 +89,10 @@ export const LoginScreen: React.FC = () => {
         
         <div className="ms-card-content" style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
           <h1 className="ms-title" style={{ marginBottom: '8px' }}>Sign in</h1>
-          <p className="ms-description" style={{ marginBottom: '24px' }}>to continue to OpenRockets</p>
+          <p className="ms-description" style={{ marginBottom: '24px' }}>
+            to continue to OpenRockets
+            {targetAppName && <span style={{ color: 'var(--theme-primary)' }}> {targetAppName}</span>}
+          </p>
 
           {status === 'error' && (
             <div style={{ color: '#E81123', marginBottom: '16px', fontSize: '14px' }}>
