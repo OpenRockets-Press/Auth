@@ -18,26 +18,50 @@ class SecurityController extends Controller
      */
     public function edit(TwoFactorAuthenticationRequest $request): Response
     {
+        $sessions = \Illuminate\Support\Facades\DB::table('sessions')
+            ->where('user_id', $request->user()->getAuthIdentifier())
+            ->orderBy('last_activity', 'desc')
+            ->get()
+            ->map(function ($session) use ($request) {
+                $userAgent = $session->user_agent ?: '';
+                
+                // Simple OS detection
+                $platform = 'Unknown';
+                if (stripos($userAgent, 'windows') !== false) $platform = 'Windows';
+                elseif (stripos($userAgent, 'mac') !== false) $platform = 'macOS';
+                elseif (stripos($userAgent, 'linux') !== false) $platform = 'Linux';
+                elseif (stripos($userAgent, 'android') !== false) $platform = 'Android';
+                elseif (stripos($userAgent, 'iphone') !== false || stripos($userAgent, 'ipad') !== false) $platform = 'iOS';
+
+                // Simple Browser detection
+                $browser = 'Unknown';
+                if (stripos($userAgent, 'edg') !== false) $browser = 'Edge';
+                elseif (stripos($userAgent, 'chrome') !== false) $browser = 'Chrome';
+                elseif (stripos($userAgent, 'safari') !== false && stripos($userAgent, 'chrome') === false) $browser = 'Safari';
+                elseif (stripos($userAgent, 'firefox') !== false) $browser = 'Firefox';
+
+                // Simple Desktop detection
+                $isDesktop = in_array($platform, ['Windows', 'macOS', 'Linux']);
+
+                return [
+                    'id' => $session->id,
+                    'ip_address' => $session->ip_address,
+                    'is_current_device' => $session->id === $request->session()->getId(),
+                    'last_active' => \Carbon\Carbon::createFromTimestamp($session->last_activity)->diffForHumans(),
+                    'agent' => [
+                        'is_desktop' => $isDesktop,
+                        'platform' => $platform,
+                        'browser' => $browser,
+                    ],
+                ];
+            });
+
         $props = [
             'canManageTwoFactor' => Features::canManageTwoFactorAuthentication(),
             'canManagePasskeys' => Features::canManagePasskeys(),
-            'passkeys' => Features::canManagePasskeys()
-                ? $request->user()
-                    ->passkeys()
-                    ->select(['id', 'name', 'credential', 'created_at', 'last_used_at'])
-                    ->latest()
-                    ->get()
-                    ->map(fn ($passkey) => [
-                        'id' => $passkey->id,
-                        'name' => $passkey->name,
-                        'authenticator' => $passkey->authenticator,
-                        'created_at_diff' => $passkey->created_at->diffForHumans(),
-                        'last_used_at_diff' => $passkey->last_used_at?->diffForHumans(),
-                    ])
-                    ->values()
-                    ->all()
-                : [],
+            'passkeys' => [],
             'passwordRules' => Password::defaults()->toPasswordRulesString(),
+            'sessions' => $sessions,
         ];
 
         if (Features::canManageTwoFactorAuthentication()) {

@@ -38,11 +38,11 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
     const { isCurrentOrParentUrl } = useCurrentUrl();
 
     return (
-        <div className="px-4 py-6">
-            <Heading
-                title="Settings"
-                description="Manage your profile and account settings"
-            />
+        <div style={{ width: '100%', maxWidth: '800px', margin: '0 auto', paddingTop: '16px' }}>
+            <h1 style={{ fontSize: '28px', fontWeight: '500', marginBottom: '8px', color: '#ffffff' }}>Account Settings</h1>
+            <p style={{ fontSize: '15px', color: '#ffffff', opacity: 0.8, marginBottom: '32px' }}>
+                Manage your profile, security, and appearance preferences
+            </p>
 
             <div className="flex flex-col lg:flex-row lg:space-x-12">
                 <aside className="w-full max-w-xl lg:w-48">

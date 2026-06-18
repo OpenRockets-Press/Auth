@@ -14,8 +14,8 @@ class AdminController extends Controller
         $stats = [
             'total_users' => User::count(),
             'total_apps' => DB::table('apps')->count(),
-            'active_consents' => DB::table('consent_records')->where('status', 'active')->count(),
-            'pending_parental_consents' => DB::table('parental_consents')->where('status', 'pending')->count(),
+            'active_consents' => DB::table('consent_records')->whereNull('revoked_at')->count(),
+            'pending_parental_consents' => DB::table('parental_consents')->where('consent_status', 'pending')->count(),
         ];
 
         return Inertia::render('admin/dashboard', [
@@ -54,5 +54,35 @@ class AdminController extends Controller
         return Inertia::render('admin/apps/index', [
             'apps' => $apps,
         ]);
+    }
+    public function updateAppStatus(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:active,suspended',
+        ]);
+
+        DB::table('apps')->where('id', $id)->update(['status' => $validated['status'], 'updated_at' => now()]);
+
+        // If suspending the app, we should also revoke its oauth client
+        if ($validated['status'] === 'suspended') {
+            $app = DB::table('apps')->where('id', $id)->first();
+            if ($app) {
+                DB::table('oauth_clients')->where('id', $app->client_id)->update(['revoked' => true, 'updated_at' => now()]);
+            }
+        } elseif ($validated['status'] === 'active') {
+            $app = DB::table('apps')->where('id', $id)->first();
+            if ($app) {
+                DB::table('oauth_clients')->where('id', $app->client_id)->update(['revoked' => false, 'updated_at' => now()]);
+            }
+        }
+
+        return back()->with('success', 'App status updated successfully.');
+    }
+
+    public function updateUserStatus(Request $request, $id)
+    {
+        // Placeholder for user suspension logic - often requires a 'status' column on users table or roles
+        // Assuming we add a 'status' column or just use soft deletes for suspension
+        return back()->with('error', 'User suspension logic requires database schema update.');
     }
 }

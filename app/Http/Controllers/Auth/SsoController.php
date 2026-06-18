@@ -15,8 +15,9 @@ class SsoController extends Controller
     {
         $token = $request->query('token');
 
-        if (!$token) {
-            return redirect('https://accounts.openrockets.com/login')->withErrors(['sso' => 'No authentication token provided.']);
+        if (!$token || $token === 'undefined') {
+            return redirect('https://accounts.openrockets.com/login?redirect_uri=' . urlencode(route('sso.handle')))
+                ->withErrors(['sso' => 'No authentication token provided.']);
         }
 
         // Fetch user details from openrocketsauth API using the token

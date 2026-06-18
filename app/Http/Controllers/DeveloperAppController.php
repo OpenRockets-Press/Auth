@@ -67,7 +67,7 @@ class DeveloperAppController extends Controller
                 'homepage_url' => $validated['homepage_url'],
                 'privacy_policy_url' => $validated['privacy_policy_url'],
                 'redirect_uris' => $redirectUrisJson,
-                'status' => 'pending',
+                'status' => 'active',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -75,7 +75,7 @@ class DeveloperAppController extends Controller
             DB::commit();
 
             return redirect()->route('developer.apps.show', $appId)
-                ->with('success', 'Application created successfully. Your App is pending review.')
+                ->with('success', 'Application created successfully.')
                 ->with('client_secret', $clientSecret);
 
         } catch (\Exception $e) {

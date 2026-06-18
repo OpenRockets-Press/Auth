@@ -1,0 +1,119 @@
+/* OpenRockets Custom Styles */
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap');
+
+body {
+  font-family: 'Kanit', 'Roboto', sans-serif !important;
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+/* Loading Dots Animation */
+.ms-loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 4px;
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.anim-dot {
+  position: absolute;
+  height: 4px;
+  background-color: #ffffff;
+  border-radius: 4px;
+  top: 0;
+  opacity: 0;
+  animation: snail-stretch 2.4s infinite linear;
+  transition: background-color 0.5s ease;
+}
+
+.anim-dot.dot1 { animation-delay: 0s; }
+.anim-dot.dot2 { animation-delay: 0.2s; }
+.anim-dot.dot3 { animation-delay: 0.4s; }
+.anim-dot.dot4 { animation-delay: 0.6s; }
+.anim-dot.dot5 { animation-delay: 0.8s; }
+
+@keyframes snail-stretch {
+  0% { left: -10%; right: 105%; opacity: 0; }
+  10% { left: 5%; right: 85%; opacity: 1; }
+  35% { left: 35%; right: 50%; opacity: 1; }
+  50% { left: 60%; right: 0%; opacity: 1; }
+  70% { left: 120%; right: -40%; opacity: 1; }
+  75%, 100% { left: 120%; right: -40%; opacity: 0; }
+}
+
+.ms-loader-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.fast-loader .anim-dot {
+  animation-duration: 1.2s;
+}
+
+/* Material Design Specific Utility Classes */
+.mat-card {
+  background-color: #000000;
+  border-radius: 24px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  border: 1px solid #ffffff;
+  transition: background-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.mat-card:hover {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+.mat-card:hover .mat-icon-bg {
+  background-color: #000000 !important;
+}
+
+.mat-card:hover .mat-icon-bg svg {
+  stroke: #ffffff !important;
+}
+
+.mat-card:hover .mat-title,
+.mat-card:hover .mat-subtitle {
+  color: #000000 !important;
+}
+
+.mat-icon-bg {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  transition: background-color 0.2s;
+}
+
+.mat-title {
+  margin: 0 0 2px 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: #ffffff;
+  transition: color 0.2s;
+}
+
+.mat-subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: #ffffff;
+  opacity: 0.8;
+  transition: color 0.2s;
+}

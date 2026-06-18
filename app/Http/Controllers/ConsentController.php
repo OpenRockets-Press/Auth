@@ -14,9 +14,9 @@ class ConsentController extends Controller
 
         $consents = DB::table('consent_records')
             ->join('apps', 'consent_records.app_id', '=', 'apps.id')
-            ->select('consent_records.id', 'consent_records.status', 'consent_records.created_at', 'apps.name as app_name', 'apps.logo_url', 'apps.privacy_policy_url', 'apps.terms_of_service_url')
+            ->select('consent_records.id', 'consent_records.granted_at as created_at', 'consent_records.scopes', 'apps.name as app_name', 'apps.logo_url', 'apps.privacy_policy_url', 'apps.terms_of_service_url')
             ->where('consent_records.user_id', $user->id)
-            ->where('consent_records.status', 'active')
+            ->whereNull('consent_records.revoked_at')
             ->get();
 
         return Inertia::render('consents/index', [
@@ -41,7 +41,6 @@ class ConsentController extends Controller
         DB::table('consent_records')
             ->where('id', $id)
             ->update([
-                'status' => 'revoked',
                 'revoked_at' => now(),
             ]);
 

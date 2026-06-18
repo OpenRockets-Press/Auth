@@ -21,49 +21,47 @@ const sidebarNavItems = [
         href: '/admin/apps',
         icon: LayoutGrid,
     },
-    {
-        title: 'Webhooks',
-        href: '/admin/webhooks',
-        icon: Webhook,
-    },
-    {
-        title: 'Platform Settings',
-        href: '/admin/settings',
-        icon: Settings,
-    },
 ];
 
 export default function AdminLayout({ children }: PropsWithChildren) {
     const { isCurrentOrParentUrl } = useCurrentUrl();
 
     return (
-        <AppLayout breadcrumbs={[{ title: 'Admin Console', href: '/admin' }]}>
-            <div className="flex flex-1 overflow-hidden">
-                <aside className="w-64 border-r bg-muted/30 flex-col hidden md:flex">
-                    <div className="p-6">
-                        <div className="flex items-center gap-2 font-bold text-lg">
-                            <ShieldAlert className="h-5 w-5 text-primary" />
+        <AppLayout breadcrumbs={[{ title: 'Admin Console', href: '/admin' }]} fullWidth={true}>
+            <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+                <aside style={{ 
+                    width: '260px', 
+                    borderRight: '1px solid #333', 
+                    backgroundColor: '#111111', 
+                    display: 'flex', 
+                    flexDirection: 'column'
+                }} className="hidden md:flex">
+                    <div style={{ padding: '24px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', fontSize: '18px', color: '#ffffff' }}>
+                            <ShieldAlert size={20} color="#ff4444" />
                             Admin Console
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p style={{ fontSize: '12px', color: '#ffffff', opacity: 0.6, marginTop: '4px' }}>
                             Platform Management
                         </p>
                     </div>
-                    <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
+                    <nav style={{ flex: 1, padding: '0 16px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                         {sidebarNavItems.map((item) => {
                             const isActive = isCurrentOrParentUrl(item.href);
                             return (
                                 <Link
                                     key={item.href}
                                     href={item.href}
-                                    className={cn(
-                                        'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                                        isActive
-                                            ? 'bg-primary text-primary-foreground'
-                                            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                                    )}
+                                    style={{
+                                        display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', borderRadius: '8px',
+                                        fontSize: '14px', fontWeight: '500', textDecoration: 'none', transition: 'all 0.2s',
+                                        backgroundColor: isActive ? '#ffffff' : 'transparent',
+                                        color: isActive ? '#000000' : '#ffffff'
+                                    }}
+                                    onMouseEnter={(e) => { if(!isActive) e.currentTarget.style.backgroundColor = '#222'; }}
+                                    onMouseLeave={(e) => { if(!isActive) e.currentTarget.style.backgroundColor = 'transparent'; }}
                                 >
-                                    <item.icon className={cn('h-4 w-4', isActive ? 'text-primary-foreground' : 'text-muted-foreground')} />
+                                    <item.icon size={16} color={isActive ? '#000000' : '#888'} />
                                     {item.title}
                                 </Link>
                             );
@@ -71,8 +69,10 @@ export default function AdminLayout({ children }: PropsWithChildren) {
                     </nav>
                 </aside>
 
-                <main className="flex-1 overflow-y-auto p-6 md:p-8">
-                    {children}
+                <main style={{ flex: 1, overflowY: 'auto', padding: '32px' }}>
+                    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                        {children}
+                    </div>
                 </main>
             </div>
         </AppLayout>

@@ -13,15 +13,17 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::get('/login', function () {
-    return redirect('https://accounts.openrockets.com/login');
+    return redirect('https://accounts.openrockets.com/login?redirect_uri=' . urlencode(route('sso.handle')));
 })->name('login');
 
 Route::get('/auth/sso', [\App\Http\Controllers\Auth\SsoController::class, 'handle'])->name('sso.handle');
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
     
     Route::get('consents', [\App\Http\Controllers\ConsentController::class, 'index'])->name('consents.index');
     Route::delete('consents/{id}', [\App\Http\Controllers\ConsentController::class, 'destroy'])->name('consents.destroy');
+    
+    Route::inertia('agreements', 'agreements/index')->name('agreements.index');
 
     Route::prefix('developer')->name('developer.')->group(function () {
         Route::get('apps', [\App\Http\Controllers\DeveloperAppController::class, 'index'])->name('apps.index');
@@ -31,10 +33,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 });
 
-Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [\App\Http\Controllers\AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('users', [\App\Http\Controllers\AdminController::class, 'users'])->name('users.index');
     Route::get('apps', [\App\Http\Controllers\AdminController::class, 'apps'])->name('apps.index');
+    Route::patch('apps/{id}/status', [\App\Http\Controllers\AdminController::class, 'updateAppStatus'])->name('apps.updateStatus');
+    Route::patch('users/{id}/status', [\App\Http\Controllers\AdminController::class, 'updateUserStatus'])->name('users.updateStatus');
 });
 
 require __DIR__.'/settings.php';

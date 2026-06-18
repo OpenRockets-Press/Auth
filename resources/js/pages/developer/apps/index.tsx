@@ -1,95 +1,128 @@
+import React from 'react';
 import { Head, Link } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Plus, LayoutGrid, Settings } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Plus, LayoutGrid, Settings, TerminalSquare } from 'lucide-react';
 
 interface App {
-    id: string;
-    name: string;
-    description: string;
-    status: string;
-    created_at: string;
+  id: string;
+  name: string;
+  description: string;
+  status: string;
+  created_at: string;
 }
 
 interface Props {
-    apps: App[];
+  apps: App[];
 }
 
 export default function DeveloperApps({ apps }: Props) {
-    const getStatusBadge = (status: string) => {
-        switch (status) {
-            case 'active':
-                return <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">Active</Badge>;
-            case 'pending':
-                return <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/20">Pending Review</Badge>;
-            case 'suspended':
-                return <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20">Suspended</Badge>;
-            default:
-                return <Badge variant="secondary">{status}</Badge>;
-        }
-    };
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active': return '#4ade80'; // Green
+      case 'pending': return '#60a5fa'; // Blue
+      case 'suspended': return '#f87171'; // Red
+      default: return '#ffffff';
+    }
+  };
 
-    return (
-        <AppLayout breadcrumbs={[{ title: 'Developer Hub', href: '/developer/apps' }]}>
-            <Head title="Developer Hub" />
-            <div className="flex flex-col gap-6 p-4 max-w-5xl mx-auto w-full">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight">Developer Hub</h1>
-                        <p className="text-muted-foreground mt-2">
-                            Build with OpenRockets. Register and manage your OAuth applications.
-                        </p>
-                    </div>
-                    <Button asChild className="gap-2">
-                        <Link href="/developer/apps/create">
-                            <Plus className="h-4 w-4" /> Create App
-                        </Link>
-                    </Button>
+  return (
+    <AppLayout breadcrumbs={[{ title: 'Developer Hub', href: '/developer/apps' }]} fullWidth={true}>
+      <Head title="Developer Hub" />
+      
+      {/* Sub-header specifically for Developer Hub */}
+      <div style={{ backgroundColor: '#111111', borderBottom: '1px solid #333', padding: '16px 24px', display: 'flex', justifyContent: 'center' }}>
+        <div style={{ width: '100%', maxWidth: '1000px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <TerminalSquare size={24} color="#8ab4f8" />
+            <h1 style={{ margin: 0, fontSize: '20px', fontWeight: '500', color: '#ffffff' }}>Developer Hub</h1>
+          </div>
+          <Link 
+            href="/developer/apps/create"
+            style={{ 
+              backgroundColor: '#ffffff', color: '#000000', padding: '8px 16px', borderRadius: '16px',
+              textDecoration: 'none', fontWeight: '500', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px',
+              transition: 'opacity 0.2s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+          >
+            <Plus size={16} /> Register App
+          </Link>
+        </div>
+      </div>
+
+      <div style={{ width: '100%', maxWidth: '1000px', margin: '0 auto', padding: '32px 24px' }}>
+        <h2 style={{ fontSize: '24px', fontWeight: '500', marginBottom: '8px', color: '#ffffff' }}>Your Applications</h2>
+        <p style={{ fontSize: '15px', color: '#ffffff', opacity: 0.8, marginBottom: '32px' }}>
+          Manage your OAuth applications, credentials, and API access.
+        </p>
+
+        {apps.length === 0 ? (
+          <div style={{ padding: '64px 32px', textAlign: 'center', border: '1px dashed #555', borderRadius: '24px', backgroundColor: '#0a0a0a' }}>
+            <LayoutGrid size={48} color="#555" style={{ margin: '0 auto 16px auto' }} />
+            <h3 style={{ fontSize: '20px', fontWeight: '500', color: '#ffffff', marginBottom: '8px' }}>No Applications Yet</h3>
+            <p style={{ fontSize: '15px', color: '#ffffff', opacity: 0.6, maxWidth: '400px', margin: '0 auto 24px auto' }}>
+              Get started by creating your first OAuth application to authenticate users with OpenRockets.
+            </p>
+            <Link 
+              href="/developer/apps/create"
+              style={{ 
+                backgroundColor: 'transparent', color: '#ffffff', border: '1px solid #ffffff', padding: '10px 24px', borderRadius: '24px',
+                textDecoration: 'none', fontWeight: '500', display: 'inline-flex', alignItems: 'center', gap: '8px'
+              }}
+            >
+              <Plus size={16} /> Register Application
+            </Link>
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px' }}>
+            {apps.map(app => (
+              <div 
+                key={app.id} 
+                style={{ 
+                  backgroundColor: '#0a0a0a', border: '1px solid #333', borderRadius: '24px', padding: '24px',
+                  display: 'flex', flexDirection: 'column', transition: 'border-color 0.2s', position: 'relative'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.borderColor = '#666'}
+                onMouseLeave={(e) => e.currentTarget.style.borderColor = '#333'}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '600', color: '#ffffff', wordBreak: 'break-word', paddingRight: '12px' }}>{app.name}</h3>
+                  <div style={{ 
+                    padding: '4px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase',
+                    color: getStatusColor(app.status), backgroundColor: `${getStatusColor(app.status)}20`, border: `1px solid ${getStatusColor(app.status)}40`
+                  }}>
+                    {app.status}
+                  </div>
                 </div>
+                
+                <p style={{ fontSize: '14px', color: '#ffffff', opacity: 0.7, marginBottom: '24px', flex: 1, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                  {app.description || 'No description provided.'}
+                </p>
 
-                {apps.length === 0 ? (
-                    <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed">
-                        <LayoutGrid className="h-12 w-12 text-muted-foreground mb-4 opacity-20" />
-                        <CardTitle className="mb-2">No Applications Yet</CardTitle>
-                        <CardDescription className="max-w-md">
-                            Get started by creating your first OAuth application. You'll get a Client ID and Secret to authenticate users with OpenRockets.
-                        </CardDescription>
-                        <Button asChild className="mt-6 gap-2" variant="outline">
-                            <Link href="/developer/apps/create">
-                                <Plus className="h-4 w-4" /> Register App
-                            </Link>
-                        </Button>
-                    </Card>
-                ) : (
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        {apps.map((app) => (
-                            <Card key={app.id} className="flex flex-col">
-                                <CardHeader>
-                                    <div className="flex items-start justify-between">
-                                        <CardTitle className="text-xl line-clamp-1">{app.name}</CardTitle>
-                                        {getStatusBadge(app.status)}
-                                    </div>
-                                    <CardDescription className="line-clamp-2 min-h-[2.5rem]">
-                                        {app.description || 'No description provided.'}
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="mt-auto flex justify-between items-center pt-4">
-                                    <span className="text-xs text-muted-foreground">
-                                        Created {new Date(app.created_at).toLocaleDateString()}
-                                    </span>
-                                    <Button asChild variant="secondary" size="sm" className="gap-2">
-                                        <Link href={`/developer/apps/${app.id}`}>
-                                            <Settings className="h-4 w-4" /> Manage
-                                        </Link>
-                                    </Button>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                )}
-            </div>
-        </AppLayout>
-    );
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '16px', borderTop: '1px solid #222' }}>
+                  <div style={{ fontSize: '12px', color: '#ffffff', opacity: 0.5 }}>
+                    Created {new Date(app.created_at).toLocaleDateString()}
+                  </div>
+                  <Link 
+                    href={`/developer/apps/${app.id}`}
+                    style={{ 
+                      backgroundColor: '#222', color: '#ffffff', padding: '6px 12px', borderRadius: '12px',
+                      textDecoration: 'none', fontSize: '13px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '6px'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#333'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#222'}
+                  >
+                    <Settings size={14} /> Manage
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </AppLayout>
+  );
 }
+
+DeveloperApps.layout = (page: any) => page;

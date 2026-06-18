@@ -1,115 +1,174 @@
-import { Head, Link } from '@inertiajs/react';
+import React, { useState } from 'react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { KeyRound, ShieldCheck, Link2, MonitorSmartphone, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Network, Database, Shield, Search, ArrowRight, Terminal, Lock } from 'lucide-react';
+import { MicrosoftLoadingDots } from '@/components/MicrosoftLoadingDots';
 
-interface DashboardStats {
-    active_consents: number;
-    connected_accounts: number;
-    active_sessions: number;
-    security_status: string;
-}
+export default function Dashboard() {
+  const { auth } = usePage().props as any;
+  const user = auth?.user;
+  
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
 
-interface Props {
-    stats: DashboardStats;
-}
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setIsSearching(true);
+    
+    // Simulate search delay
+    setTimeout(() => {
+      setIsSearching(false);
+    }, 1500);
+  };
 
-export default function Dashboard({ stats }: Props) {
-    return (
-        <AppLayout breadcrumbs={[{ title: 'Dashboard', href: '/dashboard' }]}>
-            <Head title="Dashboard" />
-            <div className="flex h-full flex-1 flex-col gap-6 p-4">
-                <div className="mb-2">
-                    <h1 className="text-3xl font-bold tracking-tight">Overview</h1>
-                    <p className="text-muted-foreground mt-2">
-                        Manage your connected apps, privacy settings, and overall account security.
-                    </p>
-                </div>
-                
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Active Consents</CardTitle>
-                            <KeyRound className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{stats.active_consents}</div>
-                            <p className="text-xs text-muted-foreground">Apps accessing your data</p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Linked Accounts</CardTitle>
-                            <Link2 className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{stats.connected_accounts}</div>
-                            <p className="text-xs text-muted-foreground">Social logins connected</p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Active Sessions</CardTitle>
-                            <MonitorSmartphone className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{stats.active_sessions}</div>
-                            <p className="text-xs text-muted-foreground">Devices currently logged in</p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Security Status</CardTitle>
-                            <ShieldCheck className={`h-4 w-4 ${stats.security_status === 'Strong' ? 'text-green-500' : 'text-amber-500'}`} />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{stats.security_status}</div>
-                            <p className="text-xs text-muted-foreground">Based on your 2FA settings</p>
-                        </CardContent>
-                    </Card>
-                </div>
-                
-                <div className="grid gap-4 md:grid-cols-2">
-                    <Card className="col-span-1">
-                        <CardHeader>
-                            <CardTitle>Recent Activity</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-8">
-                                <div className="flex items-center">
-                                    <div className="ml-4 space-y-1">
-                                        <p className="text-sm font-medium leading-none">New login from Windows PC</p>
-                                        <p className="text-sm text-muted-foreground">Just now</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center">
-                                    <div className="ml-4 space-y-1">
-                                        <p className="text-sm font-medium leading-none">Profile completed</p>
-                                        <p className="text-sm text-muted-foreground">Today</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+  if (!user) return null;
 
-                    <Card className="col-span-1 flex flex-col justify-between bg-primary/5 border-primary/20">
-                        <CardHeader>
-                            <CardTitle>Privacy Control Center</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <p className="text-sm text-muted-foreground">
-                                Review which third-party applications have access to your OpenRockets account and revoke any permissions you no longer need.
-                            </p>
-                            <Button asChild className="w-full sm:w-auto gap-2">
-                                <Link href="/consents">
-                                    Manage Consents <ArrowRight className="h-4 w-4" />
-                                </Link>
-                            </Button>
-                        </CardContent>
-                    </Card>
-                </div>
+  return (
+    <AppLayout>
+      <Head title="Account" />
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+        
+        {/* Profile Header */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '32px', marginTop: '16px' }}>
+          <div style={{ position: 'relative', marginBottom: '16px' }}>
+            <div style={{ 
+              width: '80px', 
+              height: '80px', 
+              borderRadius: '50%', 
+              backgroundColor: '#8ab4f8', 
+              color: '#000000',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              fontWeight: '400',
+              fontSize: '36px'
+            }}>
+              {user.name.charAt(0).toUpperCase()}
             </div>
-        </AppLayout>
-    );
+          </div>
+          <h1 style={{ margin: '0 0 4px 0', fontSize: '24px', fontWeight: '400', color: '#ffffff' }}>{user.name}</h1>
+          <div style={{ fontSize: '14px', color: '#ffffff' }}>{user.email}</div>
+        </div>
+
+        {/* Search Bar */}
+        <div style={{ width: '100%', marginBottom: '32px', position: 'relative' }}>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '12px', 
+            padding: '12px 16px', 
+            backgroundColor: '#000000',
+            border: '1px solid #ffffff',
+            borderRadius: '24px',
+            color: '#ffffff'
+          }}>
+            <Search size={20} />
+            <input 
+              type="text" 
+              placeholder="Search Account"
+              value={searchQuery}
+              onChange={handleSearch}
+              style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%', fontSize: '15px', fontFamily: 'inherit', color: '#ffffff' }}
+            />
+          </div>
+          {isSearching && (
+            <div className="ms-loader-overlay fast-loader" style={{ borderRadius: '24px', overflow: 'hidden' }}>
+              <MicrosoftLoadingDots />
+            </div>
+          )}
+        </div>
+
+        {/* Navigation Cards Stack */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', marginBottom: '48px' }}>
+          
+          <Link href="/consents" className="mat-card" style={{ textDecoration: 'none' }}>
+            <div className="mat-icon-bg" style={{ backgroundColor: '#ffffff' }}>
+              <Network size={20} color="#000000" />
+            </div>
+            <div>
+              <h3 className="mat-title">Linked apps & Data Access</h3>
+              <p className="mat-subtitle">Your connected apps, integrations, and data scopes</p>
+            </div>
+          </Link>
+
+          <Link href="/agreements" className="mat-card" style={{ textDecoration: 'none' }}>
+            <div className="mat-icon-bg" style={{ backgroundColor: '#ffffff' }}>
+              <Database size={20} color="#000000" />
+            </div>
+            <div>
+              <h3 className="mat-title">Data agreements</h3>
+              <p className="mat-subtitle">Cross-app data sharing and revocations</p>
+            </div>
+          </Link>
+
+          <Link href="/settings/security" className="mat-card" style={{ textDecoration: 'none' }}>
+            <div className="mat-icon-bg" style={{ backgroundColor: '#ffffff' }}>
+              <Shield size={20} color="#000000" />
+            </div>
+            <div>
+              <h3 className="mat-title">Security & devices</h3>
+              <p className="mat-subtitle">Manage trusted devices and sign-ins</p>
+            </div>
+          </Link>
+
+        </div>
+
+        {/* Portals & Tools Navigation */}
+        <section style={{ width: '100%' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: '500', marginBottom: '24px', letterSpacing: '-0.5px' }}>Portals & Tools</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
+            
+            <Link 
+              href="/developer/apps"
+              style={{ 
+                backgroundColor: '#000000', border: '1px solid #333', borderRadius: '24px', padding: '32px 24px', 
+                cursor: 'pointer', transition: 'all 0.2s ease', display: 'flex', flexDirection: 'column',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.5)', textDecoration: 'none'
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#ffffff'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#333'; e.currentTarget.style.transform = 'translateY(0)'; }}
+            >
+              <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div style={{ backgroundColor: '#111111', padding: '12px', borderRadius: '16px' }}>
+                  <Terminal size={24} color="#ffffff" />
+                </div>
+                <ArrowRight size={20} color="#ffffff" style={{ opacity: 0.5 }} />
+              </div>
+              <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: '500', color: '#ffffff' }}>Developer Portal</h3>
+              <p style={{ margin: 0, fontSize: '14px', color: '#ffffff', opacity: 0.6, lineHeight: '1.5' }}>
+                Register OAuth applications, manage API keys, and view developer documentation.
+              </p>
+            </Link>
+
+            {auth.is_admin && (
+              <Link 
+                href="/admin"
+                style={{ 
+                  backgroundColor: '#000000', border: '1px solid #333', borderRadius: '24px', padding: '32px 24px', 
+                  cursor: 'pointer', transition: 'all 0.2s ease', display: 'flex', flexDirection: 'column',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.5)', textDecoration: 'none'
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#ffffff'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#333'; e.currentTarget.style.transform = 'translateY(0)'; }}
+              >
+                <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div style={{ backgroundColor: '#111111', padding: '12px', borderRadius: '16px' }}>
+                    <Lock size={24} color="#ffffff" />
+                  </div>
+                  <ArrowRight size={20} color="#ffffff" style={{ opacity: 0.5 }} />
+                </div>
+                <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: '500', color: '#ffffff' }}>Admin Console</h3>
+                <p style={{ margin: 0, fontSize: '14px', color: '#ffffff', opacity: 0.6, lineHeight: '1.5' }}>
+                  Moderate applications, manage users, and fulfill compliance data requests.
+                </p>
+              </Link>
+            )}
+
+          </div>
+        </section>
+      </div>
+    </AppLayout>
+  );
 }
+
+Dashboard.layout = (page: any) => page;
