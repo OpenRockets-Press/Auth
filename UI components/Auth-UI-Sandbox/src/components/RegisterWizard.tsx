@@ -13,7 +13,8 @@ const VerifiedIcon = () => (
 import logoPath from '../assets/openrocketsvc1.png';
 
 import { sendOtp, verifyOtp, registerMinorWizard } from '../api';
-
+import { FaceAgeDetector } from './auth/FaceAgeDetector';
+import { MembershipCard } from './auth/MembershipCard';
 type Step = 'PARENT_STATEMENT' | 'PARENT_VERIFICATION' | 'PARENT_DETAILS' | 'CONSENT' | 'MINOR_VERIFICATION' | 'MINOR_PROFILE_SETUP' | 'SUCCESS_CARD';
 
 const PLACEHOLDER_AVATARS = [
