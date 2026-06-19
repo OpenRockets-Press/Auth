@@ -18,8 +18,17 @@ const AuthWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         return;
     }
 
-    const token = localStorage.getItem('_or_auth_tk');
-    if (token) {
+    const encryptedToken = localStorage.getItem('_or_auth_tk');
+    if (encryptedToken) {
+      let token = '';
+      try {
+        token = window.atob(encryptedToken);
+      } catch (e) {
+        localStorage.removeItem('_or_auth_tk');
+        setIsChecking(false);
+        return;
+      }
+
       // Check for redirect URI
       const storedRedirect = localStorage.getItem('_or_redirect_uri');
       
