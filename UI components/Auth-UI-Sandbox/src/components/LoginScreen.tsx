@@ -61,7 +61,19 @@ export const LoginScreen: React.FC = () => {
 
       setStatus('success');
       setTimeout(() => {
-        window.location.href = 'https://myaccount.openrockets.com/auth/sso?token=' + token;
+        const storedRedirect = localStorage.getItem('_or_redirect_uri');
+        if (storedRedirect) {
+          try {
+            const redirectUrl = new URL(storedRedirect);
+            redirectUrl.searchParams.set('token', token);
+            localStorage.removeItem('_or_redirect_uri');
+            window.location.href = redirectUrl.toString();
+          } catch (e) {
+            window.location.href = 'https://myaccount.openrockets.com/auth/sso?token=' + token;
+          }
+        } else {
+          window.location.href = 'https://myaccount.openrockets.com/auth/sso?token=' + token;
+        }
       }, 1000);
     } catch (error: any) {
       console.error('Login Error:', error);

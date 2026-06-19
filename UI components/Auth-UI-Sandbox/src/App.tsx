@@ -20,9 +20,25 @@ const AuthWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
     const token = localStorage.getItem('_or_auth_tk');
     if (token) {
+      // Check for redirect URI
+      const storedRedirect = localStorage.getItem('_or_redirect_uri');
+      
       // Simulate validation delay and redirect
       setTimeout(() => {
-        window.location.href = 'https://myaccount.openrockets.com/auth/sso?token=' + token;
+        if (storedRedirect) {
+          try {
+            const redirectUrl = new URL(storedRedirect);
+            // Append token to the redirect URL
+            redirectUrl.searchParams.set('token', token);
+            localStorage.removeItem('_or_redirect_uri');
+            window.location.href = redirectUrl.toString();
+          } catch (e) {
+            // Fallback if URL is invalid
+            window.location.href = 'https://myaccount.openrockets.com/auth/sso?token=' + token;
+          }
+        } else {
+          window.location.href = 'https://myaccount.openrockets.com/auth/sso?token=' + token;
+        }
       }, 1000);
     } else {
       setIsChecking(false);
