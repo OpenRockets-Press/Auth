@@ -26,23 +26,12 @@ class OtpMail extends Mailable
     }
 
     /**
-     * Get the message envelope.
+     * Build the message.
      */
-    public function envelope(): Envelope
+    public function build()
     {
-        return new Envelope(
-            subject: 'Your OpenRockets Verification Code',
-        );
-    }
-
-    /**
-     * Get the message content definition.
-     */
-    public function content(): Content
-    {
-        return new Content(
-            htmlString: '<div><h2>OpenRockets Verification</h2><p>Your verification code is: <strong>' . $this->otp . '</strong></p><p>This code will expire in 15 minutes.</p></div>'
-        );
+        return $this->subject('Your OpenRockets Verification Code')
+                    ->html('<div><h2>OpenRockets Verification</h2><p>Your verification code is: <strong>' . $this->otp . '</strong></p><p>This code will expire in 15 minutes.</p></div>');
     }
 
     /**

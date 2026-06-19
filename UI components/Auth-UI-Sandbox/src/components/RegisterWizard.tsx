@@ -113,7 +113,8 @@ export const RegisterWizard: React.FC = () => {
       await sendOtp(parentEmail, 'parent');
       setParentOtpSent(true);
     } catch (err: any) {
-      setErrorMessage("Failed to send OTP.");
+      console.error("OTP Send Error Details:", err.response?.data || err.message);
+      setErrorMessage(err.response?.data?.message || "Failed to send OTP.");
       setStatus('error');
     }
     setStatus('idle');
@@ -143,7 +144,8 @@ export const RegisterWizard: React.FC = () => {
       await sendOtp(email, 'minor');
       setMinorOtpSent(true);
     } catch (err: any) {
-      setErrorMessage("Failed to send OTP.");
+      console.error("OTP Send Error Details:", err.response?.data || err.message);
+      setErrorMessage(err.response?.data?.message || "Failed to send OTP.");
       setStatus('error');
     }
     setStatus('idle');
