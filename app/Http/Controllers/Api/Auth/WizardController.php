@@ -48,8 +48,10 @@ class WizardController extends Controller
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
-                'email_verified_at' => now(), // since OTP was verified
             ]);
+
+            // Mark email as verified immediately to prevent Laravel from sending a redundant verification link
+            $user->markEmailAsVerified();
 
             // Handle Profile Image Upload to local storage
             $avatarUrl = null;
