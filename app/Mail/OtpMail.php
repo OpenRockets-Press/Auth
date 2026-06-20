@@ -15,14 +15,16 @@ class OtpMail extends Mailable
 
     public string $otp;
     public string $type;
+    public ?string $name;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(string $otp, string $type)
+    public function __construct(string $otp, string $type, ?string $name = null)
     {
         $this->otp = $otp;
         $this->type = $type;
+        $this->name = $name;
     }
 
     /**
@@ -30,8 +32,12 @@ class OtpMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Your OpenRockets Verification Code')
-                    ->html('<div><h2>OpenRockets Verification</h2><p>Your verification code is: <strong>' . $this->otp . '</strong></p><p>This code will expire in 15 minutes.</p></div>');
+        return $this->subject('OpenRockets Verification')
+                    ->view('emails.otp', [
+                        'otp' => $this->otp,
+                        'type' => $this->type,
+                        'name' => $this->name
+                    ]);
     }
 
     /**

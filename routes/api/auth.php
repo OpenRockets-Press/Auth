@@ -11,9 +11,9 @@ Route::post('/auth/register-with-consent', [AuthController::class, 'registerWith
 
 use App\Http\Controllers\Api\Auth\OtpController;
 use App\Http\Controllers\Api\Auth\WizardController;
-Route::post('/auth/otp/send', [OtpController::class, 'send']);
-Route::post('/auth/otp/verify', [OtpController::class, 'verify']);
-Route::post('/auth/register-minor-wizard', [WizardController::class, 'registerMinorWizard']);
+Route::post('/auth/otp/send', [OtpController::class, 'send'])->middleware('throttle:5,1');
+Route::post('/auth/otp/verify', [OtpController::class, 'verify'])->middleware('throttle:10,1');
+Route::post('/auth/register-minor-wizard', [WizardController::class, 'registerMinorWizard'])->middleware('throttle:3,1');
 
 Route::middleware('auth:api')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);

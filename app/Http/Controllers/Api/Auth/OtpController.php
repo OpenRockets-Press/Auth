@@ -13,33 +13,35 @@ class OtpController extends Controller
 {
     public function send(Request $request): JsonResponse
     {
+        $request->validate([
+            'email' => 'required|email',
+            'type' => 'required|in:parent,minor',
+            'name' => 'nullable|string|max:255',
+        ]);
+
+        $email = $request->email;
+        $type = $request->type;
+        $name = $request->name;
+
+        // Generate a 6-digit OTP
+        $otp = sprintf('%06d', mt_rand(100000, 999999));
+
+        // Store OTP in cache for 15 minutes
+        $cacheKey = "otp_{$type}_{$email}";
+        Cache::put($cacheKey, $otp, now()->addMinutes(15));
+
+        // Send OTP email
         try {
-            $request->validate([
-                'email' => 'required|email',
-                'type' => 'required|in:parent,minor',
-            ]);
-
-            $email = $request->email;
-            $type = $request->type;
-
-            // Generate a 6-digit OTP
-            $otp = sprintf('%06d', mt_rand(100000, 999999));
-
-            // Store OTP in cache for 15 minutes
-            $cacheKey = "otp_{$type}_{$email}";
-            Cache::put($cacheKey, $otp, now()->addMinutes(15));
-
-            // Send OTP email
-            Mail::to($email)->send(new OtpMail($otp, $type));
-
+            Mail::to($email)->send(new OtpMail($otp, $type, $name));
+        } catch (\Exception $e) {
             return response()->json([
-                'message' => 'OTP sent successfully.'
-            ], 200);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'message' => 'DIAGNOSTIC ERROR: ' . $th->getMessage() . ' on line ' . $th->getLine() . ' in ' . basename($th->getFile())
+                'message' => 'Email failed to send: ' . $e->getMessage()
             ], 500);
         }
+
+        return response()->json([
+            'message' => 'OTP sent successfully.'
+        ], 200);
     }
 
     public function verify(Request $request): JsonResponse

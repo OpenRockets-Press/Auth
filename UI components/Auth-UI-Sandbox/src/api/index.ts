@@ -9,8 +9,8 @@ export const api = axios.create({
     },
 });
 
-export const sendOtp = async (email: string, type: 'parent' | 'minor') => {
-    const response = await api.post('/auth/otp/send', { email, type });
+export const sendOtp = async (email: string, type: 'parent' | 'minor', name?: string) => {
+    const response = await api.post('/auth/otp/send', { email, type, name });
     return response.data;
 };
 

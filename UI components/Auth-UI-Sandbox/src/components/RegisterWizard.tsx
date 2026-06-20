@@ -110,7 +110,7 @@ export const RegisterWizard: React.FC = () => {
     if (!parentEmail) return;
     setStatus('loading');
     try {
-      await sendOtp(parentEmail, 'parent');
+      await sendOtp(parentEmail, 'parent', parentName);
       setParentOtpSent(true);
     } catch (err: any) {
       console.error("OTP Send Error Details:", err.response?.data || err.message);
@@ -141,7 +141,7 @@ export const RegisterWizard: React.FC = () => {
     if (!email) return;
     setStatus('loading');
     try {
-      await sendOtp(email, 'minor');
+      await sendOtp(email, 'minor', name);
       setMinorOtpSent(true);
     } catch (err: any) {
       console.error("OTP Send Error Details:", err.response?.data || err.message);
@@ -327,9 +327,20 @@ export const RegisterWizard: React.FC = () => {
                   lineHeight: '1.6',
                   color: 'var(--ms-text)'
                 }}>
+                  <p style={{ marginBottom: '12px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                    <svg style={{ flexShrink: 0, marginTop: '3px' }} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M2.062 12.348a1 1 0 0 1 1.374 1.374L12 21.062 20.564 13.72a1 1 0 0 1 1.374-1.374l-9.938 8.656z" opacity="0" />
+                      <circle cx="6" cy="15" r="4" />
+                      <circle cx="18" cy="15" r="4" />
+                      <path d="M14 15a2 2 0 0 0-2-2 2 2 0 0 0-2 2" />
+                      <path d="M2.5 13 5 7c.7-1.3 1.4-2 3-2" />
+                      <path d="M21.5 13 19 7c-.7-1.3-1.5-2-3-2" />
+                    </svg>
+                    <span>If you are wearing glasses or some kind of a wearable that covers your face, we ask you to remove it to avoid delays in processing.</span>
+                  </p>
                   <p><strong>Your Privacy is Our Priority</strong></p>
                   <p style={{ marginBottom: '12px' }}>
-                    OpenRockets is a 100% teen-run corporation based in the United States, operated by high schoolers and teenagers. Our mission is to make a positive impact on our community, and our primary goal is to provide the highest security standards for our users—which means teenagers, minors, and their supervising parents.
+                    OpenRockets is a 100% teen-run corporation based in the United States, operated by high schoolers and teenagers. Our mission is to make a positive impact on our community, and our primary goal is to provide the highest security standards for our users, which means teenagers, minors, and their supervising parents.
                   </p>
                   <p style={{ marginBottom: '12px' }}>
                     <strong>How We Process Data:</strong> You will notice that we use video technology and artificial intelligence to predict your age internally, directly inside your device. Meaning that your data will never be shared with a separate data center. Since we utilize local JavaScript technologies and AI frameworks, everything is fully transparent.
@@ -338,7 +349,7 @@ export const RegisterWizard: React.FC = () => {
                     <strong>Legal Compliance:</strong> We must justify our use of video technologies based on the <a href="https://www.ftc.gov/legal-library/browse/rules/childrens-online-privacy-protection-rule-coppa" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--theme-primary)' }}>Child Online Privacy Protection Act (COPPA)</a> in the United States, and the <a href="https://gdpr-info.eu/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--theme-primary)' }}>GDPR</a> in Europe (and other countries where applicable). This rigorous process is to certify to parents and governments that we are verifying teenagers and minors properly. We collect and store teenagers and minors data securely in an encrypted manner that meets or exceeds industry standard practices.
                   </p>
                   <p style={{ marginBottom: '12px' }}>
-                    <strong>Why The High Standards?</strong> We use AI age prediction and two-step email verification because this single OpenRockets account grants teenagers and minors access to more than 30+ OpenRockets services via Single Sign-On. Furthermore, as of January 2026, 50 to 60 external organizations are integrating our account system via our API. Teenagers and minors will use this same account to access those external services. This is why we maintain such a high-standard, secure account system—so only teenagers and minors can access and benefit from it safely.
+                    <strong>Why we use AI:</strong> We use AI age prediction and two-step email verification because this single OpenRockets account grants teenagers and minors access to more than 30 OpenRockets services via Single Sign-On. Furthermore, as of January 2026, 50 to 60 external organizations are integrating our account system via our API. Teenagers and minors will use this same account to access those external services. This is why we maintain a secure account system, ensuring only teenagers and minors can access and benefit from it safely.
                   </p>
                   <p style={{ marginBottom: '0' }}>
                     To see exactly how we secure your data and how transparent we are, please review our legal policies:
