@@ -3,9 +3,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-family: 'Ubuntu', 'Helvetica Neue', Helvetica, Arial, sans-serif;
             background-color: #f9fafb;
             margin: 0;
             padding: 0;
@@ -67,7 +68,7 @@
             padding: 16px 36px;
             border-radius: 8px;
             font-size: 36px;
-            font-weight: 800;
+            font-weight: 700;
             letter-spacing: 6px;
             color: #0f172a;
             border: 2px dashed #cbd5e1;
@@ -77,11 +78,12 @@
             padding: 32px 40px;
             border-top: 1px solid #e2e8f0;
             font-size: 13px;
-            color: #64748b;
+            color: #000000;
             line-height: 1.5;
+            text-align: left;
         }
         .footer-links {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
         .footer-links a {
             color: #3b82f6;
@@ -92,8 +94,13 @@
             font-weight: 500;
         }
         .copyright {
-            margin-top: 16px;
-            color: #94a3b8;
+            margin-top: 24px;
+            color: #000000;
+        }
+        .contact-info {
+            margin-bottom: 24px;
+            color: #000000;
+            line-height: 1.6;
         }
     </style>
 </head>
@@ -105,7 +112,7 @@
             </div>
 
             <div class="hero">
-                <img src="https://cdn.pixabay.com/photo/2020/07/25/21/08/email-5437839_1280.png" alt="Email Verification">
+                <img src="{{ url('assets/images/email-vector.png') }}" alt="Email Verification">
             </div>
 
             <div class="content">
@@ -145,7 +152,7 @@
 
             <div class="footer">
                 @if ($type === 'parent')
-                    <div style="margin-bottom: 24px; font-weight: 600; color: #475569; font-size: 14px;">
+                    <div style="margin-bottom: 24px; font-weight: 700; color: #000000; font-size: 14px;">
                         By acting as the parent, you verify that you are a legal guardian of this child.
                     </div>
                 @endif
@@ -155,9 +162,18 @@
                     <a href="https://press.openrockets.com/legal/terms" target="_blank">Terms</a>
                     <a href="https://press.openrockets.com/legal/parental-consent-form" target="_blank">Parental Consent Form</a>
                 </div>
+
+                <div class="contact-info">
+                    <strong>Contact (24/7)</strong><br>
+                    team@openrockets.com<br>
+                    +1 (603) 777-2159 (U.S and Canada)<br><br>
+                    <strong>Mail us, visit us!</strong><br>
+                    266 Elmwood Ave, Ste 420, Buffalo, New York 14222, United States of America<br>
+                    Melville Lane Area, FairFax, VA, United States 22033
+                </div>
                 
                 <div class="copyright">
-                    &copy; {{ date('Y') }} Open Rockets Incorporated. All trademarks and copyrights belong to their respective owners.
+                    &copy; 2022-{{ date('Y') }} OpenRockets Incorporated. All trademarks and copyrights belong to their respective owners.
                 </div>
             </div>
         </div>

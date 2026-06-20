@@ -26,7 +26,22 @@ export const MembershipCard: React.FC<MembershipCardProps> = ({ name, password }
   };
 
   const handleFinish = () => {
-    window.location.href = 'https://myaccount.openrockets.com/auth/sso?token=' + localStorage.getItem('_or_auth_tk');
+    const encryptedToken = localStorage.getItem('_or_auth_tk');
+    const token = encryptedToken ? window.atob(encryptedToken) : '';
+    const storedRedirect = localStorage.getItem('_or_redirect_uri');
+    
+    if (storedRedirect) {
+      try {
+        const redirectUrl = new URL(storedRedirect);
+        redirectUrl.searchParams.set('token', token);
+        localStorage.removeItem('_or_redirect_uri');
+        window.location.href = redirectUrl.toString();
+      } catch (e) {
+        window.location.href = 'https://myaccount.openrockets.com/auth/sso?token=' + token;
+      }
+    } else {
+      window.location.href = 'https://myaccount.openrockets.com/auth/sso?token=' + token;
+    }
   };
 
   return (

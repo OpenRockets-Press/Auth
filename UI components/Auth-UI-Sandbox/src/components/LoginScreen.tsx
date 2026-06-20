@@ -102,8 +102,12 @@ export const LoginScreen: React.FC = () => {
         <div className="ms-card-content" style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
           <h1 className="ms-title" style={{ marginBottom: '8px' }}>Sign in</h1>
           <p className="ms-description" style={{ marginBottom: '24px' }}>
-            to continue to OpenRockets
-            {targetAppName && <span style={{ color: 'var(--theme-primary)' }}> {targetAppName}</span>}
+            to continue to
+            {targetAppName ? (
+              <span style={{ color: 'var(--theme-primary)' }}> OpenRockets {targetAppName}</span>
+            ) : (
+              ' OpenRockets'
+            )}
           </p>
 
           {status === 'error' && (
@@ -154,21 +158,27 @@ export const LoginScreen: React.FC = () => {
             />
           </div>
 
-          <div style={{ fontSize: '13px', marginBottom: '32px' }}>
-            No account?{' '}
-            <a href="#" onClick={(e) => { e.preventDefault(); navigate('/register'); }} style={{ color: 'var(--theme-primary)', textDecoration: 'none' }}>
-              Create one!
-            </a>
-          </div>
-
-          <div className="ms-button-group">
-            <button 
-              type="submit" 
-              className="ms-button ms-button-primary"
-              disabled={status === 'loading' || status === 'success'}
-            >
-              {status === 'loading' ? 'Signing in...' : 'Sign in'}
-            </button>
+          <div className="ms-button-group" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ fontSize: '15px' }}>
+              No account?
+            </div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button 
+                type="button" 
+                className="ms-button ms-button-secondary"
+                onClick={() => navigate('/register')}
+                disabled={status === 'loading' || status === 'success'}
+              >
+                Create one
+              </button>
+              <button 
+                type="submit" 
+                className="ms-button ms-button-primary"
+                disabled={status === 'loading' || status === 'success'}
+              >
+                {status === 'loading' ? 'Signing in...' : 'Sign in'}
+              </button>
+            </div>
           </div>
         </form>
         </div>
