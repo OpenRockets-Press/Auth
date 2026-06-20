@@ -30,10 +30,6 @@ class UserProfile extends Model
         'parental_consent_status',
         'onboarding_status',
         'onboarding_completed_at',
-        'phone_number',
-        'school',
-        'avatar_url',
-        'pin',
     ];
 
     public function user(): BelongsTo

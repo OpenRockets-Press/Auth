@@ -64,7 +64,7 @@ class WizardController extends Controller
                 'date_of_birth' => $request->dob,
                 'avatar_url' => $avatarUrl,
                 'pin' => Hash::make($request->pin),
-                'parental_consent_status' => 'pending', // default or active based on logic
+                'status' => 'pending_parental_consent', // default or active based on logic
             ]);
 
             // Create Parental Consent
@@ -72,7 +72,7 @@ class WizardController extends Controller
                 'parent_email' => $request->parent_email,
                 'parent_name' => $request->parent_name,
                 'signature' => $request->signature, // Store base64 or you can decode and store as file
-                'consent_status' => 'granted', // Assuming approved since signature provided
+                'status' => 'approved', // Assuming approved since signature provided
                 'consent_method' => 'digital_signature',
                 'granted_at' => now(),
             ]);
@@ -85,9 +85,6 @@ class WizardController extends Controller
             Cache::forget("otp_verified_parent_{$parentEmail}");
 
             DB::commit();
-
-            // Dispatch Registered event so Fortify can send the verification email
-            event(new \Illuminate\Auth\Events\Registered($user));
 
             // Create a token
             $token = $user->createToken('auth_token')->accessToken;

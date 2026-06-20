@@ -28,8 +28,6 @@ class ParentalConsent extends Model
         'granted_at',
         'revoked_at',
         'ip_address',
-        'signature',
-        'is_adult_self_consent',
     ];
 
     public function user(): BelongsTo

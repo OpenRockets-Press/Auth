@@ -178,52 +178,43 @@ class AuthController extends Controller
             'signature' => ['required', 'string'],
         ]);
 
-        \Illuminate\Support\Facades\DB::beginTransaction();
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+        ]);
 
-        try {
-            $user = User::create([
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'password' => Hash::make($validated['password']),
-            ]);
+        UserProfile::create([
+            'user_id' => $user->id,
+            'parental_consent_required' => $validated['is_minor'],
+            'parental_consent_status' => $validated['is_minor'] ? 'granted' : null,
+            'onboarding_status' => 'completed',
+        ]);
 
-            UserProfile::create([
+        if ($validated['is_minor']) {
+            ParentalConsent::create([
                 'user_id' => $user->id,
-                'parental_consent_required' => $validated['is_minor'],
-                'parental_consent_status' => $validated['is_minor'] ? 'granted' : null,
-                'onboarding_status' => 'completed',
+                'parent_name' => $validated['parent_name'],
+                'parent_email' => $validated['parent_email'],
+                'consent_method' => 'digital_signature',
+                'consent_status' => 'granted',
+                'signature' => $validated['signature'],
+                'is_adult_self_consent' => false,
+                'ip_address' => $request->ip(),
+                'granted_at' => now(),
             ]);
-
-            if ($validated['is_minor']) {
-                ParentalConsent::create([
-                    'user_id' => $user->id,
-                    'parent_name' => $validated['parent_name'],
-                    'parent_email' => $validated['parent_email'],
-                    'consent_method' => 'digital_signature',
-                    'consent_status' => 'granted',
-                    'signature' => $validated['signature'],
-                    'is_adult_self_consent' => false,
-                    'ip_address' => $request->ip(),
-                    'granted_at' => now(),
-                ]);
-            } else {
-                ParentalConsent::create([
-                    'user_id' => $user->id,
-                    'parent_name' => $validated['name'],
-                    'parent_email' => $validated['email'],
-                    'consent_method' => 'digital_signature',
-                    'consent_status' => 'granted',
-                    'signature' => $validated['signature'],
-                    'is_adult_self_consent' => true,
-                    'ip_address' => $request->ip(),
-                    'granted_at' => now(),
-                ]);
-            }
-
-            \Illuminate\Support\Facades\DB::commit();
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\DB::rollBack();
-            return response()->json(['message' => 'Registration failed: ' . $e->getMessage()], 500);
+        } else {
+            ParentalConsent::create([
+                'user_id' => $user->id,
+                'parent_name' => $validated['name'],
+                'parent_email' => $validated['email'],
+                'consent_method' => 'digital_signature',
+                'consent_status' => 'granted',
+                'signature' => $validated['signature'],
+                'is_adult_self_consent' => true,
+                'ip_address' => $request->ip(),
+                'granted_at' => now(),
+            ]);
         }
 
         event(new Registered($user));
