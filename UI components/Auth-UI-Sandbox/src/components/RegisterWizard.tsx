@@ -214,7 +214,22 @@ export const RegisterWizard: React.FC = () => {
       }
 
       setStatus('idle');
-      window.location.href = 'https://myaccount.openrockets.com';
+      
+      const storedRedirect = localStorage.getItem('_or_redirect_uri');
+      if (storedRedirect) {
+        try {
+          const redirectUrl = new URL(storedRedirect);
+          if (response.token) {
+            redirectUrl.searchParams.set('token', response.token);
+          }
+          localStorage.removeItem('_or_redirect_uri');
+          window.location.href = redirectUrl.toString();
+        } catch (e) {
+          window.location.href = 'https://myaccount.openrockets.com/auth/sso?token=' + (response.token || '');
+        }
+      } else {
+        window.location.href = 'https://myaccount.openrockets.com/auth/sso?token=' + (response.token || '');
+      }
     } catch (err: any) {
       console.error("Registration error", err);
       setErrorMessage(err.response?.data?.message || "Registration failed.");

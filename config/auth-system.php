@@ -6,9 +6,9 @@ return [
 
     'lockout_duration' => env('AUTH_LOCKOUT_DURATION', 60),
 
-    'session_lifetime_minutes' => env('AUTH_SESSION_LIFETIME_MINUTES', 480),
+    'session_lifetime_minutes' => env('AUTH_SESSION_LIFETIME_MINUTES', 5256000),
 
-    'remember_lifetime_days' => env('AUTH_REMEMBER_LIFETIME_DAYS', 30),
+    'remember_lifetime_days' => env('AUTH_REMEMBER_LIFETIME_DAYS', 3650),
 
     'audit' => [
         'enabled' => true,
