@@ -120,7 +120,7 @@ export const LoginScreen: React.FC = () => {
           <div style={{ marginBottom: '16px' }}>
             <input
               type="email"
-              placeholder="Email, phone, or Skype"
+              placeholder="Email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required

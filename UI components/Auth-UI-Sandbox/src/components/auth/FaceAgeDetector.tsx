@@ -19,15 +19,13 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
   const [modelsLoaded, setModelsLoaded] = useState(false);
   const [cameraError, setCameraError] = useState('');
   const [captures, setCaptures] = useState<{ label: string; age: number | null }[]>([
-    { label: 'Front Face', age: null },
-    { label: 'Left Side', age: null },
-    { label: 'Right Side', age: null }
+    { label: 'Front Face', age: null }
   ]);
   const [currentCaptureIndex, setCurrentCaptureIndex] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
-    setCaptures(prev => [...prev].sort(() => Math.random() - 0.5));
+    // Randomizer removed for single photo
   }, []);
 
   useEffect(() => {
@@ -99,12 +97,12 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
       updatedCaptures[currentCaptureIndex].age = estimatedAge;
       setCaptures(updatedCaptures);
 
-      if (currentCaptureIndex < 2) {
+      if (currentCaptureIndex < 0) {
         setCurrentCaptureIndex(prev => prev + 1);
       } else {
-        // All 3 done
+        // All 1 done
         const totalAge = updatedCaptures.reduce((sum, cap) => sum + (cap.age || 0), 0);
-        const averageAge = totalAge / 3;
+        const averageAge = totalAge;
         const isAdult = averageAge >= 18;
         
         // Stop camera
@@ -123,7 +121,7 @@ export const FaceAgeDetector: React.FC<FaceAgeDetectorProps> = ({
     setIsProcessing(false);
   };
   const resetAndRetry = () => {
-    setCaptures(prev => [...prev].sort(() => Math.random() - 0.5));
+    setCaptures([{ label: 'Front Face', age: null }]);
     setCurrentCaptureIndex(0);
     startVideo();
   };
