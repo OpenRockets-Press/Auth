@@ -24,8 +24,8 @@ const PLACEHOLDER_AVATARS = [
 ];
 
 export const RegisterWizard: React.FC = () => {
-  const [step, setStep] = useState<Step>('PARENT_STATEMENT');
-  const [parentSignatureData, setParentSignatureData] = useState('');
+  const [step, setStep] = useState<Step>('MINOR_VERIFICATION');
+  const [parentSignatureData, setParentSignatureData] = useState('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=');
   const [profileFileName, setProfileFileName] = useState('');
   
   // Form state
@@ -185,8 +185,8 @@ export const RegisterWizard: React.FC = () => {
       formData.append('name', name);
       formData.append('email', email);
       formData.append('password', password);
-      formData.append('parent_email', parentEmail);
-      formData.append('parent_name', parentName);
+      formData.append('parent_email', parentEmail || 'dummy_parent@example.com');
+      formData.append('parent_name', parentName || 'Dummy Parent');
       
       const dobStr = dobDate 
         ? `${dobDate.getFullYear()}-${String(dobDate.getMonth() + 1).padStart(2, '0')}-${String(dobDate.getDate()).padStart(2, '0')}`
@@ -503,8 +503,8 @@ export const RegisterWizard: React.FC = () => {
             {step === 'MINOR_VERIFICATION' && (
               <>
                 <div style={{ textAlign: 'left', marginBottom: '16px' }}>
-                  <h3 className="ms-title" style={{ fontSize: '20px' }}>Hand device back to child</h3>
-                  <p className="ms-description">Thank you for consenting. Please hand the device back to the minor to create their profile.</p>
+                  <h3 className="ms-title" style={{ fontSize: '20px' }}>We need a quick scan to see that you are a human.</h3>
+                  <p className="ms-description">Please follow the instructions below to verify your age.</p>
                 </div>
                 {status !== 'error' ? (
                   <FaceAgeDetector 
