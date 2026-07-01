@@ -518,7 +518,7 @@ export const RegisterWizard: React.FC = () => {
             {step === 'MINOR_VERIFICATION' && (
               <>
                 <div style={{ textAlign: 'left', marginBottom: '16px' }}>
-                  <h3 className="ms-title" style={{ fontSize: '20px' }}>We need a quick scan to see that you are a human.</h3>
+                  <h3 className="ms-title" style={{ fontSize: '20px' }}>We need a quick scan to see that you are under 20.</h3>
                   <p className="ms-description">Please follow the instructions below to verify your age.</p>
                 </div>
                 {status !== 'error' ? (
