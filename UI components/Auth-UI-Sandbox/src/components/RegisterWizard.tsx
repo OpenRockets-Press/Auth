@@ -214,7 +214,7 @@ export const RegisterWizard: React.FC = () => {
       }
 
       setStatus('idle');
-      setStep('SUCCESS_CARD');
+      window.location.href = 'https://myaccount.openrockets.com';
     } catch (err: any) {
       console.error("Registration error", err);
       setErrorMessage(err.response?.data?.message || "Registration failed.");
@@ -509,8 +509,8 @@ export const RegisterWizard: React.FC = () => {
                 {status !== 'error' ? (
                   <FaceAgeDetector 
                     onComplete={handleMinorVerification} 
-                    title="Child Verification"
-                    subtitle="Please position your face to verify."
+                    title="Verification"
+                    subtitle="Your data is never shared with anyone. This test runs locally inside your device."
                     onLoadingChange={setAiLoading}
                   />
                 ) : (
